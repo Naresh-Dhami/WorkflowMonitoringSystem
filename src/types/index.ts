@@ -26,7 +26,7 @@ export interface ApiConfig {
   };
 }
 
-export interface WorkflowConfig {
+export interface ProcessConfig {
   id: string;
   name: string;
   description: string;
@@ -36,7 +36,8 @@ export interface WorkflowConfig {
 
 export interface TestRun {
   id: string;
-  workflowId: string;
+  processId: string;
+  workflowId?: string; // Dynamic ID received from API
   startTime: Date;
   endTime?: Date;
   status: Status;

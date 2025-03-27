@@ -1,5 +1,7 @@
 
-import { ApiConfig, Status, TestRun, WorkflowConfig } from "@/types";
+import { ApiConfig, Status, TestRun, ProcessConfig } from "@/types";
+import { toast } from "sonner";
+import { saveProcessConfig } from "./configStorage";
 
 // Mock function to simulate API calls
 export const executeApiCall = async (config: ApiConfig): Promise<any> => {
@@ -11,10 +13,16 @@ export const executeApiCall = async (config: ApiConfig): Promise<any> => {
     setTimeout(() => {
       // Randomly succeed or fail for demo purposes
       if (Math.random() > 0.2) {
-        resolve({
+        // Generate a random workflowId if this is the first step
+        const response = {
           status: 200,
-          data: { success: true, message: `Successfully executed ${config.name}` }
-        });
+          data: { 
+            success: true, 
+            message: `Successfully executed ${config.name}`,
+            workflowId: `wf-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+          }
+        };
+        resolve(response);
       } else {
         reject(new Error(`Failed to execute ${config.name}`));
       }
@@ -22,9 +30,9 @@ export const executeApiCall = async (config: ApiConfig): Promise<any> => {
   });
 };
 
-// Check workflow completion status
-export const checkWorkflowStatus = async (endpoint: string, workflowId: string): Promise<Status> => {
-  console.log(`Checking workflow status for ${workflowId} at ${endpoint}`);
+// Check process completion status
+export const checkProcessStatus = async (endpoint: string, workflowId: string): Promise<Status> => {
+  console.log(`Checking process status for ${workflowId} at ${endpoint}`);
   
   // In a real implementation, this would use fetch or axios to call the endpoint
   // For now, we'll simulate with a timeout
@@ -38,26 +46,90 @@ export const checkWorkflowStatus = async (endpoint: string, workflowId: string):
   });
 };
 
-// Function to trigger a workflow
-export const triggerWorkflow = async (
-  workflow: WorkflowConfig,
+// Function to poll for process status
+export const pollProcessStatus = async (
+  endpoint: string,
+  workflowId: string,
+  onStatusUpdate: (status: Status) => void,
+  intervalMs: number = 5000, // Default 5 seconds
+  maxAttempts: number = 20 // Default 100 seconds max
+): Promise<Status> => {
+  console.log(`Starting to poll process status for ${workflowId}`);
+  
+  let attempts = 0;
+  let currentStatus: Status = 'running';
+  
+  while (attempts < maxAttempts && currentStatus === 'running') {
+    attempts++;
+    currentStatus = await checkProcessStatus(endpoint, workflowId);
+    onStatusUpdate(currentStatus);
+    
+    if (currentStatus !== 'running') {
+      return currentStatus;
+    }
+    
+    // Wait for the specified interval
+    await new Promise(resolve => setTimeout(resolve, intervalMs));
+  }
+  
+  // If we reach max attempts and status is still running, return as is
+  return currentStatus;
+};
+
+// Function to trigger a process
+export const triggerProcess = async (
+  process: ProcessConfig,
   onStepComplete?: (stepIndex: number, success: boolean, response?: any, error?: any) => void,
-  onStatusCheck?: (status: Status) => void
+  onStatusUpdate?: (status: Status) => void
 ): Promise<TestRun> => {
   const testRun: TestRun = {
     id: `run-${Date.now()}`,
-    workflowId: workflow.id,
+    processId: process.id,
     startTime: new Date(),
     status: 'running',
-    steps: workflow.steps.map(step => ({
+    steps: process.steps.map(step => ({
       apiConfigId: step.id,
       status: 'idle'
     }))
   };
 
-  // Execute each step sequentially
-  for (let i = 0; i < workflow.steps.length; i++) {
-    const step = workflow.steps[i];
+  // Execute the first step to get the workflowId
+  try {
+    testRun.steps[0].status = 'running';
+    testRun.steps[0].startTime = new Date();
+    
+    const response = await executeApiCall(process.steps[0]);
+    testRun.steps[0].status = 'completed';
+    testRun.steps[0].endTime = new Date();
+    testRun.steps[0].response = response;
+    
+    // Extract workflowId from the response
+    const workflowId = response.data?.workflowId;
+    if (workflowId) {
+      testRun.workflowId = workflowId;
+      console.log(`Received workflowId: ${workflowId}`);
+    }
+    
+    if (onStepComplete) {
+      onStepComplete(0, true, response);
+    }
+  } catch (error) {
+    testRun.steps[0].status = 'failed';
+    testRun.steps[0].endTime = new Date();
+    testRun.steps[0].error = error instanceof Error ? error.message : String(error);
+    
+    if (onStepComplete) {
+      onStepComplete(0, false, undefined, error);
+    }
+    
+    testRun.status = 'failed';
+    testRun.endTime = new Date();
+    return testRun;
+  }
+
+  // Execute remaining steps if first step was successful
+  for (let i = 1; i < process.steps.length; i++) {
+    const step = process.steps[i];
     testRun.steps[i].status = 'running';
     testRun.steps[i].startTime = new Date();
     
@@ -79,36 +151,36 @@ export const triggerWorkflow = async (
         onStepComplete(i, false, undefined, error);
       }
       
-      // If a step fails, mark the entire workflow as failed
       testRun.status = 'failed';
       testRun.endTime = new Date();
       return testRun;
     }
   }
 
-  // If workflow has a completion check endpoint, poll it for status
-  if (workflow.completionCheckEndpoint) {
-    let status: Status = 'running';
+  // Begin polling for status if there's a workflowId and completion check endpoint
+  if (testRun.workflowId && process.completionCheckEndpoint) {
+    toast.info(`Starting to monitor process status with ID: ${testRun.workflowId}`);
     
-    // Poll every 3 seconds for up to 5 minutes
-    for (let i = 0; i < 100 && status === 'running'; i++) {
-      status = await checkWorkflowStatus(workflow.completionCheckEndpoint, workflow.id);
+    try {
+      const finalStatus = await pollProcessStatus(
+        process.completionCheckEndpoint,
+        testRun.workflowId,
+        (status) => {
+          if (onStatusUpdate) {
+            onStatusUpdate(status);
+          }
+        }
+      );
       
-      if (onStatusCheck) {
-        onStatusCheck(status);
-      }
-      
-      if (status !== 'running') {
-        break;
-      }
-      
-      // Wait 3 seconds before checking again
-      await new Promise(resolve => setTimeout(resolve, 3000));
+      testRun.status = finalStatus;
+      toast.info(`Process status: ${finalStatus}`);
+    } catch (error) {
+      console.error('Error during status polling:', error);
+      testRun.status = 'failed';
+      toast.error(`Failed to monitor process status: ${error instanceof Error ? error.message : String(error)}`);
     }
-    
-    testRun.status = status;
   } else {
-    // If no completion check endpoint, assume completed if all steps succeeded
+    // If no polling needed, assume completed if all steps succeeded
     testRun.status = 'completed';
   }
   
@@ -116,8 +188,8 @@ export const triggerWorkflow = async (
   return testRun;
 };
 
-// Default sample workflow configurations
-export const defaultWorkflows: WorkflowConfig[] = [
+// Default sample process configurations
+export const defaultProcesses: ProcessConfig[] = [
   {
     id: 'eod-batch',
     name: 'EOD Batch Process',

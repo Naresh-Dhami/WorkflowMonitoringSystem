@@ -3,26 +3,28 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { PlayCircle, Clock } from "lucide-react";
+import { PlayCircle, Clock, Trash2 } from "lucide-react";
 import StatusBadge from "./StatusBadge";
-import { BatchJob, TestRun, WorkflowConfig } from "@/types";
+import { BatchJob, TestRun, ProcessConfig } from "@/types";
 import { useState } from "react";
 
 interface BatchCardProps {
-  workflow: WorkflowConfig;
+  process: ProcessConfig;
   activeJob?: BatchJob;
   lastRun?: TestRun;
-  onRunClick: (workflowId: string) => void;
-  onEditClick: (workflow: WorkflowConfig) => void;
+  onRunClick: (processId: string) => void;
+  onEditClick: (process: ProcessConfig) => void;
+  onDeleteClick: (processId: string) => void;
   isLoading: boolean;
 }
 
 const BatchCard = ({ 
-  workflow, 
+  process, 
   activeJob, 
   lastRun, 
   onRunClick, 
   onEditClick,
+  onDeleteClick,
   isLoading 
 }: BatchCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -51,10 +53,10 @@ const BatchCard = ({
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="text-xl font-semibold tracking-tight">
-              {workflow.name}
+              {process.name}
             </CardTitle>
             <CardDescription className="mt-1 line-clamp-2">
-              {workflow.description}
+              {process.description}
             </CardDescription>
           </div>
           {(activeJob || lastRun) && (
@@ -79,7 +81,14 @@ const BatchCard = ({
         
         <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm mt-2">
           <div className="text-muted-foreground">Steps:</div>
-          <div className="font-medium">{workflow.steps.length}</div>
+          <div className="font-medium">{process.steps.length}</div>
+          
+          {lastRun?.workflowId && (
+            <>
+              <div className="text-muted-foreground">WorkflowID:</div>
+              <div className="font-medium text-xs truncate">{lastRun.workflowId}</div>
+            </>
+          )}
           
           {(activeJob || lastRun) && (
             <>
@@ -112,17 +121,28 @@ const BatchCard = ({
       </CardContent>
       
       <CardFooter className="flex justify-between pt-2">
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={() => onEditClick(workflow)}
-          className="text-sm"
-        >
-          Configure
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => onEditClick(process)}
+            className="text-sm"
+          >
+            Configure
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            size="sm"
+            onClick={() => onDeleteClick(process.id)}
+            className="text-sm text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="h-4 w-4" />
+          </Button>
+        </div>
         
         <Button 
-          onClick={() => onRunClick(workflow.id)}
+          onClick={() => onRunClick(process.id)}
           disabled={isLoading || activeJob?.status === 'running'}
           size="sm"
           className={cn(
@@ -139,7 +159,7 @@ const BatchCard = ({
           ) : (
             <>
               <PlayCircle className="mr-1 h-4 w-4" />
-              Run Workflow
+              Run Process
             </>
           )}
         </Button>

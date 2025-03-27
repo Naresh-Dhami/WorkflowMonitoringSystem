@@ -1,33 +1,32 @@
 
 import { Button } from "@/components/ui/button";
 import { Plus, ChevronDown, Settings } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { WorkflowConfig } from "@/types";
 
 interface HeaderProps {
-  onNewWorkflow: () => void;
+  onNewProcess: () => void;
   onImportConfig: () => void;
   onExportConfig: () => void;
 }
 
-const Header = ({ onNewWorkflow, onImportConfig, onExportConfig }: HeaderProps) => {
+const Header = ({ onNewProcess, onImportConfig, onExportConfig }: HeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   
   // Add scroll event listener
-  useState(() => {
+  useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 10);
     };
     
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  });
+  }, []);
   
   return (
     <header 
@@ -46,11 +45,11 @@ const Header = ({ onNewWorkflow, onImportConfig, onExportConfig }: HeaderProps) 
           <Button 
             variant="ghost"
             size="sm"
-            onClick={onNewWorkflow}
+            onClick={onNewProcess}
             className="hidden sm:flex items-center"
           >
             <Plus className="mr-1 h-4 w-4" />
-            New Workflow
+            New Process
           </Button>
           
           <DropdownMenu>
@@ -64,9 +63,9 @@ const Header = ({ onNewWorkflow, onImportConfig, onExportConfig }: HeaderProps) 
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 glass">
-              <DropdownMenuItem onClick={onNewWorkflow}>
+              <DropdownMenuItem onClick={onNewProcess}>
                 <Plus className="mr-2 h-4 w-4" />
-                New Workflow
+                New Process
               </DropdownMenuItem>
               <DropdownMenuItem onClick={onImportConfig}>
                 Import Configuration

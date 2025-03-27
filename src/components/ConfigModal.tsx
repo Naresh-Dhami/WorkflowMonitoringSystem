@@ -7,19 +7,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Trash2, Plus, Save, ArrowDown } from "lucide-react";
-import { ApiConfig, WorkflowConfig } from "@/types";
+import { ApiConfig, ProcessConfig } from "@/types";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 
 interface ConfigModalProps {
   isOpen: boolean;
   onClose: () => void;
-  workflow?: WorkflowConfig;
-  onSave: (workflow: WorkflowConfig) => void;
+  process?: ProcessConfig;
+  onSave: (process: ProcessConfig) => void;
 }
 
-const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) => {
-  const [activeWorkflow, setActiveWorkflow] = useState<WorkflowConfig>({
+const ConfigModal = ({ isOpen, onClose, process, onSave }: ConfigModalProps) => {
+  const [activeProcess, setActiveProcess] = useState<ProcessConfig>({
     id: '',
     name: '',
     description: '',
@@ -29,13 +29,13 @@ const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) =>
   
   const [activeTab, setActiveTab] = useState('general');
   
-  // Initialize form when modal opens or workflow changes
+  // Initialize form when modal opens or process changes
   useEffect(() => {
-    if (workflow) {
-      setActiveWorkflow({ ...workflow });
+    if (process) {
+      setActiveProcess({ ...process });
     } else {
-      setActiveWorkflow({
-        id: `workflow-${Date.now()}`,
+      setActiveProcess({
+        id: `process-${Date.now()}`,
         name: '',
         description: '',
         steps: [],
@@ -43,56 +43,56 @@ const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) =>
       });
     }
     setActiveTab('general');
-  }, [workflow, isOpen]);
+  }, [process, isOpen]);
   
   const handleSave = () => {
-    onSave(activeWorkflow);
+    onSave(activeProcess);
     onClose();
   };
   
   const addStep = () => {
     const newStep: ApiConfig = {
       id: `step-${Date.now()}`,
-      name: `Step ${activeWorkflow.steps.length + 1}`,
+      name: `Step ${activeProcess.steps.length + 1}`,
       endpoint: '',
       method: 'GET'
     };
     
-    setActiveWorkflow({
-      ...activeWorkflow,
-      steps: [...activeWorkflow.steps, newStep]
+    setActiveProcess({
+      ...activeProcess,
+      steps: [...activeProcess.steps, newStep]
     });
   };
   
   const updateStep = (index: number, updatedStep: ApiConfig) => {
-    const newSteps = [...activeWorkflow.steps];
+    const newSteps = [...activeProcess.steps];
     newSteps[index] = updatedStep;
     
-    setActiveWorkflow({
-      ...activeWorkflow,
+    setActiveProcess({
+      ...activeProcess,
       steps: newSteps
     });
   };
   
   const removeStep = (index: number) => {
-    const newSteps = activeWorkflow.steps.filter((_, i) => i !== index);
+    const newSteps = activeProcess.steps.filter((_, i) => i !== index);
     
-    setActiveWorkflow({
-      ...activeWorkflow,
+    setActiveProcess({
+      ...activeProcess,
       steps: newSteps
     });
   };
   
   const moveStepDown = (index: number) => {
-    if (index >= activeWorkflow.steps.length - 1) return;
+    if (index >= activeProcess.steps.length - 1) return;
     
-    const newSteps = [...activeWorkflow.steps];
+    const newSteps = [...activeProcess.steps];
     const temp = newSteps[index];
     newSteps[index] = newSteps[index + 1];
     newSteps[index + 1] = temp;
     
-    setActiveWorkflow({
-      ...activeWorkflow,
+    setActiveProcess({
+      ...activeProcess,
       steps: newSteps
     });
   };
@@ -102,10 +102,10 @@ const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) =>
       <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold">
-            {workflow ? 'Edit Workflow' : 'Create New Workflow'}
+            {process ? 'Edit Process' : 'Create New Process'}
           </DialogTitle>
           <DialogDescription>
-            Configure the workflow steps and settings
+            Configure the process steps and settings
           </DialogDescription>
         </DialogHeader>
         
@@ -114,9 +114,9 @@ const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) =>
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="steps">
               Steps
-              {activeWorkflow.steps.length > 0 && (
+              {activeProcess.steps.length > 0 && (
                 <Badge className="ml-2 bg-primary/10 text-primary" variant="outline">
-                  {activeWorkflow.steps.length}
+                  {activeProcess.steps.length}
                 </Badge>
               )}
             </TabsTrigger>
@@ -124,12 +124,12 @@ const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) =>
           
           <TabsContent value="general" className="space-y-4 animate-fade-in">
             <div className="space-y-2">
-              <Label htmlFor="name">Workflow Name</Label>
+              <Label htmlFor="name">Process Name</Label>
               <Input
                 id="name"
-                value={activeWorkflow.name}
-                onChange={(e) => setActiveWorkflow({ ...activeWorkflow, name: e.target.value })}
-                placeholder="Enter workflow name"
+                value={activeProcess.name}
+                onChange={(e) => setActiveProcess({ ...activeProcess, name: e.target.value })}
+                placeholder="Enter process name"
               />
             </div>
             
@@ -137,9 +137,9 @@ const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) =>
               <Label htmlFor="description">Description</Label>
               <Textarea
                 id="description"
-                value={activeWorkflow.description}
-                onChange={(e) => setActiveWorkflow({ ...activeWorkflow, description: e.target.value })}
-                placeholder="Enter workflow description"
+                value={activeProcess.description}
+                onChange={(e) => setActiveProcess({ ...activeProcess, description: e.target.value })}
+                placeholder="Enter process description"
                 rows={3}
               />
             </div>
@@ -148,18 +148,18 @@ const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) =>
               <Label htmlFor="completion-endpoint">Completion Check Endpoint (Optional)</Label>
               <Input
                 id="completion-endpoint"
-                value={activeWorkflow.completionCheckEndpoint || ''}
-                onChange={(e) => setActiveWorkflow({ ...activeWorkflow, completionCheckEndpoint: e.target.value })}
-                placeholder="/api/workflow/status"
+                value={activeProcess.completionCheckEndpoint || ''}
+                onChange={(e) => setActiveProcess({ ...activeProcess, completionCheckEndpoint: e.target.value })}
+                placeholder="/api/process/status"
               />
               <p className="text-xs text-muted-foreground">
-                Endpoint to check if the workflow has completed after all steps have run
+                Endpoint to check if the process has completed after all steps have run
               </p>
             </div>
           </TabsContent>
           
           <TabsContent value="steps" className="space-y-6 animate-fade-in">
-            {activeWorkflow.steps.length === 0 ? (
+            {activeProcess.steps.length === 0 ? (
               <div className="text-center py-8">
                 <p className="text-muted-foreground mb-4">No steps defined yet</p>
                 <Button onClick={addStep} variant="outline">
@@ -169,7 +169,7 @@ const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) =>
               </div>
             ) : (
               <>
-                {activeWorkflow.steps.map((step, index) => (
+                {activeProcess.steps.map((step, index) => (
                   <div
                     key={step.id}
                     className={cn(
@@ -186,7 +186,7 @@ const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) =>
                           variant="ghost"
                           className="h-7 w-7"
                           onClick={() => moveStepDown(index)}
-                          disabled={index === activeWorkflow.steps.length - 1}
+                          disabled={index === activeProcess.steps.length - 1}
                         >
                           <ArrowDown className="h-4 w-4" />
                         </Button>
@@ -287,11 +287,11 @@ const ConfigModal = ({ isOpen, onClose, workflow, onSave }: ConfigModalProps) =>
           </Button>
           <Button 
             onClick={handleSave}
-            disabled={!activeWorkflow.name || activeWorkflow.steps.length === 0}
+            disabled={!activeProcess.name || activeProcess.steps.length === 0}
             className="btn-animation"
           >
             <Save className="h-4 w-4 mr-2" />
-            Save Workflow
+            Save Process
           </Button>
         </DialogFooter>
       </DialogContent>

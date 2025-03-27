@@ -1,15 +1,16 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
-import { BatchJob, TestRun, WorkflowConfig } from "@/types";
-import { triggerWorkflow, defaultWorkflows } from "@/utils/api";
+import { BatchJob, TestRun, ProcessConfig } from "@/types";
+import { triggerProcess, defaultProcesses } from "@/utils/api";
+import { loadProcessConfigs, saveProcessConfig, deleteProcessConfig } from "@/utils/configStorage";
 
 export function useBatchJobs() {
-  // State for workflows (API configurations)
-  const [workflows, setWorkflows] = useState<WorkflowConfig[]>(() => {
-    // Load from localStorage if available
-    const savedWorkflows = localStorage.getItem('batchConnector.workflows');
-    return savedWorkflows ? JSON.parse(savedWorkflows) : defaultWorkflows;
+  // State for processes (API configurations)
+  const [processes, setProcesses] = useState<ProcessConfig[]>(() => {
+    // Load from localStorage/JSON file if available
+    const savedProcesses = loadProcessConfigs();
+    return savedProcesses.length > 0 ? savedProcesses : defaultProcesses;
   });
   
   // State for test runs
@@ -24,42 +25,39 @@ export function useBatchJobs() {
   // State for loading status
   const [isLoading, setIsLoading] = useState(false);
   
-  // Save workflows to localStorage whenever they change
-  useEffect(() => {
-    localStorage.setItem('batchConnector.workflows', JSON.stringify(workflows));
-  }, [workflows]);
-  
   // Save test runs to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem('batchConnector.testRuns', JSON.stringify(testRuns));
   }, [testRuns]);
   
-  // Function to add a new workflow
-  const addWorkflow = useCallback((workflow: WorkflowConfig) => {
-    setWorkflows(prev => [...prev, workflow]);
-    toast.success(`Workflow "${workflow.name}" added successfully`);
+  // Function to add a new process
+  const addProcess = useCallback((process: ProcessConfig) => {
+    setProcesses(prev => [...prev, process]);
+    saveProcessConfig(process);
+    toast.success(`Process "${process.name}" added successfully`);
   }, []);
   
-  // Function to update an existing workflow
-  const updateWorkflow = useCallback((updatedWorkflow: WorkflowConfig) => {
-    setWorkflows(prev => 
-      prev.map(w => w.id === updatedWorkflow.id ? updatedWorkflow : w)
+  // Function to update an existing process
+  const updateProcess = useCallback((updatedProcess: ProcessConfig) => {
+    setProcesses(prev => 
+      prev.map(w => w.id === updatedProcess.id ? updatedProcess : w)
     );
-    toast.success(`Workflow "${updatedWorkflow.name}" updated successfully`);
+    saveProcessConfig(updatedProcess);
+    toast.success(`Process "${updatedProcess.name}" updated successfully`);
   }, []);
   
-  // Function to delete a workflow
-  const deleteWorkflow = useCallback((workflowId: string) => {
-    setWorkflows(prev => prev.filter(w => w.id !== workflowId));
-    toast.success("Workflow deleted successfully");
+  // Function to delete a process
+  const deleteProcess = useCallback((processId: string) => {
+    setProcesses(prev => prev.filter(p => p.id !== processId));
+    deleteProcessConfig(processId);
   }, []);
   
-  // Function to trigger a workflow execution
-  const runWorkflow = useCallback(async (workflowId: string) => {
-    const workflow = workflows.find(w => w.id === workflowId);
+  // Function to trigger a process execution
+  const runProcess = useCallback(async (processId: string) => {
+    const process = processes.find(p => p.id === processId);
     
-    if (!workflow) {
-      toast.error("Workflow not found");
+    if (!process) {
+      toast.error("Process not found");
       return;
     }
     
@@ -68,8 +66,8 @@ export function useBatchJobs() {
     // Create a new batch job
     const newJob: BatchJob = {
       id: `job-${Date.now()}`,
-      name: workflow.name,
-      description: workflow.description,
+      name: process.name,
+      description: process.description,
       status: 'running',
       progress: 0,
       startTime: new Date()
@@ -79,18 +77,18 @@ export function useBatchJobs() {
     setActiveJobs(prev => [...prev, newJob]);
     
     try {
-      toast.info(`Starting workflow "${workflow.name}"...`);
+      toast.info(`Starting process "${process.name}"...`);
       
-      // Trigger the workflow execution
-      const testRun = await triggerWorkflow(
-        workflow,
+      // Trigger the process execution
+      const testRun = await triggerProcess(
+        process,
         // Step completion callback
         (stepIndex, success, response, error) => {
           // Update job progress
           setActiveJobs(prev => 
             prev.map(job => {
               if (job.id === newJob.id) {
-                const progress = ((stepIndex + 1) / workflow.steps.length) * 100;
+                const progress = ((stepIndex + 1) / process.steps.length) * 100;
                 return {
                   ...job,
                   progress: progress,
@@ -103,9 +101,9 @@ export function useBatchJobs() {
           
           // Show toast for step completion
           if (success) {
-            toast.success(`Step ${stepIndex + 1} completed: ${workflow.steps[stepIndex].name}`);
+            toast.success(`Step ${stepIndex + 1} completed: ${process.steps[stepIndex].name}`);
           } else {
-            toast.error(`Step ${stepIndex + 1} failed: ${workflow.steps[stepIndex].name}`);
+            toast.error(`Step ${stepIndex + 1} failed: ${process.steps[stepIndex].name}`);
           }
         },
         // Status check callback
@@ -144,13 +142,13 @@ export function useBatchJobs() {
       
       // Show completion toast
       if (testRun.status === 'completed') {
-        toast.success(`Workflow "${workflow.name}" completed successfully`);
+        toast.success(`Process "${process.name}" completed successfully`);
       } else {
-        toast.error(`Workflow "${workflow.name}" ${testRun.status}`);
+        toast.error(`Process "${process.name}" ${testRun.status}`);
       }
     } catch (error) {
       // Handle any uncaught errors
-      toast.error(`Error running workflow: ${error instanceof Error ? error.message : String(error)}`);
+      toast.error(`Error running process: ${error instanceof Error ? error.message : String(error)}`);
       
       // Update job status
       setActiveJobs(prev => 
@@ -171,7 +169,7 @@ export function useBatchJobs() {
     } finally {
       setIsLoading(false);
     }
-  }, [workflows]);
+  }, [processes]);
   
   // Remove completed jobs from active jobs after 5 minutes
   useEffect(() => {
@@ -190,13 +188,13 @@ export function useBatchJobs() {
   }, []);
   
   return {
-    workflows,
+    processes,
     testRuns,
     activeJobs,
     isLoading,
-    addWorkflow,
-    updateWorkflow,
-    deleteWorkflow,
-    runWorkflow
+    addProcess,
+    updateProcess,
+    deleteProcess,
+    runProcess
   };
 }

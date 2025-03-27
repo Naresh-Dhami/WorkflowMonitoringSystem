@@ -9,23 +9,24 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { WorkflowConfig } from "@/types";
+import { ProcessConfig } from "@/types";
 import { Clock, Filter, LayoutGrid, List, Plus, RefreshCw } from "lucide-react";
+import { importConfigFromFile } from "@/utils/configStorage";
 
 const Index = () => {
   const { 
-    workflows, 
+    processes, 
     testRuns, 
     activeJobs, 
     isLoading, 
-    addWorkflow, 
-    updateWorkflow, 
-    deleteWorkflow, 
-    runWorkflow 
+    addProcess, 
+    updateProcess, 
+    deleteProcess, 
+    runProcess 
   } = useBatchJobs();
   
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
-  const [activeWorkflow, setActiveWorkflow] = useState<WorkflowConfig | undefined>(undefined);
+  const [activeProcess, setActiveProcess] = useState<ProcessConfig | undefined>(undefined);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -55,12 +56,9 @@ const Index = () => {
             event.target.value = '';
           }
           
-          // Add workflows one by one
-          parsedConfig.forEach(workflow => {
-            addWorkflow(workflow);
-          });
-          
-          toast.success(`Successfully imported ${parsedConfig.length} workflows`);
+          // Import all processes at once
+          const importedProcesses = importConfigFromFile(content);
+          toast.success(`Successfully imported ${importedProcesses.length} processes`);
         } else {
           toast.error("Invalid configuration format");
         }
@@ -74,7 +72,7 @@ const Index = () => {
   
   // Handle config export
   const handleExportConfig = () => {
-    const configJson = JSON.stringify(workflows, null, 2);
+    const configJson = JSON.stringify(processes, null, 2);
     const blob = new Blob([configJson], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     
@@ -89,28 +87,28 @@ const Index = () => {
     toast.success("Configuration exported successfully");
   };
   
-  const handleSaveWorkflow = (workflow: WorkflowConfig) => {
-    if (activeWorkflow) {
-      updateWorkflow(workflow);
+  const handleSaveProcess = (process: ProcessConfig) => {
+    if (activeProcess) {
+      updateProcess(process);
     } else {
-      addWorkflow(workflow);
+      addProcess(process);
     }
-    setActiveWorkflow(undefined);
+    setActiveProcess(undefined);
   };
   
-  // Find the last test run for each workflow
-  const getLastRunForWorkflow = (workflowId: string) => {
+  // Find the last test run for each process
+  const getLastRunForProcess = (processId: string) => {
     return testRuns
-      .filter(run => run.workflowId === workflowId)
+      .filter(run => run.processId === processId)
       .sort((a, b) => 
         new Date(b.startTime).getTime() - new Date(a.startTime).getTime()
       )[0];
   };
   
-  // Find the active job for workflow
-  const getActiveJobForWorkflow = (workflowId: string) => {
+  // Find the active job for process
+  const getActiveJobForProcess = (processId: string) => {
     return activeJobs.find(job => 
-      job.name === workflows.find(w => w.id === workflowId)?.name
+      job.name === processes.find(p => p.id === processId)?.name
     );
   };
   
@@ -121,8 +119,8 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header 
-        onNewWorkflow={() => {
-          setActiveWorkflow(undefined);
+        onNewProcess={() => {
+          setActiveProcess(undefined);
           setIsConfigModalOpen(true);
         }}
         onImportConfig={handleImportConfig}
@@ -191,10 +189,10 @@ const Index = () => {
             </section>
           )}
           
-          {/* Workflows section */}
+          {/* Processes section */}
           <section>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-semibold tracking-tight">Workflows</h2>
+              <h2 className="text-xl font-semibold tracking-tight">Processes</h2>
               <div className="flex items-center space-x-2">
                 <Button 
                   variant="ghost" 
@@ -215,40 +213,43 @@ const Index = () => {
               </div>
             </div>
             
-            {workflows.length === 0 ? (
+            {processes.length === 0 ? (
               <div className="text-center py-16 border rounded-lg bg-white/50">
-                <h3 className="text-lg font-medium mb-2">No workflows configured</h3>
+                <h3 className="text-lg font-medium mb-2">No processes configured</h3>
                 <p className="text-muted-foreground mb-6">
-                  Get started by creating your first workflow
+                  Get started by creating your first process
                 </p>
                 <Button 
                   onClick={() => {
-                    setActiveWorkflow(undefined);
+                    setActiveProcess(undefined);
                     setIsConfigModalOpen(true);
                   }}
                   className="btn-animation"
                 >
                   <Plus className="mr-2 h-4 w-4" />
-                  Create Workflow
+                  Create Process
                 </Button>
               </div>
             ) : (
               viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {workflows.map((workflow, index) => (
+                  {processes.map((process, index) => (
                     <div 
-                      key={workflow.id} 
+                      key={process.id} 
                       className={itemAnimationClass}
                       style={{ animationDelay: `${index * 100}ms` }}
                     >
                       <BatchCard 
-                        workflow={workflow}
-                        activeJob={getActiveJobForWorkflow(workflow.id)}
-                        lastRun={getLastRunForWorkflow(workflow.id)}
-                        onRunClick={runWorkflow}
-                        onEditClick={(workflow) => {
-                          setActiveWorkflow(workflow);
+                        process={process}
+                        activeJob={getActiveJobForProcess(process.id)}
+                        lastRun={getLastRunForProcess(process.id)}
+                        onRunClick={runProcess}
+                        onEditClick={(process) => {
+                          setActiveProcess(process);
                           setIsConfigModalOpen(true);
+                        }}
+                        onDeleteClick={(processId) => {
+                          deleteProcess(processId);
                         }}
                         isLoading={isLoading}
                       />
@@ -257,19 +258,19 @@ const Index = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {workflows.map((workflow, index) => {
-                    const activeJob = getActiveJobForWorkflow(workflow.id);
-                    const lastRun = getLastRunForWorkflow(workflow.id);
+                  {processes.map((process, index) => {
+                    const activeJob = getActiveJobForProcess(process.id);
+                    const lastRun = getLastRunForProcess(process.id);
                     return (
                       <div 
-                        key={workflow.id} 
+                        key={process.id} 
                         className={`${itemAnimationClass} p-4 rounded-lg border bg-white/50 shadow-sm hover:shadow transition-all`}
                         style={{ animationDelay: `${index * 75}ms` }}
                       >
                         <div className="flex justify-between items-center">
                           <div>
-                            <h3 className="font-medium">{workflow.name}</h3>
-                            <p className="text-sm text-muted-foreground">{workflow.description}</p>
+                            <h3 className="font-medium">{process.name}</h3>
+                            <p className="text-sm text-muted-foreground">{process.description}</p>
                           </div>
                           
                           <div className="flex items-center space-x-2">
@@ -284,15 +285,24 @@ const Index = () => {
                               variant="outline" 
                               size="sm"
                               onClick={() => {
-                                setActiveWorkflow(workflow);
+                                setActiveProcess(process);
                                 setIsConfigModalOpen(true);
                               }}
                             >
                               Configure
                             </Button>
                             
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => deleteProcess(process.id)}
+                              className="text-destructive hover:bg-destructive/10"
+                            >
+                              Delete
+                            </Button>
+                            
                             <Button 
-                              onClick={() => runWorkflow(workflow.id)}
+                              onClick={() => runProcess(process.id)}
                               disabled={isLoading || activeJob?.status === 'running'}
                               size="sm"
                             >
@@ -320,7 +330,8 @@ const Index = () => {
                   <table className="w-full text-sm">
                     <thead>
                       <tr className="bg-muted/50">
-                        <th className="font-medium text-left p-3">Workflow</th>
+                        <th className="font-medium text-left p-3">Process</th>
+                        <th className="font-medium text-left p-3">Workflow ID</th>
                         <th className="font-medium text-left p-3">Start Time</th>
                         <th className="font-medium text-left p-3">End Time</th>
                         <th className="font-medium text-left p-3">Duration</th>
@@ -332,14 +343,15 @@ const Index = () => {
                         .sort((a, b) => new Date(b.startTime).getTime() - new Date(a.startTime).getTime())
                         .slice(0, 10)
                         .map((run, index) => {
-                          const workflow = workflows.find(w => w.id === run.workflowId);
+                          const process = processes.find(p => p.id === run.processId);
                           const duration = run.endTime 
                             ? (new Date(run.endTime).getTime() - new Date(run.startTime).getTime()) / 1000
                             : undefined;
                             
                           return (
                             <tr key={run.id} className="border-t hover:bg-muted/20">
-                              <td className="p-3">{workflow?.name || 'Unknown'}</td>
+                              <td className="p-3">{process?.name || 'Unknown'}</td>
+                              <td className="p-3 text-xs">{run.workflowId || '-'}</td>
                               <td className="p-3">{new Date(run.startTime).toLocaleString()}</td>
                               <td className="p-3">
                                 {run.endTime ? new Date(run.endTime).toLocaleString() : '-'}
@@ -372,10 +384,10 @@ const Index = () => {
         isOpen={isConfigModalOpen}
         onClose={() => {
           setIsConfigModalOpen(false);
-          setActiveWorkflow(undefined);
+          setActiveProcess(undefined);
         }}
-        workflow={activeWorkflow}
-        onSave={handleSaveWorkflow}
+        process={activeProcess}
+        onSave={handleSaveProcess}
       />
     </div>
   );
