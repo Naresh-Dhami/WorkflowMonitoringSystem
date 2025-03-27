@@ -16,7 +16,7 @@ export function useJobRunner(
     
     if (!process) {
       toast.error("Process not found");
-      return;
+      throw new Error("Process not found");
     }
     
     // Create a new batch job
@@ -64,13 +64,15 @@ export function useJobRunner(
       addTestRun(testRun);
       
       // Update job status
+      const duration = testRun.endTime 
+        ? (new Date(testRun.endTime).getTime() - new Date(testRun.startTime).getTime()) / 1000 
+        : undefined;
+
       updateJob(newJob.id, {
         status: testRun.status,
         progress: 100,
         endTime: testRun.endTime,
-        duration: testRun.endTime 
-          ? (testRun.endTime.getTime() - testRun.startTime.getTime()) / 1000 
-          : undefined
+        duration
       });
       
       // Show completion toast
@@ -79,6 +81,12 @@ export function useJobRunner(
       } else {
         toast.error(`Process "${process.name}" ${testRun.status}`);
       }
+
+      // Return the test run for batch processing
+      return {
+        ...testRun,
+        duration
+      };
     } catch (error) {
       // Handle any uncaught errors
       toast.error(`Error running process: ${error instanceof Error ? error.message : String(error)}`);
@@ -91,6 +99,9 @@ export function useJobRunner(
           ? (new Date().getTime() - newJob.startTime.getTime()) / 1000 
           : undefined
       });
+
+      // Rethrow to handle in batch runner
+      throw error;
     }
   }, [processes, addJob, updateJob, addTestRun]);
   

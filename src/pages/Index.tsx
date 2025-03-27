@@ -2,6 +2,7 @@
 import { useState, useRef } from "react";
 import Header from "@/components/Header";
 import ConfigModal from "@/components/ConfigModal";
+import BatchRunnerModal from "@/components/BatchRunnerModal";
 import { useBatchJobs } from "@/hooks/useBatchJobs";
 import { ProcessConfig } from "@/types";
 import { toast } from "sonner";
@@ -9,6 +10,8 @@ import { importConfigFromFile } from "@/utils/configStorage";
 import ProcessSection from "@/components/ProcessSection";
 import ActiveJobsSection from "@/components/ActiveJobsSection";
 import TestRunsSection from "@/components/TestRunsSection";
+import { Button } from "@/components/ui/button";
+import { Play } from "lucide-react";
 
 const Index = () => {
   const { 
@@ -16,13 +19,18 @@ const Index = () => {
     testRuns, 
     activeJobs, 
     isLoading, 
+    isRunningBatch,
+    batchProgress,
+    batchResults,
     addProcess, 
     updateProcess, 
     deleteProcess, 
-    runProcess 
+    runProcess,
+    runBatch
   } = useBatchJobs();
   
   const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [isBatchRunnerOpen, setIsBatchRunnerOpen] = useState(false);
   const [activeProcess, setActiveProcess] = useState<ProcessConfig | undefined>(undefined);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
@@ -103,6 +111,17 @@ const Index = () => {
     setIsConfigModalOpen(true);
   };
   
+  const handleRunBatch = async (processIds: string[], emailReport?: string) => {
+    const results = await runBatch(processIds, emailReport);
+    
+    // Close modal after batch completes
+    if (!isRunningBatch) {
+      setIsBatchRunnerOpen(false);
+    }
+    
+    return results;
+  };
+  
   // Animation styles
   const containerAnimationClass = "animate-fade-in";
   
@@ -125,6 +144,20 @@ const Index = () => {
       
       <main className="max-w-6xl mx-auto pt-24 px-6 pb-16">
         <div className={`${containerAnimationClass} space-y-6`}>
+          <div className="flex justify-between items-center">
+            <h1 className="text-2xl font-semibold tracking-tight">Batch Connector</h1>
+            {processes.length > 0 && (
+              <Button 
+                onClick={() => setIsBatchRunnerOpen(true)}
+                disabled={isLoading || isRunningBatch}
+                className="btn-animation"
+              >
+                <Play className="mr-2 h-4 w-4" />
+                Run Multiple Processes
+              </Button>
+            )}
+          </div>
+          
           <ActiveJobsSection activeJobs={activeJobs} />
           
           <ProcessSection 
@@ -154,6 +187,16 @@ const Index = () => {
         }}
         process={activeProcess}
         onSave={handleSaveProcess}
+      />
+      
+      {/* Batch runner modal */}
+      <BatchRunnerModal
+        isOpen={isBatchRunnerOpen}
+        onClose={() => setIsBatchRunnerOpen(false)}
+        processes={processes}
+        onRunBatch={handleRunBatch}
+        isRunning={isRunningBatch}
+        batchProgress={batchProgress}
       />
     </div>
   );

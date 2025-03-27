@@ -4,6 +4,7 @@ import { useProcesses } from "./useProcesses";
 import { useTestRuns } from "./useTestRuns";
 import { useActiveJobs } from "./useActiveJobs";
 import { useJobRunner } from "./useJobRunner";
+import { useBatchRunner } from "./useBatchRunner";
 import { defaultProcesses } from "@/utils/api";
 
 export function useBatchJobs() {
@@ -31,6 +32,19 @@ export function useBatchJobs() {
     updateJob
   );
   
+  // Use the batch runner
+  const { 
+    runMultipleProcesses,
+    isRunningBatch,
+    batchProgress,
+    batchResults
+  } = useBatchRunner(
+    processes,
+    addTestRun,
+    addJob,
+    updateJob
+  );
+  
   // Wrap runProcess to handle loading state
   const runProcess = async (processId: string) => {
     setIsLoading(true);
@@ -41,14 +55,28 @@ export function useBatchJobs() {
     }
   };
   
+  // Wrap runMultipleProcesses to handle loading state
+  const runBatch = async (processIds: string[], emailReport?: string) => {
+    setIsLoading(true);
+    try {
+      return await runMultipleProcesses(processIds, emailReport);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return {
     processes,
     testRuns,
     activeJobs,
     isLoading,
+    isRunningBatch,
+    batchProgress,
+    batchResults,
     addProcess,
     updateProcess,
     deleteProcess,
-    runProcess
+    runProcess,
+    runBatch
   };
 }

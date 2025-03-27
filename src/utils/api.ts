@@ -19,7 +19,7 @@ export const executeApiCall = async (config: ApiConfig): Promise<any> => {
           data: { 
             success: true, 
             message: `Successfully executed ${config.name}`,
-            workflowId: `wf-${Date.now()}-${Math.floor(Math.random() * 1000)}`
+            workflowId: `WK${Date.now().toString().substring(7)}-${Math.floor(Math.random() * 1000)}`
           }
         };
         resolve(response);
@@ -38,10 +38,22 @@ export const checkProcessStatus = async (endpoint: string, workflowId: string): 
   // For now, we'll simulate with a timeout
   return new Promise((resolve) => {
     setTimeout(() => {
-      // Randomly determine status for demo purposes
-      const statuses: Status[] = ['running', 'completed', 'failed'];
-      const randomStatus = statuses[Math.floor(Math.random() * statuses.length)];
-      resolve(randomStatus);
+      // Weighted random status for more realistic simulation
+      // The longer a workflow runs, the more likely it is to complete
+      const rand = Math.random();
+      let status: Status;
+      
+      // First few checks are likely to be "running"
+      if (rand < 0.7) {
+        status = 'running';
+      } else if (rand < 0.9) {
+        status = 'completed';
+      } else {
+        status = 'failed';
+      }
+      
+      console.log(`Status check for ${workflowId}: ${status}`);
+      resolve(status);
     }, 1000);
   });
 };
