@@ -14,7 +14,6 @@ import { useState } from "react";
 import { Button } from "./ui/button";
 
 const NavigationMenuComponent = () => {
-  const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   
   const isActive = (path: string) => location.pathname === path;

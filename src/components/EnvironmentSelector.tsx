@@ -64,7 +64,7 @@ const EnvironmentSelector = () => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuLabel>Environments</DropdownMenuLabel>
+        <DropdownMenuLabel className="!text-black">Environments</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {environments.map((env) => (
           <EnvironmentMenuItem 

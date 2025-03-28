@@ -1,6 +1,5 @@
 
 import { useState } from "react";
-import Header from "@/components/Header";
 import { 
   Table, 
   TableHeader, 
@@ -171,18 +170,9 @@ const GridGainViewer = () => {
     input.click();
   };
 
-  // Dummy functions for new process, import config, export config
-  const dummyFunction = () => {};
-
   return (
     <div className="min-h-screen bg-background">
-      <Header 
-        onNewProcess={dummyFunction} 
-        onImportConfig={dummyFunction} 
-        onExportConfig={dummyFunction} 
-      />
-      
-      <main className="max-w-6xl mx-auto pt-24 px-6 pb-16">
+      <main className="max-w-6xl mx-auto pt-6 px-6 pb-16">
         <div className="space-y-6 animate-fade-in">
           <div className="flex justify-between items-center">
             <h1 className="text-2xl font-semibold tracking-tight">Grid Gain Message Viewer</h1>
