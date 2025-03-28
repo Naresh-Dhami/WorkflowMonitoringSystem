@@ -23,7 +23,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
   const isActive = (path: string) => location.pathname === path;
 
   return (
-    <SidebarProvider>
+    <SidebarProvider defaultOpen={false}>
       <div className="flex w-full min-h-screen">
         <Sidebar className="border-r border-[#FEF7CD]/20">
           <SidebarHeader className="border-b border-[#FEF7CD]/20 py-4">

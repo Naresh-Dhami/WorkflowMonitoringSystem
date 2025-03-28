@@ -7,6 +7,7 @@ export interface Environment {
   name: string;
   baseUrl: string;
   description: string;
+  children?: Environment[];
 }
 
 interface EnvironmentContextType {
@@ -29,6 +30,38 @@ const EnvironmentContext = createContext<EnvironmentContextType>({
 
 export const useEnvironment = () => useContext(EnvironmentContext);
 
+// Helper function to find an environment by ID in nested structure
+const findEnvironmentById = (environments: Environment[], id: string): Environment | undefined => {
+  for (const env of environments) {
+    if (env.id === id) return env;
+    if (env.children && env.children.length > 0) {
+      const found = findEnvironmentById(env.children, id);
+      if (found) return found;
+    }
+  }
+  return undefined;
+};
+
+// Helper function to flatten nested environments for export
+const flattenEnvironments = (environments: Environment[]): Environment[] => {
+  const result: Environment[] = [];
+  
+  const flatten = (envs: Environment[]) => {
+    for (const env of envs) {
+      // Create a copy without children
+      const { children, ...envWithoutChildren } = env;
+      result.push(envWithoutChildren);
+      
+      if (children && children.length > 0) {
+        flatten(children);
+      }
+    }
+  };
+  
+  flatten(environments);
+  return result;
+};
+
 export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [environments, setEnvironments] = useState<Environment[]>(() => {
     // Try to get the saved environments from localStorage
@@ -48,7 +81,7 @@ export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // Try to get the saved environment from localStorage
     const savedEnvironmentId = localStorage.getItem("batchConnector.environment");
     if (savedEnvironmentId) {
-      const savedEnv = environments.find(env => env.id === savedEnvironmentId);
+      const savedEnv = findEnvironmentById(environments, savedEnvironmentId);
       return savedEnv || defaultEnvironment;
     }
     return defaultEnvironment;
@@ -60,7 +93,7 @@ export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, [environments]);
 
   const setEnvironment = (environmentId: string) => {
-    const env = environments.find(env => env.id === environmentId);
+    const env = findEnvironmentById(environments, environmentId);
     if (env) {
       setCurrentEnvironment(env);
       localStorage.setItem("batchConnector.environment", env.id);
@@ -82,7 +115,7 @@ export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setEnvironments(parsed);
         
         // If current environment doesn't exist in the new list, reset to first environment
-        if (!parsed.find(env => env.id === currentEnvironment.id)) {
+        if (!findEnvironmentById(parsed, currentEnvironment.id)) {
           setCurrentEnvironment(parsed[0]);
           localStorage.setItem("batchConnector.environment", parsed[0].id);
         }
@@ -98,7 +131,9 @@ export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
   };
 
   const exportEnvironments = () => {
-    const json = JSON.stringify(environments, null, 2);
+    // Flatten the environments structure for export
+    const flattenedEnvironments = flattenEnvironments(environments);
+    const json = JSON.stringify(flattenedEnvironments, null, 2);
     const blob = new Blob([json], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     
