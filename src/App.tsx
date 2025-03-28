@@ -9,6 +9,7 @@ import NotFound from "./pages/NotFound";
 import { EnvironmentProvider } from "./contexts/EnvironmentContext";
 import AmpsViewer from "./pages/AmpsViewer";
 import GridGainViewer from "./pages/GridGainViewer";
+import AppSidebar from "./components/AppSidebar";
 
 const queryClient = new QueryClient();
 
@@ -17,13 +18,15 @@ const App = () => (
     <EnvironmentProvider>
       <BrowserRouter>
         <TooltipProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/amps-viewer" element={<AmpsViewer />} />
-            <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+          <AppSidebar>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/amps-viewer" element={<AmpsViewer />} />
+              <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
+              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AppSidebar>
           <Toaster />
           <Sonner />
         </TooltipProvider>

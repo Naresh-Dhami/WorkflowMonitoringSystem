@@ -27,7 +27,7 @@ const EnvironmentSelector = () => {
         {environments.map((env) => (
           <DropdownMenuItem
             key={env.id}
-            className={`${env.id === currentEnvironment.id ? 'bg-accent/50' : ''} cursor-pointer text-black`}
+            className={`${env.id === currentEnvironment.id ? 'bg-accent/50' : ''} cursor-pointer !text-black`}
             onClick={() => handleEnvironmentChange(env.id)}
           >
             <div className="flex flex-col">

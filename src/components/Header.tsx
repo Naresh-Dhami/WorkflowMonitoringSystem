@@ -67,14 +67,14 @@ const Header = ({
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 px-6 py-4 
         ${isScrolled 
-          ? "bg-white/80 backdrop-blur-md shadow-sm border-b" 
+          ? "bg-[#ea384c]/95 backdrop-blur-md shadow-sm" 
           : "bg-[#ea384c] border-b-4 border-[#FEF7CD]"
         }`}
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
           <MobileNav />
-          <div className={`font-medium text-xl tracking-tight ${isScrolled ? "text-foreground" : "text-white"}`}>
+          <div className="font-medium text-xl tracking-tight text-white">
             Batch Dashboard
           </div>
           <NavigationMenuComponent />
@@ -87,7 +87,7 @@ const Header = ({
             variant="ghost" 
             size="sm" 
             onClick={onNewProcess} 
-            className={`hidden sm:flex items-center ${isScrolled ? "" : "text-white hover:bg-white/10 hover:text-white"}`}
+            className="hidden sm:flex items-center text-white hover:bg-white/10 hover:text-white"
           >
             <Plus className="mr-1 h-4 w-4" />
             New Process
@@ -98,11 +98,7 @@ const Header = ({
               <Button 
                 variant="outline" 
                 size="icon" 
-                className={`h-9 w-9 ${
-                  isScrolled 
-                    ? "border-input" 
-                    : "border-yellow-300/50 bg-transparent text-white hover:bg-white/10 hover:text-white"
-                }`}
+                className="h-9 w-9 border-yellow-300/50 bg-transparent text-white hover:bg-white/10 hover:text-white"
               >
                 <Settings className="h-4 w-4" />
               </Button>
