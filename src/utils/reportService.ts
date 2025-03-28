@@ -6,6 +6,7 @@ interface BatchSummary {
   total: number;
   completed: number;
   failed: number;
+  environment: string;
   results: Array<{
     processId: string;
     processName: string;
@@ -13,6 +14,7 @@ interface BatchSummary {
     workflowId?: string;
     duration?: number;
     error?: string;
+    environment: string;
   }>;
 }
 
@@ -36,9 +38,10 @@ export const sendBatchReport = async (email: string, summary: BatchSummary): Pro
       if (Math.random() > 0.1) {
         // Format would be something like:
         // To: email
-        // Subject: Batch Process Run Report
+        // Subject: Batch Process Run Report - [Environment Name]
         // Body: 
         //   Batch Summary:
+        //   Environment: ${summary.environment}
         //   Total Processes: ${summary.total}
         //   Successful: ${summary.completed}
         //   Failed: ${summary.failed}

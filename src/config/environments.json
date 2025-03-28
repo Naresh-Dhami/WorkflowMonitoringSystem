@@ -1,0 +1,53 @@
+
+{
+  "environments": [
+    {
+      "id": "dev",
+      "name": "Development",
+      "baseUrl": "https://api-dev.example.com",
+      "description": "Development environment for testing new features"
+    },
+    {
+      "id": "dev2",
+      "name": "Development 2",
+      "baseUrl": "https://api-dev2.example.com",
+      "description": "Secondary development environment"
+    },
+    {
+      "id": "sit",
+      "name": "SIT",
+      "baseUrl": "https://api-sit.example.com",
+      "description": "System Integration Testing environment"
+    },
+    {
+      "id": "qa",
+      "name": "QA",
+      "baseUrl": "https://api-qa.example.com",
+      "description": "Quality Assurance testing environment"
+    },
+    {
+      "id": "uat",
+      "name": "UAT",
+      "baseUrl": "https://api-uat.example.com",
+      "description": "User Acceptance Testing environment"
+    },
+    {
+      "id": "uat2",
+      "name": "UAT 2",
+      "baseUrl": "https://api-uat2.example.com",
+      "description": "Secondary User Acceptance Testing environment"
+    },
+    {
+      "id": "pp",
+      "name": "Pre-Production",
+      "baseUrl": "https://api-pp.example.com",
+      "description": "Pre-Production environment for final testing"
+    },
+    {
+      "id": "prod",
+      "name": "Production",
+      "baseUrl": "https://api.example.com",
+      "description": "Live production environment"
+    }
+  ]
+}

@@ -4,22 +4,23 @@ import { toast } from "sonner";
 import { saveProcessConfig } from "./configStorage";
 
 // Mock function to simulate API calls
-export const executeApiCall = async (config: ApiConfig): Promise<any> => {
-  console.log(`Executing API call to ${config.endpoint}`);
+export const executeApiCall = async (config: ApiConfig, baseUrl: string, workflowId?: string): Promise<any> => {
+  const fullEndpoint = `${baseUrl}${config.endpoint}`;
+  console.log(`Executing API call to ${fullEndpoint}`, { workflowId });
   
-  // In a real implementation, this would use fetch or axios
+  // In a real implementation, this would use fetch or axios with the workflowId
   // For now, we'll simulate the API call with a timeout
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       // Randomly succeed or fail for demo purposes
       if (Math.random() > 0.2) {
-        // Generate a random workflowId if this is the first step
+        // Generate a random workflowId if this is the first step and no workflowId provided
         const response = {
           status: 200,
           data: { 
             success: true, 
             message: `Successfully executed ${config.name}`,
-            workflowId: `WK${Date.now().toString().substring(7)}-${Math.floor(Math.random() * 1000)}`
+            workflowId: workflowId || `WK${Date.now().toString().substring(7)}-${Math.floor(Math.random() * 1000)}`
           }
         };
         resolve(response);
@@ -31,10 +32,11 @@ export const executeApiCall = async (config: ApiConfig): Promise<any> => {
 };
 
 // Check process completion status
-export const checkProcessStatus = async (endpoint: string, workflowId: string): Promise<Status> => {
-  console.log(`Checking process status for ${workflowId} at ${endpoint}`);
+export const checkProcessStatus = async (endpoint: string, baseUrl: string, workflowId: string): Promise<Status> => {
+  const fullEndpoint = `${baseUrl}${endpoint}`;
+  console.log(`Checking process status for ${workflowId} at ${fullEndpoint}`);
   
-  // In a real implementation, this would use fetch or axios to call the endpoint
+  // In a real implementation, this would use fetch or axios to call the endpoint with the workflowId
   // For now, we'll simulate with a timeout
   return new Promise((resolve) => {
     setTimeout(() => {
@@ -61,6 +63,7 @@ export const checkProcessStatus = async (endpoint: string, workflowId: string): 
 // Function to poll for process status
 export const pollProcessStatus = async (
   endpoint: string,
+  baseUrl: string,
   workflowId: string,
   onStatusUpdate: (status: Status) => void,
   intervalMs: number = 5000, // Default 5 seconds
@@ -73,7 +76,7 @@ export const pollProcessStatus = async (
   
   while (attempts < maxAttempts && currentStatus === 'running') {
     attempts++;
-    currentStatus = await checkProcessStatus(endpoint, workflowId);
+    currentStatus = await checkProcessStatus(endpoint, baseUrl, workflowId);
     onStatusUpdate(currentStatus);
     
     if (currentStatus !== 'running') {
@@ -91,6 +94,7 @@ export const pollProcessStatus = async (
 // Function to trigger a process
 export const triggerProcess = async (
   process: ProcessConfig,
+  baseUrl: string,
   onStepComplete?: (stepIndex: number, success: boolean, response?: any, error?: any) => void,
   onStatusUpdate?: (status: Status) => void
 ): Promise<TestRun> => {
@@ -110,7 +114,7 @@ export const triggerProcess = async (
     testRun.steps[0].status = 'running';
     testRun.steps[0].startTime = new Date();
     
-    const response = await executeApiCall(process.steps[0]);
+    const response = await executeApiCall(process.steps[0], baseUrl);
     testRun.steps[0].status = 'completed';
     testRun.steps[0].endTime = new Date();
     testRun.steps[0].response = response;
@@ -146,7 +150,8 @@ export const triggerProcess = async (
     testRun.steps[i].startTime = new Date();
     
     try {
-      const response = await executeApiCall(step);
+      // Pass the workflowId to subsequent API calls
+      const response = await executeApiCall(step, baseUrl, testRun.workflowId);
       testRun.steps[i].status = 'completed';
       testRun.steps[i].endTime = new Date();
       testRun.steps[i].response = response;
@@ -176,6 +181,7 @@ export const triggerProcess = async (
     try {
       const finalStatus = await pollProcessStatus(
         process.completionCheckEndpoint,
+        baseUrl,
         testRun.workflowId,
         (status) => {
           if (onStatusUpdate) {

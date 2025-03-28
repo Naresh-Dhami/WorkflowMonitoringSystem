@@ -10,6 +10,7 @@ export interface BatchJob {
   startTime?: Date;
   endTime?: Date;
   duration?: number;
+  environment?: string;
 }
 
 export interface ApiConfig {
@@ -49,4 +50,5 @@ export interface TestRun {
     startTime?: Date;
     endTime?: Date;
   }[];
+  environment?: string;
 }

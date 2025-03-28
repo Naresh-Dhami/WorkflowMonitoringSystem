@@ -3,6 +3,7 @@ import { useCallback } from "react";
 import { toast } from "sonner";
 import { BatchJob, TestRun, ProcessConfig } from "@/types";
 import { triggerProcess } from "@/utils/api";
+import { useEnvironment } from "@/contexts/EnvironmentContext";
 
 export function useJobRunner(
   processes: ProcessConfig[],
@@ -10,6 +11,8 @@ export function useJobRunner(
   addJob: (job: BatchJob) => void,
   updateJob: (jobId: string, updates: Partial<BatchJob>) => void
 ) {
+  const { currentEnvironment } = useEnvironment();
+  
   // Function to trigger a process execution
   const runProcess = useCallback(async (processId: string) => {
     const process = processes.find(p => p.id === processId);
@@ -26,18 +29,20 @@ export function useJobRunner(
       description: process.description,
       status: 'running',
       progress: 0,
-      startTime: new Date()
+      startTime: new Date(),
+      environment: currentEnvironment.id
     };
     
     // Add to active jobs
     addJob(newJob);
     
     try {
-      toast.info(`Starting process "${process.name}"...`);
+      toast.info(`Starting process "${process.name}" in ${currentEnvironment.name} environment...`);
       
       // Trigger the process execution
       const testRun = await triggerProcess(
         process,
+        currentEnvironment.baseUrl,
         // Step completion callback
         (stepIndex, success, response, error) => {
           // Update job progress
@@ -60,8 +65,14 @@ export function useJobRunner(
         }
       );
       
+      // Add environment info to the test run
+      const testRunWithEnv = {
+        ...testRun,
+        environment: currentEnvironment.id
+      };
+      
       // Add to test runs history
-      addTestRun(testRun);
+      addTestRun(testRunWithEnv);
       
       // Update job status
       const duration = testRun.endTime 
@@ -85,7 +96,8 @@ export function useJobRunner(
       // Return the test run for batch processing
       return {
         ...testRun,
-        duration
+        duration,
+        environment: currentEnvironment.id
       };
     } catch (error) {
       // Handle any uncaught errors
@@ -103,7 +115,7 @@ export function useJobRunner(
       // Rethrow to handle in batch runner
       throw error;
     }
-  }, [processes, addJob, updateJob, addTestRun]);
+  }, [processes, addJob, updateJob, addTestRun, currentEnvironment]);
   
   return { runProcess };
 }

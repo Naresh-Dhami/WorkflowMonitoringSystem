@@ -6,6 +6,7 @@ import { useJobRunner } from "./useJobRunner";
 import { useTestRuns } from "./useTestRuns";
 import { useActiveJobs } from "./useActiveJobs";
 import { sendBatchReport } from "@/utils/reportService";
+import { useEnvironment } from "@/contexts/EnvironmentContext";
 
 export function useBatchRunner(
   processes: ProcessConfig[],
@@ -21,6 +22,8 @@ export function useBatchRunner(
     failed: number;
     processIds: string[];
   }>({ total: 0, completed: 0, failed: 0, processIds: [] });
+  
+  const { currentEnvironment } = useEnvironment();
 
   // Use the job runner
   const { runProcess } = useJobRunner(processes, addTestRun, addJob, updateJob);
@@ -55,7 +58,7 @@ export function useBatchRunner(
       processIds: [...processIds]
     });
 
-    toast.info(`Starting batch run of ${processIds.length} processes`);
+    toast.info(`Starting batch run of ${processIds.length} processes in ${currentEnvironment.name} environment`);
 
     const results = [];
     let completed = 0;
@@ -82,7 +85,8 @@ export function useBatchRunner(
           processName: process.name,
           status: result.status,
           workflowId: result.workflowId,
-          duration: result.duration
+          duration: result.duration,
+          environment: currentEnvironment.name
         });
         
         if (result.status === 'completed') {
@@ -97,7 +101,8 @@ export function useBatchRunner(
           processId,
           processName: process.name,
           status: 'failed',
-          error: error instanceof Error ? error.message : String(error)
+          error: error instanceof Error ? error.message : String(error),
+          environment: currentEnvironment.name
         });
       }
 
@@ -118,6 +123,7 @@ export function useBatchRunner(
       total: processIds.length,
       completed,
       failed,
+      environment: currentEnvironment.name,
       results
     };
 
@@ -134,7 +140,7 @@ export function useBatchRunner(
     }
 
     return summary;
-  }, [processes, runProcess, isRunningBatch]);
+  }, [processes, runProcess, isRunningBatch, currentEnvironment]);
 
   return {
     runMultipleProcesses,
