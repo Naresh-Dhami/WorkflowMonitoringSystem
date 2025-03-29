@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Plus, ChevronDown, Settings, Upload, Download, Menu } from "lucide-react";
+import { ChevronDown, Settings, Upload, Download, Menu, X } from "lucide-react";
 import { useState, useEffect } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import EnvironmentSelector from "./EnvironmentSelector";
@@ -23,7 +23,7 @@ const Header = ({
 }: HeaderProps) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { environments, importEnvironments, exportEnvironments } = useEnvironment();
-  const { toggleSidebar } = useSidebar();
+  const { open, toggleSidebar } = useSidebar();
   const location = useLocation();
 
   // Add scroll event listener
@@ -86,7 +86,7 @@ const Header = ({
             onClick={toggleSidebar}
             className="text-white hover:bg-white/10"
           >
-            <Menu className="h-5 w-5" />
+            {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
           </Button>
           <div className="font-medium text-xl tracking-tight text-white">
             {location.pathname === "/" && "Batch Dashboard"}

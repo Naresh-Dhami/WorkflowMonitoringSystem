@@ -11,7 +11,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, Filter, X } from "lucide-react";
+import { Search, Filter, X, Loader2 } from "lucide-react";
 import { useEnvironment } from "@/contexts/EnvironmentContext";
 import { 
   DropdownMenu, 
@@ -27,6 +27,16 @@ import {
   DrawerTitle,
   DrawerClose
 } from "@/components/ui/drawer";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
+import { toast } from "sonner";
 
 // Sample data type for Grid Gain messages
 interface GridGainMessage {
@@ -94,7 +104,21 @@ const sampleGridGainData: GridGainMessage[] = [
     status: "failed",
     type: "cache-operation",
     environment: "UAT"
-  }
+  },
+  // Add more sample data for pagination testing
+  ...[...Array(15)].map((_, i) => ({
+    id: `${i + 5}`,
+    workflowId: `WK${2005 + i}`,
+    timestamp: new Date(2023, 8, 15, 12 + Math.floor(i/2), (i % 2) * 30).toISOString(),
+    details: JSON.stringify({ 
+      operation: i % 3 === 0 ? "cache-put" : i % 3 === 1 ? "compute-task" : "cluster-rebalance",
+      key: `key-${i}`,
+      value: { data: `Sample data ${i}` }
+    }, null, 2),
+    status: i % 3 === 0 ? "completed" : i % 3 === 1 ? "running" : "failed",
+    type: i % 3 === 0 ? "cache-operation" : i % 3 === 1 ? "compute-task" : "cluster-operation",
+    environment: i % 4 === 0 ? "DEV" : i % 4 === 1 ? "SIT" : i % 4 === 2 ? "QA" : "UAT"
+  }))
 ];
 
 // Available message types for filtering
@@ -107,10 +131,15 @@ const messageTypes = [
 const GridGainViewer = () => {
   const [gridGainMessages, setGridGainMessages] = useState<GridGainMessage[]>(sampleGridGainData);
   const [searchTerm, setSearchTerm] = useState("");
+  const [workflowSearch, setWorkflowSearch] = useState("");
   const [selectedMessage, setSelectedMessage] = useState<GridGainMessage | null>(null);
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
   const { currentEnvironment } = useEnvironment();
+  
+  const itemsPerPage = 10;
 
   // Filter messages based on search term and selected types
   const filteredMessages = gridGainMessages.filter(message => {
@@ -124,6 +153,11 @@ const GridGainViewer = () => {
     
     return matchesSearch && matchesType;
   });
+
+  // Calculate pagination
+  const totalPages = Math.ceil(filteredMessages.length / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const paginatedMessages = filteredMessages.slice(startIndex, startIndex + itemsPerPage);
 
   // Handle item click to show details
   const handleRowClick = (message: GridGainMessage) => {
@@ -143,31 +177,36 @@ const GridGainViewer = () => {
   // Check if a type is selected
   const isTypeSelected = (type: string) => selectedTypes.includes(type);
 
-  // Handle file import for messages (placeholder)
-  const handleImportMessages = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      if (!target.files?.length) return;
+  // Handle search by workflow ID
+  const handleSearchWorkflow = async () => {
+    if (!workflowSearch.trim()) {
+      toast.error("Please enter a workflow ID to search");
+      return;
+    }
+    
+    setIsSearching(true);
+    
+    // Simulate API call with a timeout
+    setTimeout(() => {
+      const filteredData = sampleGridGainData.filter(
+        message => message.workflowId.toLowerCase().includes(workflowSearch.toLowerCase())
+      );
       
-      const file = target.files[0];
-      const reader = new FileReader();
+      setGridGainMessages(filteredData);
+      setCurrentPage(1);
+      setIsSearching(false);
       
-      reader.onload = (event) => {
-        try {
-          const content = event.target?.result as string;
-          const parsedMessages = JSON.parse(content) as GridGainMessage[];
-          setGridGainMessages(parsedMessages);
-        } catch (error) {
-          console.error('Failed to import messages:', error);
-        }
-      };
-      
-      reader.readAsText(file);
-    };
-    input.click();
+      if (filteredData.length === 0) {
+        toast.error(`No messages found for workflow ID: ${workflowSearch}`);
+      } else {
+        toast.success(`Found ${filteredData.length} messages for workflow ID: ${workflowSearch}`);
+      }
+    }, 800);
+  };
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
   return (
@@ -181,38 +220,53 @@ const GridGainViewer = () => {
             </div>
           </div>
           
-          <div className="flex items-center space-x-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
+            <div className="relative flex items-center">
+              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 type="search"
-                placeholder="Search by workflow ID, status, environment, or message content..."
+                placeholder="Filter results..."
                 className="pl-8"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="icon" className="ml-2">
+                    <Filter className="h-4 w-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {messageTypes.map((type) => (
+                    <DropdownMenuCheckboxItem
+                      key={type}
+                      checked={isTypeSelected(type)}
+                      onCheckedChange={() => toggleType(type)}
+                    >
+                      {type}
+                    </DropdownMenuCheckboxItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
             
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">
-                  <Filter className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                {messageTypes.map((type) => (
-                  <DropdownMenuCheckboxItem
-                    key={type}
-                    checked={isTypeSelected(type)}
-                    onCheckedChange={() => toggleType(type)}
-                  >
-                    {type}
-                  </DropdownMenuCheckboxItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-            
-            <Button onClick={handleImportMessages}>Import Messages</Button>
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Search by workflow ID..."
+                value={workflowSearch}
+                onChange={(e) => setWorkflowSearch(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleSearchWorkflow()}
+              />
+              <Button onClick={handleSearchWorkflow} disabled={isSearching}>
+                {isSearching ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Search className="h-4 w-4 mr-2" />
+                )}
+                Search
+              </Button>
+            </div>
           </div>
           
           <Card>
@@ -235,14 +289,14 @@ const GridGainViewer = () => {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredMessages.length === 0 ? (
+                    {paginatedMessages.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={5} className="text-center py-6 text-muted-foreground">
                           No messages found
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredMessages.map((message) => (
+                      paginatedMessages.map((message) => (
                         <TableRow 
                           key={message.id} 
                           className="cursor-pointer hover:bg-muted"
@@ -271,6 +325,60 @@ const GridGainViewer = () => {
                   </TableBody>
                 </Table>
               </div>
+              
+              {totalPages > 1 && (
+                <div className="mt-4">
+                  <Pagination>
+                    <PaginationContent>
+                      <PaginationItem>
+                        <PaginationPrevious 
+                          onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                          className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                      
+                      {[...Array(totalPages)].map((_, i) => {
+                        const page = i + 1;
+                        // Show first page, last page, current page, and pages around current
+                        if (
+                          page === 1 || 
+                          page === totalPages || 
+                          (page >= currentPage - 1 && page <= currentPage + 1)
+                        ) {
+                          return (
+                            <PaginationItem key={page}>
+                              <PaginationLink 
+                                isActive={page === currentPage}
+                                onClick={() => handlePageChange(page)}
+                              >
+                                {page}
+                              </PaginationLink>
+                            </PaginationItem>
+                          );
+                        }
+                        
+                        // Add ellipsis for skipped pages
+                        if (page === 2 || page === totalPages - 1) {
+                          return (
+                            <PaginationItem key={`ellipsis-${page}`}>
+                              <PaginationEllipsis />
+                            </PaginationItem>
+                          );
+                        }
+                        
+                        return null;
+                      })}
+                      
+                      <PaginationItem>
+                        <PaginationNext 
+                          onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                          className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                        />
+                      </PaginationItem>
+                    </PaginationContent>
+                  </Pagination>
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
