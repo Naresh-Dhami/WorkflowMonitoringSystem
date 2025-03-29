@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Settings, Upload, Download, Menu, X } from "lucide-react";
+import { ChevronDown, Settings, Upload, Download, Menu, X, PlusIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import EnvironmentSelector from "./EnvironmentSelector";
@@ -105,7 +105,7 @@ const Header = ({
               onClick={onNewProcess} 
               className="hidden sm:flex items-center text-white hover:bg-white/10 hover:text-white"
             >
-              <Plus className="mr-1 h-4 w-4" />
+              <PlusIcon className="mr-1 h-4 w-4" />
               New Process
             </Button>
           )}
@@ -123,7 +123,7 @@ const Header = ({
             <DropdownMenuContent align="end" className="w-56 glass">
               {shouldShowNewProcess && onNewProcess && (
                 <DropdownMenuItem onClick={onNewProcess}>
-                  <Plus className="mr-2 h-4 w-4" />
+                  <PlusIcon className="mr-2 h-4 w-4" />
                   New Process
                 </DropdownMenuItem>
               )}
