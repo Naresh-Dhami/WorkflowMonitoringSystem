@@ -25,7 +25,7 @@ export function AppSidebar({ children }: { children: React.ReactNode }) {
   return (
     <SidebarProvider defaultOpen={false}>
       <div className="flex w-full min-h-screen">
-        <Sidebar className="border-r border-[#FEF7CD]/20">
+        <Sidebar className="border-r border-[#FEF7CD]/20 z-[60]">
           <SidebarHeader className="border-b border-[#FEF7CD]/20 py-4">
             <div className="flex items-center justify-center">
               <span className="text-lg font-semibold text-white">Batch Dashboard</span>

@@ -12,9 +12,11 @@ import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 import { Button } from "./ui/button";
+import { useSidebar } from "./ui/sidebar";
 
 const NavigationMenuComponent = () => {
   const location = useLocation();
+  const { toggleSidebar } = useSidebar();
   
   const isActive = (path: string) => location.pathname === path;
 
@@ -68,55 +70,19 @@ const NavigationMenuComponent = () => {
 export const MobileNav = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
+  const { toggleSidebar } = useSidebar();
 
   return (
     <div className="md:hidden">
       <Button 
         variant="ghost" 
         size="icon" 
-        onClick={() => setOpen(!open)}
+        onClick={toggleSidebar}
         className="text-white"
       >
         <Menu />
         <span className="sr-only">Toggle menu</span>
       </Button>
-      
-      {open && (
-        <div className="absolute top-16 left-0 right-0 z-50 bg-white border-b shadow-lg">
-          <div className="flex flex-col p-4 space-y-2">
-            <Link 
-              to="/" 
-              className={cn(
-                "px-4 py-2 rounded-md", 
-                location.pathname === "/" ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
-              )}
-              onClick={() => setOpen(false)}
-            >
-              Batch Dashboard
-            </Link>
-            <Link 
-              to="/amps-viewer" 
-              className={cn(
-                "px-4 py-2 rounded-md", 
-                location.pathname === "/amps-viewer" ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
-              )}
-              onClick={() => setOpen(false)}
-            >
-              Amps Viewer
-            </Link>
-            <Link 
-              to="/grid-gain-viewer" 
-              className={cn(
-                "px-4 py-2 rounded-md", 
-                location.pathname === "/grid-gain-viewer" ? "bg-accent text-accent-foreground" : "hover:bg-accent/50"
-              )}
-              onClick={() => setOpen(false)}
-            >
-              Grid Gain Viewer
-            </Link>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
