@@ -141,4 +141,13 @@
   .btn-animation:hover::after {
     @apply scale-x-100;
   }
+
+  /* Viewer styles */
+  .viewer-header {
+    @apply bg-viewer-header text-white;
+  }
+  
+  .viewer-background {
+    @apply bg-viewer-background;
+  }
 }
