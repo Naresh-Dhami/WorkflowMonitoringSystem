@@ -10,6 +10,7 @@ import { EnvironmentProvider } from "./contexts/EnvironmentContext";
 import AmpsViewer from "./pages/AmpsViewer";
 import GridGainViewer from "./pages/GridGainViewer";
 import AppSidebar from "./components/AppSidebar";
+import { SidebarProvider } from "./components/ui/sidebar";
 
 const queryClient = new QueryClient();
 
@@ -18,15 +19,17 @@ const App = () => (
     <EnvironmentProvider>
       <BrowserRouter>
         <TooltipProvider>
-          <AppSidebar>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/amps-viewer" element={<AmpsViewer />} />
-              <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </AppSidebar>
+          <SidebarProvider defaultOpen={false}>
+            <AppSidebar>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/amps-viewer" element={<AmpsViewer />} />
+                <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
+                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AppSidebar>
+          </SidebarProvider>
           <Toaster />
           <Sonner />
         </TooltipProvider>
