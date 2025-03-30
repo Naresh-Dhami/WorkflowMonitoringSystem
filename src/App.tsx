@@ -1,4 +1,5 @@
 
+import React, { useState, useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -12,7 +13,6 @@ import GridGainViewer from "./pages/GridGainViewer";
 import AppSidebar from "./components/AppSidebar";
 import { SidebarProvider } from "./components/ui/sidebar";
 import Header from "./components/Header";
-import { useState, useEffect } from "react";
 
 // Custom page component for dynamic navigation
 const DynamicPage = ({ url }: { url: string }) => {
