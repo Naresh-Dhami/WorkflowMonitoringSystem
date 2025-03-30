@@ -1,149 +1,112 @@
-import { useState, useRef } from "react";
+
+import { useState, useEffect } from "react";
 import Header from "@/components/Header";
-import ConfigModal from "@/components/ConfigModal";
-import BatchRunnerModal from "@/components/BatchRunnerModal";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useBatchRunner } from "@/hooks/useBatchRunner";
+import { useProcesses } from "@/hooks/useProcesses";
 import { useBatchJobs } from "@/hooks/useBatchJobs";
-import { ProcessConfig } from "@/types";
-import { toast } from "sonner";
-import { importConfigFromFile } from "@/utils/configStorage";
+import { useActiveJobs } from "@/hooks/useActiveJobs";
+import { useTestRuns } from "@/hooks/useTestRuns";
+import BatchCard from "@/components/BatchCard";
 import ProcessSection from "@/components/ProcessSection";
 import ActiveJobsSection from "@/components/ActiveJobsSection";
 import TestRunsSection from "@/components/TestRunsSection";
-import { Button } from "@/components/ui/button";
-import { Play } from "lucide-react";
+import StatusBadge from "@/components/StatusBadge";
+import BatchFilter from "@/components/BatchFilter";
+import { toast } from "sonner";
+
 const Index = () => {
-  const {
-    processes,
-    testRuns,
-    activeJobs,
-    isLoading,
-    isRunningBatch,
-    batchProgress,
-    batchResults,
-    addProcess,
-    updateProcess,
-    deleteProcess,
-    runProcess,
-    runBatch
-  } = useBatchJobs();
-  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
-  const [isBatchRunnerOpen, setIsBatchRunnerOpen] = useState(false);
-  const [activeProcess, setActiveProcess] = useState<ProcessConfig | undefined>(undefined);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const { openBatchRunnerModal } = useBatchRunner();
+  const { processes, importConfig, exportConfig } = useProcesses();
+  const { batchJobs } = useBatchJobs();
+  const { activeJobs } = useActiveJobs();
+  const { testRuns } = useTestRuns();
 
-  // Handle file import
+  const availableStatuses = ["Completed", "Running", "Failed", "Pending"];
+
+  // Filter batch jobs based on search and status
+  const filteredBatchJobs = batchJobs.filter(job => {
+    const matchesSearch = job.name.toLowerCase().includes(searchTerm.toLowerCase());
+    const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(job.status);
+    return matchesSearch && matchesStatus;
+  });
+
   const handleImportConfig = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = e => {
-      try {
-        const content = e.target?.result as string;
-        const parsedConfig = JSON.parse(content);
-
-        // Validate imported config
-        if (Array.isArray(parsedConfig) && parsedConfig.every(item => item.id && item.name && Array.isArray(item.steps))) {
-          // Reset file input
-          if (event.target) {
-            event.target.value = '';
-          }
-
-          // Import all processes at once
-          const importedProcesses = importConfigFromFile(content);
-          toast.success(`Successfully imported ${importedProcesses.length} processes`);
-        } else {
-          toast.error("Invalid configuration format");
-        }
-      } catch (error) {
-        toast.error("Failed to parse configuration file");
-        console.error(error);
-      }
-    };
-    reader.readAsText(file);
+    importConfig();
   };
 
-  // Handle config export
   const handleExportConfig = () => {
-    const configJson = JSON.stringify(processes, null, 2);
-    const blob = new Blob([configJson], {
-      type: "application/json"
-    });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "batch-connector-config.json";
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast.success("Configuration exported successfully");
-  };
-  const handleSaveProcess = (process: ProcessConfig) => {
-    if (activeProcess) {
-      updateProcess(process);
-    } else {
-      addProcess(process);
-    }
-    setActiveProcess(undefined);
-    setIsConfigModalOpen(false);
-  };
-  const openNewProcessModal = () => {
-    setActiveProcess(undefined);
-    setIsConfigModalOpen(true);
-  };
-  const openEditProcessModal = (process: ProcessConfig) => {
-    setActiveProcess(process);
-    setIsConfigModalOpen(true);
-  };
-  const handleRunBatch = async (processIds: string[], emailReport?: string) => {
-    const results = await runBatch(processIds, emailReport);
-
-    // Close modal after batch completes
-    if (!isRunningBatch) {
-      setIsBatchRunnerOpen(false);
-    }
-    return results;
+    exportConfig();
   };
 
-  // Animation styles
-  const containerAnimationClass = "animate-fade-in";
-  return <div className="min-h-screen bg-background">
-      <Header onNewProcess={openNewProcessModal} onImportConfig={handleImportConfig} onExportConfig={handleExportConfig} />
-      
-      {/* Hidden file input for import */}
-      <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".json" className="hidden" />
-      
-      <main className="max-w-6xl mx-auto pt-24 px-6 pb-16">
-        <div className={`${containerAnimationClass} space-y-6`}>
-          <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-semibold tracking-tight">Batch Workflows</h1>
-            {processes.length > 0 && <Button onClick={() => setIsBatchRunnerOpen(true)} disabled={isLoading || isRunningBatch} className="btn-animation">
-                <Play className="mr-2 h-4 w-4" />
-                Run Multiple Processes
-              </Button>}
-          </div>
-          
-          <ActiveJobsSection activeJobs={activeJobs} />
-          
-          <ProcessSection processes={processes} testRuns={testRuns} activeJobs={activeJobs} isLoading={isLoading} onNewProcess={openNewProcessModal} onRunProcess={runProcess} onEditProcess={openEditProcessModal} onDeleteProcess={deleteProcess} />
-          
-          <TestRunsSection testRuns={testRuns} processes={processes} />
+  return (
+    <>
+      <Header 
+        onNewProcess={openBatchRunnerModal}
+        onImportConfig={handleImportConfig}
+        onExportConfig={handleExportConfig}
+      />
+
+      <main className="pt-24 pb-16 px-4 sm:px-6 md:px-8 max-w-6xl mx-auto">
+        <div className="mb-8">
+          <Tabs defaultValue="processes" className="w-full">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6">
+              <TabsList>
+                <TabsTrigger value="processes">Processes</TabsTrigger>
+                <TabsTrigger value="batch-jobs">Batch Jobs</TabsTrigger>
+                <TabsTrigger value="active-jobs">Active Jobs</TabsTrigger>
+                <TabsTrigger value="test-runs">Test Runs</TabsTrigger>
+              </TabsList>
+              
+              <div className="mt-4 sm:mt-0 w-full sm:w-auto max-w-md">
+                <BatchFilter 
+                  onSearchChange={setSearchTerm}
+                  onStatusFilter={setSelectedStatuses}
+                  statuses={availableStatuses}
+                  selectedStatuses={selectedStatuses}
+                />
+              </div>
+            </div>
+
+            <TabsContent value="processes" className="mt-0">
+              <ProcessSection processes={processes} />
+            </TabsContent>
+
+            <TabsContent value="batch-jobs" className="mt-0">
+              <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                {filteredBatchJobs.length > 0 ? (
+                  filteredBatchJobs.map((job) => (
+                    <BatchCard key={job.id} batchJob={job} />
+                  ))
+                ) : (
+                  <div className="md:col-span-2 lg:col-span-3 p-8 text-center">
+                    <p className="text-muted-foreground">
+                      {searchTerm || selectedStatuses.length > 0 
+                        ? "No batch jobs match your search criteria" 
+                        : "No batch jobs available"}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="active-jobs" className="mt-0">
+              <ActiveJobsSection activeJobs={activeJobs} />
+            </TabsContent>
+
+            <TabsContent value="test-runs" className="mt-0">
+              <TestRunsSection testRuns={testRuns} />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
-      
-      {/* Config modal */}
-      <ConfigModal isOpen={isConfigModalOpen} onClose={() => {
-      setIsConfigModalOpen(false);
-      setActiveProcess(undefined);
-    }} process={activeProcess} onSave={handleSaveProcess} />
-      
-      {/* Batch runner modal */}
-      <BatchRunnerModal isOpen={isBatchRunnerOpen} onClose={() => setIsBatchRunnerOpen(false)} processes={processes} onRunBatch={handleRunBatch} isRunning={isRunningBatch} batchProgress={batchProgress} />
-    </div>;
+    </>
+  );
 };
+
 export default Index;

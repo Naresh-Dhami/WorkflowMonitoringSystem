@@ -37,14 +37,14 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 84% 58%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 0 84% 58%;
+    --sidebar-accent: 0 84% 65%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 0 0% 98%;
+    --sidebar-ring: 0 0% 98%;
   }
 
   .dark {
@@ -149,5 +149,20 @@
   
   .viewer-background {
     @apply bg-viewer-background;
+  }
+
+  /* Sortable headers */
+  .sortable-header {
+    @apply cursor-pointer select-none hover:bg-muted/60 transition-colors;
+  }
+
+  .sortable-header.sort-asc::after {
+    content: '↑';
+    @apply ml-1 inline-block;
+  }
+
+  .sortable-header.sort-desc::after {
+    content: '↓';
+    @apply ml-1 inline-block;
   }
 }

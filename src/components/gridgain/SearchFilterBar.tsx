@@ -9,6 +9,7 @@ import {
   DropdownMenuCheckboxItem 
 } from "@/components/ui/dropdown-menu";
 import { Search, Filter, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface SearchFilterBarProps {
   onSearchChange: (value: string) => void;
@@ -30,11 +31,11 @@ const SearchFilterBar = ({
 
   // Toggle type selection
   const toggleType = (type: string) => {
-    onTypeFilter(
-      selectedTypes.includes(type)
-        ? selectedTypes.filter(t => t !== type)
-        : [...selectedTypes, type]
-    );
+    const newTypes = selectedTypes.includes(type)
+      ? selectedTypes.filter(t => t !== type)
+      : [...selectedTypes, type];
+    
+    onTypeFilter(newTypes);
   };
 
   // Check if a type is selected
@@ -42,16 +43,23 @@ const SearchFilterBar = ({
 
   // Handle search by workflow ID
   const handleSearchWorkflow = async () => {
-    if (!workflowSearch.trim()) return;
+    if (!workflowSearch.trim()) {
+      toast.error("Please enter a workflow ID to search");
+      return;
+    }
     
     setIsSearching(true);
-    await onWorkflowSearch(workflowSearch);
-    setIsSearching(false);
+    
+    try {
+      await onWorkflowSearch(workflowSearch);
+    } finally {
+      setIsSearching(false);
+    }
   };
 
   return (
-    <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
-      <div className="relative flex items-center">
+    <div className="flex flex-col md:flex-row gap-2 items-start md:items-center w-full">
+      <div className="relative flex items-center w-full md:w-auto">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
@@ -80,7 +88,7 @@ const SearchFilterBar = ({
         </DropdownMenu>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 w-full md:w-auto">
         <Input
           placeholder="Search by workflow ID..."
           value={workflowSearch}

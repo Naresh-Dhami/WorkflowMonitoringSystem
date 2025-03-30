@@ -14,7 +14,7 @@ import { toast } from "sonner";
 interface SearchFilterBarProps {
   onSearchChange: (value: string) => void;
   onTypeFilter: (types: string[]) => void;
-  onWorkflowSearch: (workflowId: string) => void;
+  onWorkflowSearch: (workflowId: string) => Promise<void>;
   messageTypes: string[];
   selectedTypes: string[];
 }
@@ -58,8 +58,8 @@ const SearchFilterBar = ({
   };
 
   return (
-    <div className="grid gap-4 md:grid-cols-[2fr_1fr]">
-      <div className="relative flex items-center">
+    <div className="flex flex-col md:flex-row gap-2 items-start md:items-center w-full">
+      <div className="relative flex items-center w-full md:w-auto">
         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
           type="search"
@@ -88,7 +88,7 @@ const SearchFilterBar = ({
         </DropdownMenu>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 w-full md:w-auto">
         <Input
           placeholder="Search by workflow ID..."
           value={workflowSearch}

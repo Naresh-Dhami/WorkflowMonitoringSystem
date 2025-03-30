@@ -83,17 +83,20 @@ const AmpsViewer = () => {
       
       <main className="max-w-6xl mx-auto px-6 pb-16">
         <div className="space-y-6 animate-fade-in">
-          <SearchFilterBar
-            onSearchChange={setSearchTerm}
-            onTypeFilter={setSelectedTypes}
-            onWorkflowSearch={handleSearchWorkflow}
-            messageTypes={messageTypes}
-            selectedTypes={selectedTypes}
-          />
-          
           <Card>
-            <CardHeader>
-              <CardTitle>Amps Messages</CardTitle>
+            <CardHeader className="py-4">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <CardTitle>Amps Messages</CardTitle>
+                <div className="w-full md:w-auto">
+                  <SearchFilterBar
+                    onSearchChange={setSearchTerm}
+                    onTypeFilter={setSelectedTypes}
+                    onWorkflowSearch={handleSearchWorkflow}
+                    messageTypes={messageTypes}
+                    selectedTypes={selectedTypes}
+                  />
+                </div>
+              </div>
               <CardDescription>
                 {filteredMessages.length} message(s) found
               </CardDescription>

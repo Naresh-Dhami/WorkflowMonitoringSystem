@@ -14,22 +14,34 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { Home, Grid, Zap, Settings } from "lucide-react";
+import { Home, Grid, Zap, Settings, X } from "lucide-react";
 import EnvironmentSelector from "./EnvironmentSelector";
+import { Button } from "./ui/button";
+import { useSidebar } from "./ui/sidebar";
 
 export function AppSidebar({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const { open, toggleSidebar } = useSidebar();
   
   const isActive = (path: string) => location.pathname === path;
 
   return (
     <SidebarProvider defaultOpen={false}>
       <div className="flex w-full min-h-screen">
-        <Sidebar className="border-r border-[#FEF7CD]/20 z-[60]">
-          <SidebarHeader className="border-b border-[#FEF7CD]/20 py-4">
+        <Sidebar className="border-r border-[#FEF7CD]/20 z-[60] bg-viewer-header">
+          <SidebarHeader className="border-b border-[#FEF7CD]/20 py-4 flex items-center justify-between px-4">
             <div className="flex items-center justify-center">
               <span className="text-lg font-semibold text-white">Batch Dashboard</span>
             </div>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={toggleSidebar}
+              className="text-white md:hidden"
+            >
+              <X className="h-5 w-5" />
+              <span className="sr-only">Close menu</span>
+            </Button>
           </SidebarHeader>
           <SidebarContent>
             <SidebarGroup>
