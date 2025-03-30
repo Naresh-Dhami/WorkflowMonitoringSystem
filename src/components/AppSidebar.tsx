@@ -16,16 +16,56 @@ import {
   SidebarMenuSubButton,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Home, Grid, Zap, Settings, X, Menu } from "lucide-react";
+import { Home, Grid, Zap, Settings, X, Menu, ExternalLink } from "lucide-react";
 import EnvironmentSelector from "./EnvironmentSelector";
 import { Button } from "./ui/button";
 import { useState, useEffect } from "react";
+import * as LucideIcons from "lucide-react";
+
+// Define types for navigation items
+interface NavigationItem {
+  id: string;
+  title: string;
+  path: string;
+  icon: string;
+  parentId?: string;
+  children?: NavigationItem[];
+}
 
 export function AppSidebar() {
   const location = useLocation();
-  const { open, toggleSidebar } = useSidebar();
+  const { open, toggleSidebar, setOpenMobile, openMobile } = useSidebar();
+  const [customNavItems, setCustomNavItems] = useState<NavigationItem[]>([]);
+  
+  useEffect(() => {
+    // Load custom navigation items from localStorage
+    try {
+      const saved = localStorage.getItem('batchConnector.navigation');
+      if (saved) {
+        const items = JSON.parse(saved);
+        if (Array.isArray(items)) {
+          // Filter to only top-level items (no parentId)
+          setCustomNavItems(items.filter(item => !item.parentId));
+        }
+      }
+    } catch (e) {
+      console.error("Error loading navigation items:", e);
+    }
+  }, []);
   
   const isActive = (path: string) => location.pathname === path;
+
+  // Dynamic icon component
+  const DynamicIcon = ({ iconName }: { iconName: string }) => {
+    const IconComponent = (LucideIcons as any)[iconName] || ExternalLink;
+    return <IconComponent className="h-5 w-5" />;
+  };
+
+  const closeSidebar = () => {
+    if (openMobile) {
+      setOpenMobile(false);
+    }
+  };
 
   return (
     <Sidebar className="border-r border-[#FEF7CD]/20 z-[60] bg-viewer-header">
@@ -49,7 +89,7 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu id="main-navigation">
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Batch Dashboard" isActive={isActive("/")}>
+                <SidebarMenuButton asChild tooltip="Batch Dashboard" isActive={isActive("/")} onClick={closeSidebar}>
                   <Link to="/">
                     <Home />
                     <span>Batch Dashboard</span>
@@ -57,7 +97,7 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Amps Viewer" isActive={isActive("/amps-viewer")}>
+                <SidebarMenuButton asChild tooltip="Amps Viewer" isActive={isActive("/amps-viewer")} onClick={closeSidebar}>
                   <Link to="/amps-viewer">
                     <Zap />
                     <span>Amps Viewer</span>
@@ -65,13 +105,52 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Grid Gain Viewer" isActive={isActive("/grid-gain-viewer")}>
+                <SidebarMenuButton asChild tooltip="Grid Gain Viewer" isActive={isActive("/grid-gain-viewer")} onClick={closeSidebar}>
                   <Link to="/grid-gain-viewer">
                     <Grid />
                     <span>Grid Gain Viewer</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+
+              {/* Custom navigation items */}
+              {customNavItems.map(item => (
+                <SidebarMenuItem key={item.id}>
+                  {item.children && item.children.length > 0 ? (
+                    <SidebarMenuSub>
+                      <SidebarMenuButton>
+                        <DynamicIcon iconName={item.icon} />
+                        <span>{item.title}</span>
+                      </SidebarMenuButton>
+                      {item.children.map(child => (
+                        <SidebarMenuSubItem key={child.id}>
+                          <SidebarMenuSubButton asChild onClick={closeSidebar}>
+                            <Link 
+                              to={child.path.startsWith('http') ? 
+                                `/${child.path.replace(/^https?:\/\//, '')}` : 
+                                child.path}
+                            >
+                              <DynamicIcon iconName={child.icon || "ExternalLink"} />
+                              <span>{child.title}</span>
+                            </Link>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  ) : (
+                    <SidebarMenuButton asChild onClick={closeSidebar}>
+                      <Link 
+                        to={item.path.startsWith('http') ? 
+                          `/${item.path.replace(/^https?:\/\//, '')}` : 
+                          item.path}
+                      >
+                        <DynamicIcon iconName={item.icon} />
+                        <span>{item.title}</span>
+                      </Link>
+                    </SidebarMenuButton>
+                  )}
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

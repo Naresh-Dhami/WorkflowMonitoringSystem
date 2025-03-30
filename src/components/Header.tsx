@@ -9,7 +9,7 @@ import { useEnvironment } from "@/contexts/EnvironmentContext";
 import { toast } from "sonner";
 import { useSidebar } from "./ui/sidebar";
 import { useLocation } from "react-router-dom";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 
@@ -97,6 +97,7 @@ const Header = ({
           parent.children.push(newItem);
         } else {
           // If parent not found, add as top-level
+          delete newItem.parentId;
           updated.push(newItem);
         }
         
@@ -107,7 +108,7 @@ const Header = ({
       setNavigationItems(current => [...current, newItem]);
     }
 
-    // Reset form
+    // Reset form and close dialog
     setNavTitle("");
     setNavUrl("");
     setNavIcon("ExternalLink");
@@ -115,6 +116,9 @@ const Header = ({
     setShowNavDialog(false);
     
     toast.success("Navigation item added successfully");
+    
+    // Force reload to update routes
+    window.location.reload();
   };
 
   // Export navigation items
@@ -149,6 +153,9 @@ const Header = ({
           const items = JSON.parse(content) as NavigationItem[];
           setNavigationItems(items);
           toast.success('Navigation imported successfully');
+          
+          // Force reload to update routes
+          window.location.reload();
         } catch (error) {
           console.error('Failed to import navigation:', error);
           toast.error('Failed to import navigation');
@@ -199,6 +206,15 @@ const Header = ({
 
   // Determine if we should show the New Process button based on route
   const shouldShowNewProcess = location.pathname === "/";
+  
+  // Handle New Process click - redirect to Index page if not there
+  const handleNewProcessClick = () => {
+    if (location.pathname !== "/") {
+      window.location.href = "/";
+    } else if (onNewProcess) {
+      onNewProcess();
+    }
+  };
 
   return (
     <>
@@ -229,17 +245,15 @@ const Header = ({
           <div className="flex items-center space-x-2">
             <EnvironmentSelector />
             
-            {shouldShowNewProcess && onNewProcess && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={onNewProcess} 
-                className="hidden sm:flex items-center text-white hover:bg-white/10 hover:text-white"
-              >
-                <PlusIcon className="mr-1 h-4 w-4" />
-                New Process
-              </Button>
-            )}
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              onClick={handleNewProcessClick} 
+              className="hidden sm:flex items-center text-white hover:bg-white/10 hover:text-white"
+            >
+              <PlusIcon className="mr-1 h-4 w-4" />
+              New Process
+            </Button>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -251,13 +265,11 @@ const Header = ({
                   <Settings className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 glass">
-                {shouldShowNewProcess && onNewProcess && (
-                  <DropdownMenuItem onClick={onNewProcess}>
-                    <PlusIcon className="mr-2 h-4 w-4" />
-                    New Process
-                  </DropdownMenuItem>
-                )}
+              <DropdownMenuContent align="end" className="w-56 bg-background">
+                <DropdownMenuItem onClick={handleNewProcessClick}>
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                  New Process
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowNavDialog(true)}>
                   <PlusIcon className="mr-2 h-4 w-4" />
                   Add Navigation Item
@@ -301,6 +313,9 @@ const Header = ({
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>Add Navigation Item</DialogTitle>
+            <DialogDescription>
+              Add a new navigation item to the sidebar menu. External URLs will open in an iframe.
+            </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -323,6 +338,7 @@ const Header = ({
                 value={navUrl}
                 onChange={(e) => setNavUrl(e.target.value)}
                 className="col-span-3"
+                placeholder="https://example.com or /local-path"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">

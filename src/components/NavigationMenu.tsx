@@ -110,9 +110,8 @@ const NavigationMenuComponent = () => {
                         <li key={child.id}>
                           <Link 
                             to={child.path.startsWith('http') ? 
-                              `/external/${encodeURIComponent(child.path.replace(/^https?:\/\//, ''))}` : 
+                              `/${child.path.replace(/^https?:\/\//, '')}` : 
                               child.path}
-                            target={child.path.startsWith('http') ? "_blank" : "_self"}
                           >
                             <NavigationMenuLink
                               className={cn(
@@ -133,9 +132,8 @@ const NavigationMenuComponent = () => {
               ) : (
                 <Link 
                   to={item.path.startsWith('http') ? 
-                    `/external/${encodeURIComponent(item.path.replace(/^https?:\/\//, ''))}` : 
+                    `/${item.path.replace(/^https?:\/\//, '')}` : 
                     item.path}
-                  target={item.path.startsWith('http') ? "_blank" : "_self"}
                 >
                   <NavigationMenuLink 
                     className={cn(
@@ -170,7 +168,7 @@ export const MobileNav = () => {
         onClick={toggleSidebar}
         className="text-white"
       >
-        <Menu />
+        <Menu className="h-5 w-5" />
         <span className="sr-only">Toggle menu</span>
       </Button>
     </div>
