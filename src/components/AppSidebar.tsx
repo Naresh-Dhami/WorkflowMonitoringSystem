@@ -11,11 +11,15 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Home, Grid, Zap, Settings, X } from "lucide-react";
+import { Home, Grid, Zap, Settings, X, Menu } from "lucide-react";
 import EnvironmentSelector from "./EnvironmentSelector";
 import { Button } from "./ui/button";
+import { useState, useEffect } from "react";
 
 export function AppSidebar() {
   const location = useLocation();
@@ -43,7 +47,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu id="main-navigation">
               <SidebarMenuItem>
                 <SidebarMenuButton asChild tooltip="Batch Dashboard" isActive={isActive("/")}>
                   <Link to="/">
