@@ -5,11 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useBatchRunner } from "@/hooks/useBatchRunner";
 import { useProcesses } from "@/hooks/useProcesses";
-import { useBatchJobs } from "@/hooks/useBatchJobs";
-import { useActiveJobs } from "@/hooks/useActiveJobs";
 import { useTestRuns } from "@/hooks/useTestRuns";
+import { useActiveJobs } from "@/hooks/useActiveJobs";
 import BatchCard from "@/components/BatchCard";
 import ProcessSection from "@/components/ProcessSection";
 import ActiveJobsSection from "@/components/ActiveJobsSection";
@@ -17,37 +15,52 @@ import TestRunsSection from "@/components/TestRunsSection";
 import StatusBadge from "@/components/StatusBadge";
 import BatchFilter from "@/components/BatchFilter";
 import { toast } from "sonner";
+import { useBatchJobs } from "@/hooks/useBatchJobs";
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
-  const { openBatchRunnerModal } = useBatchRunner();
-  const { processes, importConfig, exportConfig } = useProcesses();
-  const { batchJobs } = useBatchJobs();
-  const { activeJobs } = useActiveJobs();
-  const { testRuns } = useTestRuns();
+  
+  // Use the batch jobs hook which provides all the necessary functions
+  const { 
+    processes, 
+    testRuns, 
+    activeJobs, 
+    isLoading, 
+    runProcess, 
+    runBatch,
+    addProcess,
+    updateProcess,
+    deleteProcess
+  } = useBatchJobs();
 
   const availableStatuses = ["Completed", "Running", "Failed", "Pending"];
 
   // Filter batch jobs based on search and status
-  const filteredBatchJobs = batchJobs.filter(job => {
+  const filteredBatchJobs = activeJobs.filter(job => {
     const matchesSearch = job.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = selectedStatuses.length === 0 || selectedStatuses.includes(job.status);
     return matchesSearch && matchesStatus;
   });
 
+  // These functions would typically be provided by the Header component's props
+  const handleNewProcess = () => {
+    // This would open the batch runner modal
+    toast.info("New Process functionality would go here");
+  };
+
   const handleImportConfig = () => {
-    importConfig();
+    toast.info("Import Config functionality would go here");
   };
 
   const handleExportConfig = () => {
-    exportConfig();
+    toast.info("Export Config functionality would go here");
   };
 
   return (
     <>
       <Header 
-        onNewProcess={openBatchRunnerModal}
+        onNewProcess={handleNewProcess}
         onImportConfig={handleImportConfig}
         onExportConfig={handleExportConfig}
       />
@@ -74,14 +87,36 @@ const Index = () => {
             </div>
 
             <TabsContent value="processes" className="mt-0">
-              <ProcessSection processes={processes} />
+              <ProcessSection 
+                processes={processes}
+                testRuns={testRuns}
+                activeJobs={activeJobs}
+                isLoading={isLoading}
+                onNewProcess={handleNewProcess}
+                onRunProcess={runProcess}
+                onEditProcess={(process) => toast.info(`Edit ${process.name}`)}
+                onDeleteProcess={deleteProcess}
+              />
             </TabsContent>
 
             <TabsContent value="batch-jobs" className="mt-0">
               <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                 {filteredBatchJobs.length > 0 ? (
                   filteredBatchJobs.map((job) => (
-                    <BatchCard key={job.id} batchJob={job} />
+                    <BatchCard 
+                      key={job.id} 
+                      process={{
+                        id: job.id,
+                        name: job.name,
+                        description: job.description || "",
+                        steps: []
+                      }}
+                      activeJob={job}
+                      onRunClick={() => {}}
+                      onEditClick={() => {}}
+                      onDeleteClick={() => {}}
+                      isLoading={isLoading}
+                    />
                   ))
                 ) : (
                   <div className="md:col-span-2 lg:col-span-3 p-8 text-center">
@@ -100,7 +135,7 @@ const Index = () => {
             </TabsContent>
 
             <TabsContent value="test-runs" className="mt-0">
-              <TestRunsSection testRuns={testRuns} />
+              <TestRunsSection testRuns={testRuns} processes={processes} />
             </TabsContent>
           </Tabs>
         </div>

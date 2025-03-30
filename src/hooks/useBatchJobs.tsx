@@ -6,6 +6,7 @@ import { useActiveJobs } from "./useActiveJobs";
 import { useJobRunner } from "./useJobRunner";
 import { useBatchRunner } from "./useBatchRunner";
 import { defaultProcesses } from "@/utils/api";
+import { BatchJob, ProcessConfig } from "@/types";
 
 export function useBatchJobs() {
   // State for loading status

@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
 import { X } from "lucide-react";
-import { AmpsMessage } from "./MessagesTable";
+import { AmpsMessage } from "./ampsData";
 
 interface MessageDetailsDrawerProps {
   open: boolean;
