@@ -20,15 +20,18 @@ const App = () => (
       <BrowserRouter>
         <TooltipProvider>
           <SidebarProvider defaultOpen={false}>
-            <AppSidebar>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/amps-viewer" element={<AmpsViewer />} />
-                <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
-                {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AppSidebar>
+            <div className="flex w-full min-h-screen">
+              <AppSidebar />
+              <div className="flex-1 flex flex-col">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/amps-viewer" element={<AmpsViewer />} />
+                  <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
+                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
+            </div>
           </SidebarProvider>
           <Toaster />
           <Sonner />

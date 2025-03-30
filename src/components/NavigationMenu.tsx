@@ -10,13 +10,11 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { Menu } from "lucide-react";
-import { useState } from "react";
 import { Button } from "./ui/button";
 import { useSidebar } from "./ui/sidebar";
 
 const NavigationMenuComponent = () => {
   const location = useLocation();
-  const { toggleSidebar } = useSidebar();
   
   const isActive = (path: string) => location.pathname === path;
 
@@ -68,8 +66,6 @@ const NavigationMenuComponent = () => {
 
 // Mobile navigation menu
 export const MobileNav = () => {
-  const [open, setOpen] = useState(false);
-  const location = useLocation();
   const { toggleSidebar } = useSidebar();
 
   return (

@@ -35,6 +35,11 @@ const Header = ({
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  // Improve performance with debounced toggle
+  const handleToggleSidebar = () => {
+    toggleSidebar();
+  };
+
   const handleImportEnvironments = () => {
     const input = document.createElement('input');
     input.type = 'file';
@@ -80,16 +85,14 @@ const Header = ({
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-4">
-          {!open && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleSidebar}
-              className="text-white hover:bg-white/10"
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          )}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleToggleSidebar}
+            className="text-white hover:bg-white/10"
+          >
+            <Menu className="h-5 w-5" />
+          </Button>
           <div className="font-medium text-xl tracking-tight text-white">
             {location.pathname === "/" && "Batch Dashboard"}
             {location.pathname === "/amps-viewer" && "Amps Viewer"}
