@@ -1,19 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { Settings, Menu, PlusIcon, ExternalLink } from "lucide-react";
-import { useState, useEffect } from "react";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import EnvironmentSelector from "./EnvironmentSelector";
-import { useEnvironment } from "@/contexts/EnvironmentContext";
-import { toast } from "sonner";
-import { useSidebar } from "./ui/sidebar";
-import { useLocation } from "react-router-dom";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
-import EnvironmentModal from "./EnvironmentModal";
+import { useEnvironment } from "@/contexts/EnvironmentContext";
 import * as LucideIcons from "lucide-react";
+import { ExternalLink, Menu, PlusIcon, Settings } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
+import EnvironmentModal from "./EnvironmentModal";
+import EnvironmentSelector from "./EnvironmentSelector";
+import { useSidebar } from "./ui/sidebar";
 
 // Define types for navigation items
 interface NavigationItem {
@@ -39,7 +39,7 @@ const Header = () => {
   const [navUrl, setNavUrl] = useState("");
   const [navIcon, setNavIcon] = useState("ExternalLink");
   const [navParent, setNavParent] = useState("");
-  const [currentPageTitle, setCurrentPageTitle] = useState("Batch Dashboard");
+  const [currentPageTitle, setCurrentPageTitle] = useState("XVA Dashboard");
   const [navigationItems, setNavigationItems] = useState<NavigationItem[]>(() => {
     try {
       const saved = localStorage.getItem(NAVIGATION_STORAGE_KEY);
@@ -74,7 +74,7 @@ const Header = () => {
     
     // Default routes
     if (path === "/") {
-      setCurrentPageTitle("Batch Dashboard");
+      setCurrentPageTitle("XVA Dashboard");
       return;
     } else if (path === "/amps-viewer") {
       setCurrentPageTitle("Amps Viewer");

@@ -1,5 +1,4 @@
 
-import { useLocation, Link } from "react-router-dom";
 import {
   Sidebar,
   SidebarContent,
@@ -12,16 +11,17 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarMenuSub,
-  SidebarMenuSubItem,
   SidebarMenuSubButton,
+  SidebarMenuSubItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { Home, Grid, Zap, Settings, X, Menu, ExternalLink } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { ExternalLink, Grid, Home, Settings, X, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
+import { toast } from "sonner";
 import EnvironmentSelector from "./EnvironmentSelector";
 import { Button } from "./ui/button";
-import { useState, useEffect } from "react";
-import * as LucideIcons from "lucide-react";
-import { toast } from "sonner";
 
 // Define types for navigation items
 interface NavigationItem {
@@ -72,7 +72,7 @@ export function AppSidebar() {
     <Sidebar className="border-r border-[#FEF7CD]/20 z-[60] bg-[#ea384c]">
       <SidebarHeader className="border-b border-[#FEF7CD]/20 py-4 flex items-center justify-between px-4">
         <div className="flex items-center justify-center">
-          <span className="text-lg font-semibold text-white">Batch Dashboard</span>
+          <span className="text-lg font-semibold text-white">XVA Dashboard</span>
         </div>
         <Button 
           variant="ghost" 
@@ -86,14 +86,13 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu id="main-navigation">
               <SidebarMenuItem>
-                <SidebarMenuButton asChild tooltip="Batch Dashboard" isActive={isActive("/")} onClick={closeSidebar}>
+                <SidebarMenuButton asChild tooltip="XVA Processes" isActive={isActive("/")} onClick={closeSidebar}>
                   <Link to="/">
                     <Home />
-                    <span>Batch Dashboard</span>
+                    <span>XVA Processes</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

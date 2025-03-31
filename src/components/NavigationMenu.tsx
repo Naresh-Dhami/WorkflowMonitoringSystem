@@ -1,6 +1,5 @@
 
-import { Link, useLocation } from "react-router-dom";
-import { 
+import {
   NavigationMenu,
   NavigationMenuContent,
   NavigationMenuItem,
@@ -9,11 +8,12 @@ import {
   NavigationMenuTrigger
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import { Menu, ExternalLink } from "lucide-react";
+import * as LucideIcons from "lucide-react";
+import { ExternalLink, Menu } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
 import { useSidebar } from "./ui/sidebar";
-import { useEffect, useState } from "react";
-import * as LucideIcons from "lucide-react";
 
 // Define types for navigation items
 interface NavigationItem {
@@ -64,7 +64,7 @@ const NavigationMenuComponent = () => {
                   isActive("/") && "bg-accent text-accent-foreground"
                 )}
               >
-                Batch Dashboard
+                XVA Dashboard
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
