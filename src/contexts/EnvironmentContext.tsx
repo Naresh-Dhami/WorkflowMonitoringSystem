@@ -16,6 +16,7 @@ interface EnvironmentContextType {
   setEnvironment: (environmentId: string) => void;
   importEnvironments: (jsonString: string) => void;
   exportEnvironments: () => void;
+  addEnvironment: (environment: Environment) => void;
 }
 
 const defaultEnvironment = environmentsConfig.environments[0];
@@ -26,6 +27,7 @@ const EnvironmentContext = createContext<EnvironmentContextType>({
   setEnvironment: () => {},
   importEnvironments: () => {},
   exportEnvironments: () => {},
+  addEnvironment: () => {},
 });
 
 export const useEnvironment = () => useContext(EnvironmentContext);
@@ -100,6 +102,10 @@ export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
   };
 
+  const addEnvironment = (environment: Environment) => {
+    setEnvironments(prev => [...prev, environment]);
+  };
+
   const importEnvironments = (jsonString: string) => {
     try {
       const parsed = JSON.parse(jsonString);
@@ -154,6 +160,7 @@ export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setEnvironment,
         importEnvironments,
         exportEnvironments,
+        addEnvironment,
       }}
     >
       {children}

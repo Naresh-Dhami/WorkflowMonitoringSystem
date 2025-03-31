@@ -37,6 +37,24 @@ const Index = () => {
     deleteProcess
   } = useBatchJobs();
 
+  // Check URL parameters on component mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('newProcess') === 'true') {
+      handleNewProcess();
+      // Clean up the URL
+      window.history.replaceState({}, document.title, window.location.pathname);
+    }
+
+    // Listen for the custom event from Header
+    const handleCustomEvent = () => handleNewProcess();
+    window.addEventListener('open-process-modal', handleCustomEvent);
+
+    return () => {
+      window.removeEventListener('open-process-modal', handleCustomEvent);
+    };
+  }, []);
+
   const availableStatuses = ["Completed", "Running", "Failed", "Pending"];
 
   // Filter batch jobs based on search and status

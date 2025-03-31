@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Settings, Menu, PlusIcon, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
@@ -12,7 +11,9 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import EnvironmentModal from "./EnvironmentModal";
 import * as LucideIcons from "lucide-react";
+import { v4 as uuidv4 } from "uuid";
 
 // Define types for navigation items
 interface NavigationItem {
@@ -28,11 +29,12 @@ const NAVIGATION_STORAGE_KEY = 'batchConnector.navigation';
 
 const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
-  const { environments, importEnvironments, exportEnvironments } = useEnvironment();
-  const { open, toggleSidebar } = useSidebar();
+  const { environments, importEnvironments, exportEnvironments, addEnvironment } = useEnvironment();
+  const { open, toggleSidebar, setOpenMobile } = useSidebar();
   const location = useLocation();
   const [showNavDialog, setShowNavDialog] = useState(false);
   const [showNavManager, setShowNavManager] = useState(false);
+  const [showEnvModal, setShowEnvModal] = useState(false);
   const [navTitle, setNavTitle] = useState("");
   const [navUrl, setNavUrl] = useState("");
   const [navIcon, setNavIcon] = useState("ExternalLink");
@@ -277,6 +279,31 @@ const Header = () => {
     toast.success('Environments exported successfully');
   };
 
+  // Handle adding a new environment
+  const handleSaveEnvironment = (envData: { name: string; baseUrl: string; description: string }) => {
+    const newEnvironment = {
+      id: uuidv4(),
+      ...envData
+    };
+    
+    addEnvironment(newEnvironment);
+    setShowEnvModal(false);
+    toast.success(`Environment "${envData.name}" added successfully`);
+  };
+
+  // Handle process creation by redirecting to main dashboard with dialog open
+  const handleNewProcess = () => {
+    // If we're not on the dashboard, navigate to it
+    if (location.pathname !== '/') {
+      window.location.href = '/?newProcess=true';
+    } else {
+      // Dispatch a custom event that Index.tsx can listen for
+      const event = new CustomEvent('open-process-modal');
+      window.dispatchEvent(event);
+    }
+    toast.info("Opening process creation dialog...");
+  };
+
   // Dynamic icon component
   const DynamicIcon = ({ iconName }: { iconName: string }) => {
     const IconComponent = (LucideIcons as any)[iconName] || ExternalLink;
@@ -321,6 +348,16 @@ const Header = () => {
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-background z-[100]">
+                {/* Add Process Button */}
+                <DropdownMenuItem onClick={handleNewProcess}>
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                  Add Process
+                </DropdownMenuItem>
+                {/* Add Environment Button */}
+                <DropdownMenuItem onClick={() => setShowEnvModal(true)}>
+                  <PlusIcon className="mr-2 h-4 w-4" />
+                  Add Environment
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => setShowNavDialog(true)}>
                   <PlusIcon className="mr-2 h-4 w-4" />
                   Add Navigation Item
@@ -502,6 +539,13 @@ const Header = () => {
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Environment Modal */}
+      <EnvironmentModal 
+        isOpen={showEnvModal}
+        onClose={() => setShowEnvModal(false)}
+        onSave={handleSaveEnvironment}
+      />
     </>
   );
 };
