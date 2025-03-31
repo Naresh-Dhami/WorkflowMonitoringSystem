@@ -4,6 +4,7 @@ import { useEnvironment, Environment } from "@/contexts/EnvironmentContext";
 import { Globe } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import { useEffect } from "react";
 
 const EnvironmentMenuItem = ({ env, onSelect }: { env: Environment, onSelect: (envId: string) => void }) => {
   if (env.children && env.children.length > 0) {
@@ -15,7 +16,7 @@ const EnvironmentMenuItem = ({ env, onSelect }: { env: Environment, onSelect: (e
             <span className="text-xs text-muted-foreground">{env.baseUrl}</span>
           </div>
         </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent>
+        <DropdownMenuSubContent className="bg-white">
           <DropdownMenuItem
             className="cursor-pointer !text-black"
             onClick={() => onSelect(env.id)}
@@ -52,18 +53,18 @@ const EnvironmentSelector = () => {
 
   const handleEnvironmentChange = (envId: string) => {
     setEnvironment(envId);
-    toast.success(`Environment switched to ${currentEnvironment.name}`);
+    toast.success(`Environment switched to ${environments.find(e => e.id === envId)?.name || 'new environment'}`);
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="h-9 gap-1 border-yellow-300/50 bg-transparent text-white hover:bg-white/10 hover:text-white">
-          <Globe className="h-4 w-4" />
+        <Button variant="outline" size="sm" className="h-9 gap-1 border-yellow-300/50 bg-transparent text-white hover:bg-white/10 hover:text-white w-full">
+          <Globe className="h-4 w-4 mr-2" />
           {currentEnvironment.name}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56 z-[100] bg-white">
         <DropdownMenuLabel className="!text-black">Environments</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {environments.map((env) => (

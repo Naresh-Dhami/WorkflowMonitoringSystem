@@ -16,10 +16,14 @@ import StatusBadge from "@/components/StatusBadge";
 import BatchFilter from "@/components/BatchFilter";
 import { toast } from "sonner";
 import { useBatchJobs } from "@/hooks/useBatchJobs";
+import ConfigModal from "@/components/ConfigModal";
+import { ProcessConfig } from "@/types";
 
 const Index = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedStatuses, setSelectedStatuses] = useState<string[]>([]);
+  const [isConfigModalOpen, setIsConfigModalOpen] = useState(false);
+  const [currentProcess, setCurrentProcess] = useState<ProcessConfig | undefined>(undefined);
   
   // Use the batch jobs hook which provides all the necessary functions
   const { 
@@ -43,10 +47,25 @@ const Index = () => {
     return matchesSearch && matchesStatus;
   });
 
-  // These functions would typically be provided by the Header component's props
+  // Function to handle opening the new process modal
   const handleNewProcess = () => {
-    // This would open the batch runner modal
-    toast.info("New Process functionality would go here");
+    setCurrentProcess(undefined);
+    setIsConfigModalOpen(true);
+  };
+
+  // Function to handle editing a process
+  const handleEditProcess = (process: ProcessConfig) => {
+    setCurrentProcess(process);
+    setIsConfigModalOpen(true);
+  };
+
+  // Function to save process (create or update)
+  const handleSaveProcess = (process: ProcessConfig) => {
+    if (processes.some(p => p.id === process.id)) {
+      updateProcess(process);
+    } else {
+      addProcess(process);
+    }
   };
 
   const handleImportConfig = () => {
@@ -94,7 +113,7 @@ const Index = () => {
                 isLoading={isLoading}
                 onNewProcess={handleNewProcess}
                 onRunProcess={runProcess}
-                onEditProcess={(process) => toast.info(`Edit ${process.name}`)}
+                onEditProcess={handleEditProcess}
                 onDeleteProcess={deleteProcess}
               />
             </TabsContent>
@@ -140,6 +159,13 @@ const Index = () => {
           </Tabs>
         </div>
       </main>
+
+      <ConfigModal
+        isOpen={isConfigModalOpen}
+        onClose={() => setIsConfigModalOpen(false)}
+        process={currentProcess}
+        onSave={handleSaveProcess}
+      />
     </>
   );
 };
