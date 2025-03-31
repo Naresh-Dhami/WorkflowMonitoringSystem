@@ -12,6 +12,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
 // Define types for navigation items
 interface NavigationItem {
@@ -42,6 +43,7 @@ const Header = ({
   const location = useLocation();
   const navigate = useNavigate();
   const [showNavDialog, setShowNavDialog] = useState(false);
+  const [showNavManager, setShowNavManager] = useState(false);
   const [navTitle, setNavTitle] = useState("");
   const [navUrl, setNavUrl] = useState("");
   const [navIcon, setNavIcon] = useState("ExternalLink");
@@ -117,6 +119,30 @@ const Header = ({
     setShowNavDialog(false);
     
     toast.success("Navigation item added successfully");
+    
+    // Force reload to update routes
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  };
+
+  // Function to delete a navigation item
+  const handleDeleteNavItem = (id: string) => {
+    setNavigationItems(current => {
+      // Filter out the item to be deleted from the top level
+      const filtered = current.filter(item => item.id !== id);
+      
+      // Also remove from children arrays in any parent items
+      filtered.forEach(item => {
+        if (item.children) {
+          item.children = item.children.filter(child => child.id !== id);
+        }
+      });
+      
+      return filtered;
+    });
+    
+    toast.success("Navigation item deleted successfully");
   };
 
   // Export navigation items
@@ -220,6 +246,20 @@ const Header = ({
     }
   };
 
+  // Get the current page title
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case "/":
+        return "Batch Dashboard";
+      case "/amps-viewer":
+        return "Amps Viewer";
+      case "/grid-gain-viewer":
+        return "Grid Gain Viewer";
+      default:
+        return "Batch Dashboard";
+    }
+  };
+
   return (
     <>
       <header 
@@ -240,24 +280,24 @@ const Header = ({
               <Menu className="h-5 w-5" />
             </Button>
             <div className="font-medium text-xl tracking-tight text-white">
-              {location.pathname === "/" && "Batch Dashboard"}
-              {location.pathname === "/amps-viewer" && "Amps Viewer"}
-              {location.pathname === "/grid-gain-viewer" && "Grid Gain Viewer"}
+              {getPageTitle()}
             </div>
           </div>
           
           <div className="flex items-center space-x-2">
             <EnvironmentSelector />
             
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleNewProcessClick} 
-              className="hidden sm:flex items-center text-white hover:bg-white/10 hover:text-white"
-            >
-              <PlusIcon className="mr-1 h-4 w-4" />
-              New Process
-            </Button>
+            {shouldShowNewProcess && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={handleNewProcessClick} 
+                className="hidden sm:flex items-center text-white hover:bg-white/10 hover:text-white"
+              >
+                <PlusIcon className="mr-1 h-4 w-4" />
+                New Process
+              </Button>
+            )}
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -270,13 +310,19 @@ const Header = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-background z-[100]">
-                <DropdownMenuItem onClick={handleNewProcessClick}>
-                  <PlusIcon className="mr-2 h-4 w-4" />
-                  New Process
-                </DropdownMenuItem>
+                {shouldShowNewProcess && (
+                  <DropdownMenuItem onClick={handleNewProcessClick}>
+                    <PlusIcon className="mr-2 h-4 w-4" />
+                    New Process
+                  </DropdownMenuItem>
+                )}
                 <DropdownMenuItem onClick={() => setShowNavDialog(true)}>
                   <PlusIcon className="mr-2 h-4 w-4" />
                   Add Navigation Item
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setShowNavManager(true)}>
+                  <Settings className="mr-2 h-4 w-4" />
+                  Manage Navigation Items
                 </DropdownMenuItem>
                 {onImportConfig && (
                   <DropdownMenuItem onClick={onImportConfig}>
@@ -380,6 +426,87 @@ const Header = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Manage Navigation Items Sheet */}
+      <Sheet open={showNavManager} onOpenChange={setShowNavManager}>
+        <SheetContent side="right" className="bg-white z-[150] overflow-y-auto w-[400px] sm:max-w-none">
+          <SheetHeader>
+            <SheetTitle>Manage Navigation Items</SheetTitle>
+          </SheetHeader>
+          <div className="mt-6 space-y-6">
+            <div className="flex justify-between">
+              <Button variant="outline" onClick={importNavigation}>
+                <Upload className="mr-2 h-4 w-4" />
+                Import
+              </Button>
+              <Button variant="outline" onClick={exportNavigation}>
+                <Download className="mr-2 h-4 w-4" />
+                Export
+              </Button>
+            </div>
+            
+            <div className="space-y-4 mt-4">
+              <h3 className="font-medium text-lg">Navigation Items</h3>
+              {navigationItems.length === 0 ? (
+                <p className="text-muted-foreground">No navigation items yet. Add some to get started.</p>
+              ) : (
+                <div className="space-y-3">
+                  {navigationItems.map(item => (
+                    <div key={item.id} className="border rounded-lg p-3 space-y-2">
+                      <div className="flex justify-between items-center">
+                        <div className="font-medium">{item.title}</div>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDeleteNavItem(item.id)}
+                          className="h-7 text-red-500 hover:text-red-700"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                      <div className="text-sm text-muted-foreground">Path: {item.path}</div>
+                      <div className="text-sm text-muted-foreground">Icon: {item.icon}</div>
+                      
+                      {item.children && item.children.length > 0 && (
+                        <div className="pl-4 border-l mt-2 space-y-2">
+                          <div className="text-sm font-medium">Child Items:</div>
+                          {item.children.map(child => (
+                            <div key={child.id} className="border-t pt-2">
+                              <div className="flex justify-between items-center">
+                                <div className="font-medium text-sm">{child.title}</div>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleDeleteNavItem(child.id)}
+                                  className="h-6 text-red-500 hover:text-red-700"
+                                >
+                                  <X className="h-3 w-3" />
+                                </Button>
+                              </div>
+                              <div className="text-xs text-muted-foreground">Path: {child.path}</div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+              
+              <Button 
+                className="w-full mt-4" 
+                onClick={() => {
+                  setShowNavManager(false);
+                  setTimeout(() => setShowNavDialog(true), 300);
+                }}
+              >
+                <PlusIcon className="mr-2 h-4 w-4" />
+                Add New Item
+              </Button>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
     </>
   );
 };

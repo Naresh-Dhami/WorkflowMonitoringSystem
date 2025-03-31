@@ -47,9 +47,9 @@ const App = () => {
           
           // Process top-level items
           items.forEach(item => {
-            if (item.path.startsWith('http')) {
+            if (item.path) {
               routes.push({
-                path: `/${encodeURIComponent(item.path)}`,
+                path: item.path.startsWith('http') ? `/${encodeURIComponent(item.path)}` : item.path,
                 url: item.path
               });
             }
@@ -57,9 +57,9 @@ const App = () => {
             // Process children
             if (item.children) {
               item.children.forEach(child => {
-                if (child.path.startsWith('http')) {
+                if (child.path) {
                   routes.push({
-                    path: `/${encodeURIComponent(child.path)}`,
+                    path: child.path.startsWith('http') ? `/${encodeURIComponent(child.path)}` : child.path,
                     url: child.path
                   });
                 }

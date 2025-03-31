@@ -21,7 +21,6 @@ import EnvironmentSelector from "./EnvironmentSelector";
 import { Button } from "./ui/button";
 import { useState, useEffect } from "react";
 import * as LucideIcons from "lucide-react";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { toast } from "sonner";
 
 // Define types for navigation items
@@ -38,7 +37,6 @@ export function AppSidebar() {
   const location = useLocation();
   const { open, toggleSidebar, setOpenMobile, openMobile } = useSidebar();
   const [customNavItems, setCustomNavItems] = useState<NavigationItem[]>([]);
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   
   useEffect(() => {
     // Load custom navigation items from localStorage
@@ -160,26 +158,16 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="border-t border-[#FEF7CD]/20 p-4">
         <div className="flex justify-center">
-          <Sheet open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="text-white/70 hover:text-white hover:bg-white/10">
-                <Settings className="h-5 w-5" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-white z-[150]">
-              <SheetHeader>
-                <SheetTitle>Navigation Settings</SheetTitle>
-              </SheetHeader>
-              <div className="mt-6">
-                <Button variant="outline" onClick={() => {
-                  toast.info("Navigation settings would be managed here");
-                  setIsSettingsOpen(false);
-                }}>
-                  Manage Navigation Items
-                </Button>
-              </div>
-            </SheetContent>
-          </Sheet>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => {
+              toast.info("Settings would be managed here");
+            }}
+            className="text-white/70 hover:text-white hover:bg-white/10"
+          >
+            <Settings className="h-5 w-5" />
+          </Button>
         </div>
       </SidebarFooter>
     </Sidebar>
