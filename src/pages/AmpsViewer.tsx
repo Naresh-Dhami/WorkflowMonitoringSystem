@@ -71,17 +71,17 @@ const AmpsViewer = () => {
   };
 
   return (
-    <div className="min-h-screen viewer-background">
-      <div className="viewer-header py-6 mb-6">
+    <div className="min-h-screen bg-background">
+      <div className="bg-[#ea384c] py-6 mb-6">
         <div className="max-w-6xl mx-auto px-6">
-          <h1 className="text-2xl font-bold tracking-tight">Amps Message Viewer</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-white">Amps Message Viewer</h1>
           <div className="text-sm text-white/80 mt-1">
             Environment: <span className="font-medium">{currentEnvironment.name}</span>
           </div>
         </div>
       </div>
       
-      <main className="max-w-6xl mx-auto px-6 pb-16">
+      <main className="max-w-6xl mx-auto px-6 pb-16 pt-4">
         <div className="space-y-6 animate-fade-in">
           <Card>
             <CardHeader className="py-4">

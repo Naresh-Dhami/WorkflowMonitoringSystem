@@ -37,14 +37,17 @@
 
     --radius: 0.5rem;
 
-    --sidebar-background: 0 84% 58%;
+    --sidebar-background: 354 84% 58%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 0 0% 98%;
-    --sidebar-primary-foreground: 0 84% 58%;
-    --sidebar-accent: 0 84% 65%;
+    --sidebar-primary-foreground: 354 84% 58%;
+    --sidebar-accent: 354 84% 65%;
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 0 0% 98%;
     --sidebar-ring: 0 0% 98%;
+    
+    --viewer-header: 354 84% 58%;
+    --viewer-background: 210 30% 98%;
   }
 
   .dark {
@@ -144,11 +147,11 @@
 
   /* Viewer styles */
   .viewer-header {
-    @apply bg-viewer-header text-white;
+    @apply bg-[#ea384c] text-white;
   }
   
   .viewer-background {
-    @apply bg-viewer-background;
+    @apply bg-background;
   }
 
   /* Sortable headers */
@@ -165,4 +168,41 @@
     content: '↓';
     @apply ml-1 inline-block;
   }
+  
+  /* Make sure popup contents appear above other elements */
+  .z-popover {
+    z-index: 100;
+  }
+  
+  /* Higher z-index for modals and dialogs */
+  .z-dialog {
+    z-index: 200;
+  }
+  
+  /* Responsive margins for content areas */
+  @media (max-width: 640px) {
+    .content-area {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+  }
+}
+
+/* Animations for content loading */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Fix z-index stacking for modals and dropdowns */
+.radix-portal {
+  z-index: 9999;
 }

@@ -8,7 +8,7 @@ import NavigationMenuComponent, { MobileNav } from "./NavigationMenu";
 import { useEnvironment } from "@/contexts/EnvironmentContext";
 import { toast } from "sonner";
 import { useSidebar } from "./ui/sidebar";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,7 @@ const Header = ({
   const { environments, importEnvironments, exportEnvironments } = useEnvironment();
   const { open, toggleSidebar } = useSidebar();
   const location = useLocation();
+  const navigate = useNavigate();
   const [showNavDialog, setShowNavDialog] = useState(false);
   const [navTitle, setNavTitle] = useState("");
   const [navUrl, setNavUrl] = useState("");
@@ -116,9 +117,6 @@ const Header = ({
     setShowNavDialog(false);
     
     toast.success("Navigation item added successfully");
-    
-    // Force reload to update routes
-    window.location.reload();
   };
 
   // Export navigation items
@@ -210,7 +208,13 @@ const Header = ({
   // Handle New Process click - redirect to Index page if not there
   const handleNewProcessClick = () => {
     if (location.pathname !== "/") {
-      window.location.href = "/";
+      navigate("/");
+      // Add a small delay before triggering the onNewProcess to ensure navigation is complete
+      setTimeout(() => {
+        if (onNewProcess) {
+          onNewProcess();
+        }
+      }, 100);
     } else if (onNewProcess) {
       onNewProcess();
     }
@@ -231,7 +235,7 @@ const Header = ({
               variant="ghost"
               size="icon"
               onClick={handleToggleSidebar}
-              className="text-white hover:bg-white/10"
+              className="text-white hover:bg-white/10 z-[70]"
             >
               <Menu className="h-5 w-5" />
             </Button>
@@ -265,7 +269,7 @@ const Header = ({
                   <Settings className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56 bg-background">
+              <DropdownMenuContent align="end" className="w-56 bg-background z-[100]">
                 <DropdownMenuItem onClick={handleNewProcessClick}>
                   <PlusIcon className="mr-2 h-4 w-4" />
                   New Process
@@ -310,7 +314,7 @@ const Header = ({
 
       {/* Add Navigation Item Dialog */}
       <Dialog open={showNavDialog} onOpenChange={setShowNavDialog}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] z-[200]">
           <DialogHeader>
             <DialogTitle>Add Navigation Item</DialogTitle>
             <DialogDescription>

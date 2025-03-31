@@ -4,7 +4,6 @@ import { useEnvironment, Environment } from "@/contexts/EnvironmentContext";
 import { Globe } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import { useEffect } from "react";
 
 const EnvironmentMenuItem = ({ env, onSelect }: { env: Environment, onSelect: (envId: string) => void }) => {
   if (env.children && env.children.length > 0) {
@@ -16,7 +15,7 @@ const EnvironmentMenuItem = ({ env, onSelect }: { env: Environment, onSelect: (e
             <span className="text-xs text-muted-foreground">{env.baseUrl}</span>
           </div>
         </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="bg-white">
+        <DropdownMenuSubContent className="bg-white z-[150]">
           <DropdownMenuItem
             className="cursor-pointer !text-black"
             onClick={() => onSelect(env.id)}
@@ -64,7 +63,7 @@ const EnvironmentSelector = () => {
           {currentEnvironment.name}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 z-[100] bg-white">
+      <DropdownMenuContent align="end" className="w-56 z-[150] bg-white">
         <DropdownMenuLabel className="!text-black">Environments</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {environments.map((env) => (

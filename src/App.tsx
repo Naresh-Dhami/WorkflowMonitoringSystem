@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -16,12 +16,16 @@ import Header from "./components/Header";
 
 // Custom page component for dynamic navigation
 const DynamicPage = ({ url }: { url: string }) => {
+  // Decode URL if it's encoded
+  const decodedUrl = url.startsWith('http') ? url : decodeURIComponent(url);
+  
   return (
     <div className="container mx-auto p-6 pt-24">
       <iframe 
-        src={url} 
+        src={decodedUrl} 
         className="w-full h-[calc(100vh-100px)] border-0 rounded-lg shadow-md"
         title="External content"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-forms"
       />
     </div>
   );
@@ -30,19 +34,39 @@ const DynamicPage = ({ url }: { url: string }) => {
 const queryClient = new QueryClient();
 
 const App = () => {
-  const [navigationRoutes, setNavigationRoutes] = useState<{path: string, url: string}[]>([]);
+  const [navigationRoutes, setNavigationRoutes] = React.useState<{path: string, url: string}[]>([]);
 
-  useEffect(() => {
+  React.useEffect(() => {
     // Load custom navigation items from localStorage
     try {
       const saved = localStorage.getItem('batchConnector.navigation');
       if (saved) {
         const items = JSON.parse(saved);
         if (Array.isArray(items)) {
-          const routes = items.map(item => ({
-            path: item.path.startsWith('/') ? item.path : `/${item.path.replace(/^https?:\/\//, '')}`,
-            url: item.path.startsWith('http') ? item.path : `https://${item.path}`
-          }));
+          const routes = [];
+          
+          // Process top-level items
+          items.forEach(item => {
+            if (item.path.startsWith('http')) {
+              routes.push({
+                path: `/${encodeURIComponent(item.path)}`,
+                url: item.path
+              });
+            }
+            
+            // Process children
+            if (item.children) {
+              item.children.forEach(child => {
+                if (child.path.startsWith('http')) {
+                  routes.push({
+                    path: `/${encodeURIComponent(child.path)}`,
+                    url: child.path
+                  });
+                }
+              });
+            }
+          });
+          
           setNavigationRoutes(routes);
         }
       }
@@ -60,7 +84,6 @@ const App = () => {
               <div className="flex w-full min-h-screen">
                 <AppSidebar />
                 <div className="flex-1 flex flex-col">
-                  <Header />
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/amps-viewer" element={<AmpsViewer />} />

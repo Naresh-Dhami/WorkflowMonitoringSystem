@@ -71,7 +71,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className="border-r border-[#FEF7CD]/20 z-[60] bg-viewer-header">
+    <Sidebar className="border-r border-[#FEF7CD]/20 z-[60] bg-[#ea384c]">
       <SidebarHeader className="border-b border-[#FEF7CD]/20 py-4 flex items-center justify-between px-4">
         <div className="flex items-center justify-center">
           <span className="text-lg font-semibold text-white">Batch Dashboard</span>
@@ -128,11 +128,7 @@ export function AppSidebar() {
                       {item.children.map(child => (
                         <SidebarMenuSubItem key={child.id}>
                           <SidebarMenuSubButton asChild onClick={closeSidebar}>
-                            <Link 
-                              to={child.path.startsWith('http') ? 
-                                `/${child.path.replace(/^https?:\/\//, '')}` : 
-                                child.path}
-                            >
+                            <Link to={child.path.startsWith('http') ? `/${encodeURIComponent(child.path)}` : child.path}>
                               <DynamicIcon iconName={child.icon || "ExternalLink"} />
                               <span>{child.title}</span>
                             </Link>
@@ -142,11 +138,7 @@ export function AppSidebar() {
                     </SidebarMenuSub>
                   ) : (
                     <SidebarMenuButton asChild onClick={closeSidebar}>
-                      <Link 
-                        to={item.path.startsWith('http') ? 
-                          `/${item.path.replace(/^https?:\/\//, '')}` : 
-                          item.path}
-                      >
+                      <Link to={item.path.startsWith('http') ? `/${encodeURIComponent(item.path)}` : item.path}>
                         <DynamicIcon iconName={item.icon} />
                         <span>{item.title}</span>
                       </Link>
@@ -174,7 +166,7 @@ export function AppSidebar() {
                 <Settings className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-white">
+            <SheetContent side="right" className="bg-white z-[150]">
               <SheetHeader>
                 <SheetTitle>Navigation Settings</SheetTitle>
               </SheetHeader>
