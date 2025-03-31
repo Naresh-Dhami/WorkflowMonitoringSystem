@@ -1,18 +1,18 @@
 
 import { Button } from "@/components/ui/button";
-import { ChevronDown, Settings, Upload, Download, Menu, X, PlusIcon, ExternalLink } from "lucide-react";
+import { Settings, Menu, PlusIcon, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import EnvironmentSelector from "./EnvironmentSelector";
-import NavigationMenuComponent, { MobileNav } from "./NavigationMenu";
 import { useEnvironment } from "@/contexts/EnvironmentContext";
 import { toast } from "sonner";
 import { useSidebar } from "./ui/sidebar";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import * as LucideIcons from "lucide-react";
 
 // Define types for navigation items
 interface NavigationItem {
@@ -24,30 +24,20 @@ interface NavigationItem {
   children?: NavigationItem[];
 }
 
-interface HeaderProps {
-  onNewProcess?: () => void;
-  onImportConfig?: () => void;
-  onExportConfig?: () => void;
-}
-
 const NAVIGATION_STORAGE_KEY = 'batchConnector.navigation';
 
-const Header = ({
-  onNewProcess,
-  onImportConfig,
-  onExportConfig
-}: HeaderProps) => {
+const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const { environments, importEnvironments, exportEnvironments } = useEnvironment();
   const { open, toggleSidebar } = useSidebar();
   const location = useLocation();
-  const navigate = useNavigate();
   const [showNavDialog, setShowNavDialog] = useState(false);
   const [showNavManager, setShowNavManager] = useState(false);
   const [navTitle, setNavTitle] = useState("");
   const [navUrl, setNavUrl] = useState("");
   const [navIcon, setNavIcon] = useState("ExternalLink");
   const [navParent, setNavParent] = useState("");
+  const [currentPageTitle, setCurrentPageTitle] = useState("Batch Dashboard");
   const [navigationItems, setNavigationItems] = useState<NavigationItem[]>(() => {
     try {
       const saved = localStorage.getItem(NAVIGATION_STORAGE_KEY);
@@ -70,6 +60,65 @@ const Header = ({
   useEffect(() => {
     localStorage.setItem(NAVIGATION_STORAGE_KEY, JSON.stringify(navigationItems));
   }, [navigationItems]);
+
+  // Update page title based on location
+  useEffect(() => {
+    updatePageTitle();
+  }, [location.pathname]);
+
+  // Function to determine the current page title based on route
+  const updatePageTitle = () => {
+    const path = location.pathname;
+    
+    // Default routes
+    if (path === "/") {
+      setCurrentPageTitle("Batch Dashboard");
+      return;
+    } else if (path === "/amps-viewer") {
+      setCurrentPageTitle("Amps Viewer");
+      return;
+    } else if (path === "/grid-gain-viewer") {
+      setCurrentPageTitle("Grid Gain Viewer");
+      return;
+    } else if (path === "/not-found" || path === "*") {
+      setCurrentPageTitle("Page Not Found");
+      return;
+    }
+    
+    // Check custom navigation items for the title
+    const findTitleFromNavItems = (items: NavigationItem[]) => {
+      for (const item of items) {
+        // Check if current path matches this item
+        const itemPath = item.path.startsWith('http') ? 
+          `/${encodeURIComponent(item.path)}` : item.path;
+          
+        if (path === itemPath) {
+          setCurrentPageTitle(item.title);
+          return true;
+        }
+        
+        // Check children
+        if (item.children && item.children.length > 0) {
+          for (const child of item.children) {
+            const childPath = child.path.startsWith('http') ? 
+              `/${encodeURIComponent(child.path)}` : child.path;
+              
+            if (path === childPath) {
+              setCurrentPageTitle(child.title);
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    };
+    
+    // Try to find title from navigation items
+    if (!findTitleFromNavItems(navigationItems)) {
+      // If not found, set a default title
+      setCurrentPageTitle("External Page");
+    }
+  };
 
   // Handle adding a new navigation item
   const handleAddNavItem = () => {
@@ -228,36 +277,10 @@ const Header = ({
     toast.success('Environments exported successfully');
   };
 
-  // Determine if we should show the New Process button based on route
-  const shouldShowNewProcess = location.pathname === "/";
-  
-  // Handle New Process click - redirect to Index page if not there
-  const handleNewProcessClick = () => {
-    if (location.pathname !== "/") {
-      navigate("/");
-      // Add a small delay before triggering the onNewProcess to ensure navigation is complete
-      setTimeout(() => {
-        if (onNewProcess) {
-          onNewProcess();
-        }
-      }, 100);
-    } else if (onNewProcess) {
-      onNewProcess();
-    }
-  };
-
-  // Get the current page title
-  const getPageTitle = () => {
-    switch (location.pathname) {
-      case "/":
-        return "Batch Dashboard";
-      case "/amps-viewer":
-        return "Amps Viewer";
-      case "/grid-gain-viewer":
-        return "Grid Gain Viewer";
-      default:
-        return "Batch Dashboard";
-    }
+  // Dynamic icon component
+  const DynamicIcon = ({ iconName }: { iconName: string }) => {
+    const IconComponent = (LucideIcons as any)[iconName] || ExternalLink;
+    return <IconComponent className="h-4 w-4" />;
   };
 
   return (
@@ -280,24 +303,12 @@ const Header = ({
               <Menu className="h-5 w-5" />
             </Button>
             <div className="font-medium text-xl tracking-tight text-white">
-              {getPageTitle()}
+              {currentPageTitle}
             </div>
           </div>
           
           <div className="flex items-center space-x-2">
             <EnvironmentSelector />
-            
-            {shouldShowNewProcess && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
-                onClick={handleNewProcessClick} 
-                className="hidden sm:flex items-center text-white hover:bg-white/10 hover:text-white"
-              >
-                <PlusIcon className="mr-1 h-4 w-4" />
-                New Process
-              </Button>
-            )}
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -310,12 +321,6 @@ const Header = ({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 bg-background z-[100]">
-                {shouldShowNewProcess && (
-                  <DropdownMenuItem onClick={handleNewProcessClick}>
-                    <PlusIcon className="mr-2 h-4 w-4" />
-                    New Process
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuItem onClick={() => setShowNavDialog(true)}>
                   <PlusIcon className="mr-2 h-4 w-4" />
                   Add Navigation Item
@@ -324,32 +329,20 @@ const Header = ({
                   <Settings className="mr-2 h-4 w-4" />
                   Manage Navigation Items
                 </DropdownMenuItem>
-                {onImportConfig && (
-                  <DropdownMenuItem onClick={onImportConfig}>
-                    <Upload className="mr-2 h-4 w-4" />
-                    Import Configuration
-                  </DropdownMenuItem>
-                )}
-                {onExportConfig && (
-                  <DropdownMenuItem onClick={onExportConfig}>
-                    <Download className="mr-2 h-4 w-4" />
-                    Export Configuration
-                  </DropdownMenuItem>
-                )}
                 <DropdownMenuItem onClick={importNavigation}>
-                  <Upload className="mr-2 h-4 w-4" />
+                  <PlusIcon className="mr-2 h-4 w-4" />
                   Import Navigation
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={exportNavigation}>
-                  <Download className="mr-2 h-4 w-4" />
+                  <PlusIcon className="mr-2 h-4 w-4" />
                   Export Navigation
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleImportEnvironments}>
-                  <Upload className="mr-2 h-4 w-4" />
+                  <PlusIcon className="mr-2 h-4 w-4" />
                   Import Environments
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={handleExportEnvironments}>
-                  <Download className="mr-2 h-4 w-4" />
+                  <PlusIcon className="mr-2 h-4 w-4" />
                   Export Environments
                 </DropdownMenuItem>
               </DropdownMenuContent>
@@ -436,12 +429,12 @@ const Header = ({
           <div className="mt-6 space-y-6">
             <div className="flex justify-between">
               <Button variant="outline" onClick={importNavigation}>
-                <Upload className="mr-2 h-4 w-4" />
-                Import
+                <DynamicIcon iconName="Upload" />
+                <span className="ml-2">Import</span>
               </Button>
               <Button variant="outline" onClick={exportNavigation}>
-                <Download className="mr-2 h-4 w-4" />
-                Export
+                <DynamicIcon iconName="Download" />
+                <span className="ml-2">Export</span>
               </Button>
             </div>
             
@@ -461,11 +454,12 @@ const Header = ({
                           onClick={() => handleDeleteNavItem(item.id)}
                           className="h-7 text-red-500 hover:text-red-700"
                         >
-                          <X className="h-4 w-4" />
+                          <DynamicIcon iconName="X" />
                         </Button>
                       </div>
                       <div className="text-sm text-muted-foreground">Path: {item.path}</div>
                       <div className="text-sm text-muted-foreground">Icon: {item.icon}</div>
+                      <div className="text-sm text-muted-foreground">ID: {item.id}</div>
                       
                       {item.children && item.children.length > 0 && (
                         <div className="pl-4 border-l mt-2 space-y-2">
@@ -480,10 +474,11 @@ const Header = ({
                                   onClick={() => handleDeleteNavItem(child.id)}
                                   className="h-6 text-red-500 hover:text-red-700"
                                 >
-                                  <X className="h-3 w-3" />
+                                  <DynamicIcon iconName="X" />
                                 </Button>
                               </div>
                               <div className="text-xs text-muted-foreground">Path: {child.path}</div>
+                              <div className="text-xs text-muted-foreground">ID: {child.id}</div>
                             </div>
                           ))}
                         </div>
