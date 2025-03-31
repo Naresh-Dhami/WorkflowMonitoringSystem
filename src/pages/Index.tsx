@@ -1,6 +1,5 @@
 
 import { useState, useEffect } from "react";
-import Header from "@/components/Header";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -78,12 +77,6 @@ const Index = () => {
 
   return (
     <>
-      <Header 
-        onNewProcess={handleNewProcess}
-        onImportConfig={handleImportConfig}
-        onExportConfig={handleExportConfig}
-      />
-
       <main className="pt-24 pb-16 px-4 sm:px-6 md:px-8 max-w-6xl mx-auto">
         <div className="mb-8">
           <Tabs defaultValue="processes" className="w-full">
