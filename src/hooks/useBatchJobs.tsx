@@ -5,7 +5,7 @@ import { useTestRuns } from "./useTestRuns";
 import { useActiveJobs } from "./useActiveJobs";
 import { useJobRunner } from "./useJobRunner";
 import { useBatchRunner } from "./useBatchRunner";
-import { defaultProcesses } from "@/utils/api";
+import { defaultProcesses } from "@/utils/api/defaultConfigs";
 import { BatchJob, ProcessConfig } from "@/types";
 
 export function useBatchJobs() {

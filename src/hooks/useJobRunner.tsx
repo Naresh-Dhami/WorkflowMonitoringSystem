@@ -2,7 +2,7 @@
 import { useCallback } from "react";
 import { toast } from "sonner";
 import { BatchJob, TestRun, ProcessConfig } from "@/types";
-import { triggerProcess } from "@/utils/api";
+import { triggerProcess } from "@/utils/api/processes";
 import { useEnvironment } from "@/contexts/EnvironmentContext";
 
 export function useJobRunner(
