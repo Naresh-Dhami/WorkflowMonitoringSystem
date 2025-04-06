@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useEnvironment } from "@/contexts/EnvironmentContext";
@@ -38,38 +37,26 @@ const GridGainViewer = () => {
     const fetchGridGainData = async () => {
       setIsLoading(true);
       try {
-        // For production, use the actual API endpoint
+        // Use the actual API endpoint
         const apiUrl = "http://localhost:8095/api/gridgain/dcserverdetails";
         const payload = {
           CallId: "temp",
-          Env: "temp2"
+          Env: currentEnvironment.name || "temp2"
         };
         
-        // In a real environment, you would use this:
-        // const response = await fetch(apiUrl, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   body: JSON.stringify(payload),
-        // });
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
         
-        // If the API is not available in development, use sample data
-        // const data = await response.json() as GridGainApiResponse;
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
         
-        // Simulate API response with sample data
-        const data: GridGainApiResponse = {
-          CallId: "temp",
-          Result: "success",
-          ErrorDescription: "done",
-          ServerDetails: [
-            {
-              HostId: "wdpra96a0417",
-              DcName: "DC1",
-              DcUri: "wdpra96a0417"
-            }
-          ]
-        };
+        const data = await response.json() as GridGainApiResponse;
         
         // Convert API response to GridGainMessage format
         const messages: GridGainMessage[] = data.ServerDetails.map((detail, index) => ({
@@ -83,8 +70,14 @@ const GridGainViewer = () => {
           data: detail
         }));
         
-        setGridGainMessages(messages.length > 0 ? messages : sampleGridGainData);
-        toast.success(`Loaded ${messages.length} server details`);
+        if (messages.length > 0) {
+          setGridGainMessages(messages);
+          toast.success(`Loaded ${messages.length} server details from API`);
+        } else {
+          // Fallback to sample data if no messages in API response
+          setGridGainMessages(sampleGridGainData);
+          toast.info("No server details found in API response, using sample data");
+        }
       } catch (error) {
         console.error("Error fetching GridGain data:", error);
         toast.error("Failed to fetch server details. Using sample data.");
@@ -94,7 +87,38 @@ const GridGainViewer = () => {
       }
     };
     
+    // Also fetch DC records keys
+    const fetchDcRecordsKeys = async () => {
+      try {
+        const apiUrl = "http://localhost:8095/api/gridgain/dcrecordskeys";
+        const payload = {
+          CallId: "temp",
+          Env: currentEnvironment.name || "temp2"
+        };
+        
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+        
+        if (!response.ok) {
+          throw new Error(`DC records API request failed with status ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log("DC Records Keys:", data);
+        // We're just logging this data for now, could be used in the future
+        
+      } catch (error) {
+        console.error("Error fetching DC records keys:", error);
+      }
+    };
+    
     fetchGridGainData();
+    fetchDcRecordsKeys();
   }, [currentEnvironment.name]);
 
   // Filter messages based on search term and selected types
@@ -178,7 +202,7 @@ const GridGainViewer = () => {
                 </div>
               </div>
               <CardDescription>
-                {filteredMessages.length} message(s) found {isLoading && "• Loading..."}
+                {isLoading ? "Loading data from API..." : `${filteredMessages.length} message(s) found`}
               </CardDescription>
             </CardHeader>
             <CardContent>

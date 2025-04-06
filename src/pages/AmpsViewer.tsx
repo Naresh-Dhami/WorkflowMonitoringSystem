@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { useEnvironment } from "@/contexts/EnvironmentContext";
@@ -8,9 +7,17 @@ import MessagesTable from "@/components/amps/MessagesTable";
 import MessageDetailsDrawer from "@/components/amps/MessageDetailsDrawer";
 import { AmpsMessage, sampleAmpsData, messageTypes } from "@/components/amps/ampsData";
 
-interface AmpsEntry {
-  serverName: string;
-  url: string;
+interface ServerDetail {
+  HostId: string;
+  DcName: string;
+  DcUri: string;
+}
+
+interface GridGainApiResponse {
+  CallId: string;
+  Result: string;
+  ErrorDescription: string;
+  ServerDetails: ServerDetail[];
 }
 
 const AmpsViewer = () => {
@@ -30,52 +37,67 @@ const AmpsViewer = () => {
     const fetchAmpsData = async () => {
       setIsLoading(true);
       try {
-        // In a real environment, you would fetch from the actual API
-        // const response = await fetch('your-amps-api-endpoint');
-        // const data = await response.json();
+        // Use the actual API endpoint to fetch server details
+        const apiUrl = "http://localhost:8095/api/gridgain/dcserverdetails";
+        const payload = {
+          CallId: "temp",
+          Env: currentEnvironment.name || "temp2"
+        };
         
-        // For demonstration, using data similar to the screenshot
-        const rrAmpsList = [
-          { serverName: "RR CO AMPS - PROD_XAE_CO_RR", url: "WPPRA89A0460.wellsfargo.com:8017,8071,8079" },
-          { serverName: "RR Relayer - PROD_XAE_RELAY", url: "WPPRA88A0460.wellsfargo.com:8017,8071,8079" }
-        ];
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
         
-        const dcAmpsList = [
-          { serverName: "DC1 - PROD_XAE_DC6", url: "WPPRA99A0396.wellsfargo.com:9023" },
-          { serverName: "DC10 - PROD_XAE_DC10", url: "WPVRA85A0011.wellsfargo.com:9023" },
-          { serverName: "DC11 - PROD_XAE_DC11", url: "WPVRA85A0012.wellsfargo.com:9023" },
-          { serverName: "DC12 - PROD_XAE_DC12", url: "WPVRA85A0013.wellsfargo.com:9023" },
-          { serverName: "DC13 - PROD_XAE_DC13", url: "WPVRA85A0014.wellsfargo.com:9023" },
-          { serverName: "DC14 - PROD_XAE_DC14", url: "wpvra85a0015.wellsfargo.com:9023" },
-          { serverName: "DC15 - PROD_XAE_DC15", url: "wppra90a0460.wellsfargo.com:9023" }
-        ];
+        if (!response.ok) {
+          throw new Error(`API request failed with status ${response.status}`);
+        }
         
-        // Convert to AmpsMessage format
-        const rrMessages: AmpsMessage[] = rrAmpsList.map((entry, index) => ({
-          id: `rr-${index}`,
-          workflowId: `RR-${index + 1}`,
-          type: "RR AMPS",
-          status: "Completed",
-          timestamp: new Date().toISOString(),
-          details: `${entry.serverName} (${entry.url})`,
-          environment: "Production",
-          data: { serverName: entry.serverName, url: entry.url }
-        }));
+        const data = await response.json() as GridGainApiResponse;
         
-        const dcMessages: AmpsMessage[] = dcAmpsList.map((entry, index) => ({
-          id: `dc-${index}`,
-          workflowId: entry.serverName.split(' - ')[0],
+        // Convert API response to AmpsMessage format
+        const serverMessages: AmpsMessage[] = data.ServerDetails.map((detail, index) => ({
+          id: `api-server-${index}`,
+          workflowId: detail.HostId,
           type: "DC AMPS",
-          status: "Completed",
+          status: data.Result === "success" ? "Completed" : "Failed",
           timestamp: new Date().toISOString(),
-          details: `${entry.serverName} (${entry.url})`,
-          environment: "Production",
-          data: { serverName: entry.serverName, url: entry.url }
+          details: `DC: ${detail.DcName}, Host URI: ${detail.DcUri}`,
+          environment: currentEnvironment.name,
+          data: { serverName: detail.DcName, url: detail.DcUri }
         }));
         
-        const combinedMessages = [...rrMessages, ...dcMessages];
-        setAmpsMessages(combinedMessages.length > 0 ? combinedMessages : sampleAmpsData);
-        toast.success(`Loaded ${combinedMessages.length} AMPS entries`);
+        // For demonstration purposes, also fetch DC records keys
+        try {
+          const dcRecordsUrl = "http://localhost:8095/api/gridgain/dcrecordskeys";
+          const dcRecordsResponse = await fetch(dcRecordsUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(payload),
+          });
+          
+          if (dcRecordsResponse.ok) {
+            const dcData = await dcRecordsResponse.json();
+            console.log("DC Records Keys:", dcData);
+            // Could potentially use this data in the future
+          }
+        } catch (dcError) {
+          console.error("Error fetching DC records keys:", dcError);
+        }
+        
+        if (serverMessages.length > 0) {
+          setAmpsMessages(serverMessages);
+          toast.success(`Loaded ${serverMessages.length} AMPS entries from API`);
+        } else {
+          // Fallback to sample data if no server details in API response
+          setAmpsMessages(sampleAmpsData);
+          toast.info("No AMPS entries found in API response, using sample data");
+        }
       } catch (error) {
         console.error("Error fetching AMPS data:", error);
         toast.error("Failed to fetch AMPS data. Using sample data.");
@@ -169,7 +191,7 @@ const AmpsViewer = () => {
                 </div>
               </div>
               <CardDescription>
-                {filteredMessages.length} message(s) found {isLoading && "• Loading..."}
+                {isLoading ? "Loading data from API..." : `${filteredMessages.length} message(s) found`}
               </CardDescription>
             </CardHeader>
             <CardContent>
