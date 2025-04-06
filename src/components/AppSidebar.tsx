@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/sidebar";
 import * as LucideIcons from "lucide-react";
 import { ExternalLink, Grid, Home, Settings, X, Zap } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import EnvironmentSelector from "./EnvironmentSelector";
@@ -37,7 +37,6 @@ export function AppSidebar() {
   const location = useLocation();
   const { open, toggleSidebar, setOpenMobile, openMobile } = useSidebar();
   const [customNavItems, setCustomNavItems] = useState<NavigationItem[]>([]);
-  const sidebarRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     // Load custom navigation items from localStorage
@@ -54,25 +53,6 @@ export function AppSidebar() {
       console.error("Error loading navigation items:", e);
     }
   }, []);
-  
-  useEffect(() => {
-    // Handle click outside of sidebar to close it
-    const handleClickOutside = (event: MouseEvent) => {
-      if (sidebarRef.current && !sidebarRef.current.contains(event.target as Node)) {
-        if (openMobile) {
-          setOpenMobile(false);
-        }
-      }
-    };
-
-    // Add event listener
-    document.addEventListener('mousedown', handleClickOutside);
-    
-    // Clean up
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [openMobile, setOpenMobile]);
   
   // Also close sidebar when route changes
   useEffect(() => {
@@ -96,7 +76,7 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar ref={sidebarRef} className="border-r border-[#FEF7CD]/20 z-[60] bg-[#ea384c]">
+    <Sidebar className="border-r border-[#FEF7CD]/20 z-[60] bg-[#ea384c]">
       <SidebarHeader className="border-b border-[#FEF7CD]/20 py-4 flex items-center justify-between px-4">
         <div className="flex items-center justify-center">
           <span className="text-lg font-semibold text-white">XVA Dashboard</span>
