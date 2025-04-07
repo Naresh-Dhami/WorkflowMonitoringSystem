@@ -1,4 +1,3 @@
-
 import {
   Sidebar,
   SidebarContent,
@@ -86,6 +85,7 @@ export function AppSidebar() {
           size="icon" 
           onClick={() => setOpenMobile(false)}
           className="text-white md:hidden"
+          aria-label="Close menu"
         >
           <X className="h-5 w-5" />
           <span className="sr-only">Close menu</span>

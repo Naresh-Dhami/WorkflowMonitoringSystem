@@ -167,6 +167,7 @@ export const MobileNav = () => {
         size="icon" 
         onClick={toggleSidebar}
         className="text-white"
+        aria-label="Toggle menu"
       >
         <Menu className="h-5 w-5" />
         <span className="sr-only">Toggle menu</span>

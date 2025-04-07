@@ -326,6 +326,7 @@ const Header = () => {
               size="icon"
               onClick={handleToggleSidebar}
               className="text-white hover:bg-white/10 z-[70]"
+              aria-label="Toggle sidebar"
             >
               <Menu className="h-5 w-5" />
             </Button>
