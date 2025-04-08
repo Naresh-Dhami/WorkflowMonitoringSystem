@@ -7,6 +7,8 @@ export interface Environment {
   name: string;
   baseUrl: string;
   description: string;
+  gridGainUrl?: string;
+  ampsUrl?: string;
   children?: Environment[];
 }
 

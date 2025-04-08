@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import { EnvironmentProvider } from "./contexts/EnvironmentContext";
 import AmpsViewer from "./pages/AmpsViewer";
 import GridGainViewer from "./pages/GridGainViewer";
+import TopicDetailsPage from "./pages/TopicDetailsPage";
 import AppSidebar from "./components/AppSidebar";
 import { SidebarProvider } from "./components/ui/sidebar";
 import Header from "./components/Header";
@@ -88,7 +89,9 @@ const App = () => {
                   <Routes>
                     <Route path="/" element={<Index />} />
                     <Route path="/amps-viewer" element={<AmpsViewer />} />
+                    <Route path="/amps-viewer/topic/:id" element={<TopicDetailsPage />} />
                     <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
+                    <Route path="/grid-gain-viewer/topic/:id" element={<TopicDetailsPage />} />
                     
                     {/* Dynamic routes based on user-added navigation */}
                     {navigationRoutes.map((route, index) => (
@@ -106,7 +109,7 @@ const App = () => {
               </div>
             </SidebarProvider>
             <Toaster />
-            <Sonner />
+            <Sonner position="top-right" />
           </TooltipProvider>
         </BrowserRouter>
       </EnvironmentProvider>

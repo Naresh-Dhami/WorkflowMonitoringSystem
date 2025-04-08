@@ -13,6 +13,8 @@ const EnvironmentMenuItem = ({ env, onSelect }: { env: Environment, onSelect: (e
           <div className="flex flex-col">
             <span>{env.name}</span>
             <span className="text-xs text-muted-foreground">{env.baseUrl}</span>
+            {env.gridGainUrl && <span className="text-xs text-muted-foreground">GridGain: {env.gridGainUrl}</span>}
+            {env.ampsUrl && <span className="text-xs text-muted-foreground">AMPS: {env.ampsUrl}</span>}
           </div>
         </DropdownMenuSubTrigger>
         <DropdownMenuSubContent className="bg-white z-[150]">
@@ -23,6 +25,8 @@ const EnvironmentMenuItem = ({ env, onSelect }: { env: Environment, onSelect: (e
             <div className="flex flex-col">
               <span>{env.name} (Root)</span>
               <span className="text-xs text-muted-foreground">{env.baseUrl}</span>
+              {env.gridGainUrl && <span className="text-xs text-muted-foreground">GridGain: {env.gridGainUrl}</span>}
+              {env.ampsUrl && <span className="text-xs text-muted-foreground">AMPS: {env.ampsUrl}</span>}
             </div>
           </DropdownMenuItem>
           <DropdownMenuSeparator />
@@ -42,6 +46,8 @@ const EnvironmentMenuItem = ({ env, onSelect }: { env: Environment, onSelect: (e
       <div className="flex flex-col">
         <span>{env.name}</span>
         <span className="text-xs text-muted-foreground">{env.baseUrl}</span>
+        {env.gridGainUrl && <span className="text-xs text-muted-foreground">GridGain: {env.gridGainUrl}</span>}
+        {env.ampsUrl && <span className="text-xs text-muted-foreground">AMPS: {env.ampsUrl}</span>}
       </div>
     </DropdownMenuItem>
   );
@@ -63,7 +69,7 @@ const EnvironmentSelector = () => {
           {currentEnvironment.name}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 z-[150] bg-white">
+      <DropdownMenuContent align="end" className="w-64 z-[150] bg-white">
         <DropdownMenuLabel className="!text-black">Environments</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {environments.map((env) => (

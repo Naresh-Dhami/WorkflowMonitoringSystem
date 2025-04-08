@@ -60,3 +60,13 @@ export interface DCAmpsServer {
   status: string;
   environment?: string;
 }
+
+export interface TopicDetail {
+  id: string;
+  topic: string;
+  partition: number;
+  offset: number;
+  timestamp: string;
+  status: string;
+  message?: string;
+}

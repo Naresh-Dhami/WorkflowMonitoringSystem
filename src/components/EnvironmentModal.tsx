@@ -20,6 +20,8 @@ interface EnvironmentModalProps {
     name: string;
     baseUrl: string;
     description: string;
+    gridGainUrl?: string;
+    ampsUrl?: string;
   }) => void;
 }
 
@@ -31,6 +33,8 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
   const [name, setName] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
   const [description, setDescription] = useState("");
+  const [gridGainUrl, setGridGainUrl] = useState("");
+  const [ampsUrl, setAmpsUrl] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,12 +53,16 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
       name,
       baseUrl,
       description,
+      gridGainUrl,
+      ampsUrl,
     });
 
     // Reset form
     setName("");
     setBaseUrl("");
     setDescription("");
+    setGridGainUrl("");
+    setAmpsUrl("");
   };
 
   const handleClose = () => {
@@ -62,6 +70,8 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
     setName("");
     setBaseUrl("");
     setDescription("");
+    setGridGainUrl("");
+    setAmpsUrl("");
     onClose();
   };
 
@@ -99,6 +109,30 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
                 onChange={(e) => setBaseUrl(e.target.value)}
                 className="col-span-3"
                 placeholder="https://api.example.com"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="gridgain-url" className="text-right">
+                GridGain URL
+              </Label>
+              <Input
+                id="gridgain-url"
+                value={gridGainUrl}
+                onChange={(e) => setGridGainUrl(e.target.value)}
+                className="col-span-3"
+                placeholder="http://localhost:8095/api/gridgain"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="amps-url" className="text-right">
+                AMPS URL
+              </Label>
+              <Input
+                id="amps-url"
+                value={ampsUrl}
+                onChange={(e) => setAmpsUrl(e.target.value)}
+                className="col-span-3"
+                placeholder="http://localhost:8095/api/amps"
               />
             </div>
             <div className="grid grid-cols-4 items-center gap-4">

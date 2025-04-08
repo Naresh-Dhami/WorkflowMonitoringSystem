@@ -59,7 +59,13 @@ const HeaderSettingsMenu = ({
   };
 
   // Handle adding a new environment
-  const handleSaveEnvironment = (envData: { name: string; baseUrl: string; description: string }) => {
+  const handleSaveEnvironment = (envData: { 
+    name: string; 
+    baseUrl: string; 
+    description: string; 
+    gridGainUrl?: string;
+    ampsUrl?: string;
+  }) => {
     const newEnvironment = {
       id: uuidv4(),
       ...envData
@@ -82,7 +88,7 @@ const HeaderSettingsMenu = ({
             <Settings className="h-4 w-4" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56 bg-background z-[100]">
+        <DropdownMenuContent align="end" className="w-56 bg-white z-[200]">
           {/* Add Process Button */}
           <DropdownMenuItem onClick={onNewProcess}>
             <PlusIcon className="mr-2 h-4 w-4" />
@@ -121,11 +127,13 @@ const HeaderSettingsMenu = ({
       </DropdownMenu>
 
       {/* Environment Modal */}
-      <EnvironmentModal 
-        isOpen={showEnvModal}
-        onClose={() => setShowEnvModal(false)}
-        onSave={handleSaveEnvironment}
-      />
+      {showEnvModal && (
+        <EnvironmentModal 
+          isOpen={showEnvModal}
+          onClose={() => setShowEnvModal(false)}
+          onSave={handleSaveEnvironment}
+        />
+      )}
     </>
   );
 };
