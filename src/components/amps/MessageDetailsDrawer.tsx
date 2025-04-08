@@ -31,13 +31,16 @@ const MessageDetailsDrawer = ({
   const hasTopic = message && 'topicDetail' in message && message.topicDetail;
   const topicDetail = hasTopic ? message.topicDetail as unknown as TopicDetail : null;
 
+  // Check if this is a server details message from GridGain API
+  const isServerDetails = message.type === "DC AMPS" && message.data && 'serverName' in message.data;
+  
   return (
     <Drawer open={open} onOpenChange={onOpenChange}>
       <DrawerContent>
         <div className="mx-auto w-full max-w-lg">
           <DrawerHeader className="text-left">
             <DrawerTitle className="flex items-center justify-between">
-              {topicDetail ? "Topic Detail" : "Message Details"}
+              {isServerDetails ? "DC AMPS Details" : topicDetail ? "Topic Detail" : "Message Details"}
               <DrawerClose asChild>
                 <Button variant="ghost" size="icon">
                   <X className="h-4 w-4" />
@@ -45,16 +48,56 @@ const MessageDetailsDrawer = ({
               </DrawerClose>
             </DrawerTitle>
             <DrawerDescription>
-              {topicDetail 
-                ? `Topic ${topicDetail.topic}` 
-                : message 
-                  ? `Workflow ${message.workflowId}`
-                  : ''}
+              {isServerDetails 
+                ? `DC ${message.data.serverName}`
+                : topicDetail 
+                  ? `Topic ${topicDetail.topic}` 
+                  : message 
+                    ? `Workflow ${message.workflowId}`
+                    : ''}
             </DrawerDescription>
           </DrawerHeader>
           <div className="p-4 pb-8">
             <div className="space-y-4">
-              {topicDetail ? (
+              {isServerDetails ? (
+                // DC AMPS Server Details View
+                <>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <h3 className="text-sm font-medium">DC Name</h3>
+                      <p className="text-sm">{message.data.serverName}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium">Host ID</h3>
+                      <p className="text-sm">{message.workflowId}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium">URI</h3>
+                      <p className="text-sm">{message.data.url}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium">Status</h3>
+                      <p className="text-sm">{message.status}</p>
+                    </div>
+                    <div>
+                      <h3 className="text-sm font-medium">Environment</h3>
+                      <p className="text-sm">{message.environment || environmentName}</p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="text-sm font-medium mb-2">Connection Details</h3>
+                    <pre className="text-xs bg-muted p-4 rounded-md overflow-auto max-h-80 whitespace-pre-wrap">
+                      {`DC: ${message.data.serverName}
+Host: ${message.workflowId}
+URI: ${message.data.url}
+Connection Status: ${message.status}
+Environment: ${message.environment || environmentName}
+Last Updated: ${new Date(message.timestamp).toLocaleString()}`}
+                    </pre>
+                  </div>
+                </>
+              ) : topicDetail ? (
                 // Topic Details View
                 <>
                   <div className="grid grid-cols-2 gap-4">
