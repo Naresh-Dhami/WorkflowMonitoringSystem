@@ -7,13 +7,20 @@ export interface AmpsMessage {
   status: string;
   type: string;
   environment?: string;
+  data?: {
+    serverName?: string;
+    url?: string;
+    [key: string]: any;  // Allow for additional properties
+  };
+  topicDetail?: any;
 }
 
 // Available message types for filtering
 export const messageTypes = [
   "init",
   "process",
-  "validate"
+  "validate",
+  "DC AMPS"
 ];
 
 // Sample data for demonstration
@@ -44,6 +51,20 @@ export const sampleAmpsData: AmpsMessage[] = [
     status: "failed",
     type: "validate",
     environment: "QA"
+  },
+  // Add DC AMPS sample
+  {
+    id: "dc-1",
+    workflowId: "WPPRAP9A0396",
+    timestamp: new Date().toISOString(),
+    details: "DC AMPS Server Information",
+    status: "Active",
+    type: "DC AMPS",
+    environment: "PROD",
+    data: {
+      serverName: "PROD_XAE_DC6",
+      url: "WPPRAP9A0396.wellsfargo.com:9023"
+    }
   },
   // Add more sample data for pagination testing
   ...[...Array(15)].map((_, i) => ({

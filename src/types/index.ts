@@ -52,3 +52,11 @@ export interface TestRun {
   }[];
   environment?: string;
 }
+
+export interface DCAmpsServer {
+  serverName: string;
+  hostId: string;
+  url: string;
+  status: string;
+  environment?: string;
+}

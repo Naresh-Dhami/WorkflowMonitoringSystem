@@ -48,7 +48,7 @@ const MessageDetailsDrawer = ({
               </DrawerClose>
             </DrawerTitle>
             <DrawerDescription>
-              {isServerDetails 
+              {isServerDetails && message.data 
                 ? `DC ${message.data.serverName}`
                 : topicDetail 
                   ? `Topic ${topicDetail.topic}` 
@@ -59,7 +59,7 @@ const MessageDetailsDrawer = ({
           </DrawerHeader>
           <div className="p-4 pb-8">
             <div className="space-y-4">
-              {isServerDetails ? (
+              {isServerDetails && message.data ? (
                 // DC AMPS Server Details View
                 <>
                   <div className="grid grid-cols-2 gap-4">
