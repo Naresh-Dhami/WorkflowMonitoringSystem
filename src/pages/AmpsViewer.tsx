@@ -5,7 +5,6 @@ import MessageDetailsDrawer from "@/components/amps/MessageDetailsDrawer";
 import AmpsHeader from "@/components/amps/AmpsHeader";
 import AmpsContent from "@/components/amps/AmpsContent";
 import { useAmpsData } from "@/hooks/useAmpsData";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
 const AmpsViewer = () => {
   const { currentEnvironment } = useEnvironment();

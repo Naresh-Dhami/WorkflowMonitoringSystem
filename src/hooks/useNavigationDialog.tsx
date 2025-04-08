@@ -26,10 +26,35 @@ export function useNavigationDialog() {
         mainContent.style.pointerEvents = 'auto';
       }
       
+      // Restore body scroll and pointer events
+      document.body.style.overflow = '';
+      document.body.style.pointerEvents = 'auto';
+      
+      // Remove any aria-hidden attributes from other elements
+      document.querySelectorAll('[aria-hidden="true"]').forEach(el => {
+        if (el.id !== 'radix-:r0:' && !el.closest('[role="dialog"]')) {
+          el.removeAttribute('aria-hidden');
+        }
+      });
+      
       // Refresh navigation items
       refreshNavigation();
     }, 50);
   }, [refreshNavigation]);
+  
+  // Effect to add event listener for dialog close events
+  useEffect(() => {
+    const handleDialogCloseEvent = () => {
+      handleDialogClose();
+    };
+    
+    // Listen for custom dialog close events
+    window.addEventListener('dialogClosed', handleDialogCloseEvent);
+    
+    return () => {
+      window.removeEventListener('dialogClosed', handleDialogCloseEvent);
+    };
+  }, [handleDialogClose]);
   
   return {
     refreshNavigation,

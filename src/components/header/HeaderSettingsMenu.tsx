@@ -7,6 +7,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import EnvironmentModal from "../EnvironmentModal";
+import { useNavigationDialog } from "@/hooks/useNavigationDialog";
 
 interface HeaderSettingsMenuProps {
   onNewProcess: () => void;
@@ -25,6 +26,7 @@ const HeaderSettingsMenu = ({
 }: HeaderSettingsMenuProps) => {
   const { importEnvironments, exportEnvironments, addEnvironment } = useEnvironment();
   const [showEnvModal, setShowEnvModal] = useState(false);
+  const { handleDialogClose } = useNavigationDialog();
 
   const handleImportEnvironments = () => {
     const input = document.createElement('input');
@@ -74,6 +76,17 @@ const HeaderSettingsMenu = ({
     addEnvironment(newEnvironment);
     setShowEnvModal(false);
     toast.success(`Environment "${envData.name}" added successfully`);
+    
+    // Fix any stuck modal issues
+    handleDialogClose();
+  };
+
+  const handleNavItemClick = (handler: () => void) => {
+    handler();
+    // Fix any focus trap issues after dialog closes
+    setTimeout(() => {
+      handleDialogClose();
+    }, 100);
   };
 
   return (
@@ -90,7 +103,7 @@ const HeaderSettingsMenu = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 bg-white z-[200]">
           {/* Add Process Button */}
-          <DropdownMenuItem onClick={onNewProcess}>
+          <DropdownMenuItem onClick={() => handleNavItemClick(onNewProcess)}>
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Process
           </DropdownMenuItem>
@@ -99,19 +112,19 @@ const HeaderSettingsMenu = ({
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Environment
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onAddNavItem}>
+          <DropdownMenuItem onClick={() => handleNavItemClick(onAddNavItem)}>
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Navigation Item
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onManageNavItems}>
+          <DropdownMenuItem onClick={() => handleNavItemClick(onManageNavItems)}>
             <Settings className="mr-2 h-4 w-4" />
             Manage Navigation Items
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onImportNavigation}>
+          <DropdownMenuItem onClick={() => handleNavItemClick(onImportNavigation)}>
             <PlusIcon className="mr-2 h-4 w-4" />
             Import Navigation
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onExportNavigation}>
+          <DropdownMenuItem onClick={() => handleNavItemClick(onExportNavigation)}>
             <PlusIcon className="mr-2 h-4 w-4" />
             Export Navigation
           </DropdownMenuItem>

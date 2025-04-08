@@ -1,10 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { GridGainMessage, sampleGridGainData } from "@/components/gridgain/GridGainData";
 import { GridGainApiResponse, ServerDetail } from "@/types/gridgain";
+import { useEnvironment } from "@/contexts/EnvironmentContext";
 
 export function useGridGainData(environmentName: string) {
+  const { currentEnvironment } = useEnvironment();
   const [gridGainMessages, setGridGainMessages] = useState<GridGainMessage[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMessage, setSelectedMessage] = useState<GridGainMessage | null>(null);
@@ -20,8 +21,11 @@ export function useGridGainData(environmentName: string) {
     const fetchGridGainData = async () => {
       setIsLoading(true);
       try {
-        // Use the actual API endpoint
-        const apiUrl = "http://localhost:8095/api/gridgain/dcserverdetails";
+        // Use the environment's gridGainUrl if available
+        const apiUrl = currentEnvironment.gridGainUrl 
+          ? `${currentEnvironment.gridGainUrl}/dcserverdetails` 
+          : "http://localhost:8095/api/gridgain/dcserverdetails";
+          
         const payload = {
           CallId: "temp",
           Env: environmentName || "temp2"
@@ -73,7 +77,10 @@ export function useGridGainData(environmentName: string) {
     // Also fetch DC records keys
     const fetchDcRecordsKeys = async () => {
       try {
-        const apiUrl = "http://localhost:8095/api/gridgain/dcrecordskeys";
+        const apiUrl = currentEnvironment.gridGainUrl
+          ? `${currentEnvironment.gridGainUrl}/dcrecordskeys`
+          : "http://localhost:8095/api/gridgain/dcrecordskeys";
+          
         const payload = {
           CallId: "temp",
           Env: environmentName || "temp2"
@@ -102,7 +109,7 @@ export function useGridGainData(environmentName: string) {
     
     fetchGridGainData();
     fetchDcRecordsKeys();
-  }, [environmentName]);
+  }, [environmentName, currentEnvironment]);
 
   // Filter messages based on search term and selected types
   const filteredMessages = gridGainMessages.filter(message => {

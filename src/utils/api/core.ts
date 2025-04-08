@@ -4,7 +4,8 @@ import { ApiConfig } from "@/types";
 
 // Mock function to simulate API calls
 export const executeApiCall = async (config: ApiConfig, baseUrl: string, workflowId?: string): Promise<any> => {
-  const fullEndpoint = `${baseUrl}${config.endpoint}`;
+  // Ensure we use the environment's baseUrl properly
+  const fullEndpoint = baseUrl && config.endpoint ? `${baseUrl}${config.endpoint}` : config.endpoint;
   console.log(`Executing API call to ${fullEndpoint}`, { workflowId });
   
   // In a real implementation, this would use fetch or axios with the workflowId
@@ -32,7 +33,8 @@ export const executeApiCall = async (config: ApiConfig, baseUrl: string, workflo
 
 // Check process completion status
 export const checkProcessStatus = async (endpoint: string, baseUrl: string, workflowId: string): Promise<Status> => {
-  const fullEndpoint = `${baseUrl}${endpoint}`;
+  // Ensure we use the environment's baseUrl properly
+  const fullEndpoint = baseUrl && endpoint ? `${baseUrl}${endpoint}` : endpoint;
   console.log(`Checking process status for ${workflowId} at ${fullEndpoint}`);
   
   // In a real implementation, this would use fetch or axios to call the endpoint with the workflowId

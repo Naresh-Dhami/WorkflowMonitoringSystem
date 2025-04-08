@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useNavigationDialog } from "@/hooks/useNavigationDialog";
 
 interface EnvironmentModalProps {
   isOpen: boolean;
@@ -35,6 +36,7 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
   const [description, setDescription] = useState("");
   const [gridGainUrl, setGridGainUrl] = useState("");
   const [ampsUrl, setAmpsUrl] = useState("");
+  const { handleDialogClose } = useNavigationDialog();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,6 +65,9 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
     setDescription("");
     setGridGainUrl("");
     setAmpsUrl("");
+    
+    // Fix any stuck modal issues
+    handleDialogClose();
   };
 
   const handleClose = () => {
@@ -73,7 +78,19 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
     setGridGainUrl("");
     setAmpsUrl("");
     onClose();
+    
+    // Fix any stuck modal issues
+    handleDialogClose();
   };
+
+  // Handle dialog close when the component unmounts
+  useEffect(() => {
+    return () => {
+      // Dispatch a custom dialog closed event
+      const event = new CustomEvent('dialogClosed');
+      window.dispatchEvent(event);
+    };
+  }, []);
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>

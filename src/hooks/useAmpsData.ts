@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { AmpsMessage, sampleAmpsData } from "@/components/amps/ampsData";
+import { useEnvironment } from "@/contexts/EnvironmentContext";
 
 interface ServerDetail {
   HostId: string;
@@ -17,6 +17,7 @@ interface GridGainApiResponse {
 }
 
 export function useAmpsData(environmentName: string) {
+  const { currentEnvironment } = useEnvironment();
   const [ampsMessages, setAmpsMessages] = useState<AmpsMessage[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedMessage, setSelectedMessage] = useState<AmpsMessage | null>(null);
@@ -32,8 +33,8 @@ export function useAmpsData(environmentName: string) {
     const fetchAmpsData = async () => {
       setIsLoading(true);
       try {
-        // Use the actual API endpoint to fetch server details
-        const apiUrl = "http://localhost:8095/api/gridgain/dcserverdetails";
+        // Use the environment's ampsUrl if available
+        const apiUrl = currentEnvironment.ampsUrl || "http://localhost:8095/api/amps";
         const payload = {
           CallId: "temp",
           Env: environmentName || "temp2"
@@ -67,7 +68,10 @@ export function useAmpsData(environmentName: string) {
         
         // For demonstration purposes, also fetch DC records keys
         try {
-          const dcRecordsUrl = "http://localhost:8095/api/gridgain/dcrecordskeys";
+          const dcRecordsUrl = currentEnvironment.ampsUrl 
+            ? `${currentEnvironment.ampsUrl}/dcrecordskeys` 
+            : "http://localhost:8095/api/amps/dcrecordskeys";
+            
           const dcRecordsResponse = await fetch(dcRecordsUrl, {
             method: 'POST',
             headers: {
@@ -103,7 +107,7 @@ export function useAmpsData(environmentName: string) {
     };
     
     fetchAmpsData();
-  }, [environmentName]);
+  }, [environmentName, currentEnvironment]);
 
   // Filter messages based on search term and selected types
   const filteredMessages = ampsMessages.filter(message => {
