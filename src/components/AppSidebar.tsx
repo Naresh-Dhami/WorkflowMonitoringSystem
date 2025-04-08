@@ -1,3 +1,4 @@
+
 import {
   Sidebar,
   SidebarContent,
@@ -37,8 +38,8 @@ export function AppSidebar() {
   const { open, toggleSidebar, setOpenMobile, openMobile } = useSidebar();
   const [customNavItems, setCustomNavItems] = useState<NavigationItem[]>([]);
   
-  useEffect(() => {
-    // Load custom navigation items from localStorage
+  // Load custom navigation items from localStorage
+  const loadNavigationItems = () => {
     try {
       const saved = localStorage.getItem('batchConnector.navigation');
       if (saved) {
@@ -51,6 +52,23 @@ export function AppSidebar() {
     } catch (e) {
       console.error("Error loading navigation items:", e);
     }
+  };
+  
+  useEffect(() => {
+    loadNavigationItems();
+    
+    // Add event listener to reload navigation items when localStorage changes
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === 'batchConnector.navigation') {
+        loadNavigationItems();
+      }
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
   
   // Also close sidebar when route changes
@@ -73,6 +91,19 @@ export function AppSidebar() {
       setOpenMobile(false);
     }
   };
+
+  // Custom event to refresh navigation after dialog closes
+  useEffect(() => {
+    const handleRefreshNav = () => {
+      loadNavigationItems();
+    };
+    
+    window.addEventListener('refreshNavigation', handleRefreshNav);
+    
+    return () => {
+      window.removeEventListener('refreshNavigation', handleRefreshNav);
+    };
+  }, []);
 
   return (
     <Sidebar className="border-r border-[#FEF7CD]/20 z-[60] bg-[#ea384c]">
