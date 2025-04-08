@@ -70,3 +70,16 @@ export interface TopicDetail {
   status: string;
   message?: string;
 }
+
+export interface MessageDetail {
+  id: string;
+  typeId: number;
+  typeName: string;
+  typePfx: string;
+  typeRunDate: string;
+  startIndex: number;
+  dataSetType: string;
+  topic?: string;
+  messageCount?: number;
+  details?: string;
+}

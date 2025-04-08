@@ -6,6 +6,7 @@ import { ChevronLeft } from "lucide-react";
 import SearchFilterBar from "@/components/gridgain/SearchFilterBar";
 import MessagesTable from "@/components/gridgain/MessagesTable";
 import TopicDetailsTable, { TopicDetail } from "@/components/gridgain/TopicDetailsTable";
+import MessageDetailsGrid from "@/components/shared/MessageDetailsGrid";
 import { GridGainMessage } from "@/components/gridgain/GridGainData";
 
 interface GridGainContentProps {
@@ -45,6 +46,7 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
   const [selectedWorkflow, setSelectedWorkflow] = useState<GridGainMessage | null>(null);
   const [topicDetails, setTopicDetails] = useState<TopicDetail[]>([]);
   const [topicCurrentPage, setTopicCurrentPage] = useState(1);
+  const [selectedTopic, setSelectedTopic] = useState<TopicDetail | null>(null);
   
   // Calculate total pages for topic details
   const topicItemsPerPage = 10;
@@ -55,6 +57,7 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
   // Handle workflow row click
   const handleWorkflowClick = (message: GridGainMessage) => {
     setSelectedWorkflow(message);
+    setSelectedTopic(null);
     
     // Generate sample topic details based on the selected workflow
     // In a real app, you would fetch these from an API
@@ -73,7 +76,15 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
 
   // Handle topic detail click
   const handleTopicClick = (topicDetail: TopicDetail) => {
-    // Pass the topic details to the parent component to show in the drawer
+    if (selectedTopic && selectedTopic.id === topicDetail.id) {
+      // If clicking the same topic, toggle off
+      setSelectedTopic(null);
+    } else {
+      // Set the selected topic
+      setSelectedTopic(topicDetail);
+    }
+    
+    // Also pass the topic details to the parent component to show in the drawer if needed
     if (selectedWorkflow) {
       const enrichedMessage = {
         ...selectedWorkflow,
@@ -87,6 +98,12 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
   const handleBackToWorkflows = () => {
     setSelectedWorkflow(null);
     setTopicDetails([]);
+    setSelectedTopic(null);
+  };
+  
+  // Back to topics view
+  const handleBackToTopics = () => {
+    setSelectedTopic(null);
   };
 
   return (
@@ -96,11 +113,11 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
           <CardHeader className="py-4">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
               <div className="flex items-center gap-2">
-                {selectedWorkflow && (
+                {(selectedWorkflow || selectedTopic) && (
                   <Button
                     variant="ghost"
                     size="sm"
-                    onClick={handleBackToWorkflows}
+                    onClick={selectedTopic ? handleBackToTopics : handleBackToWorkflows}
                     className="flex items-center gap-1"
                   >
                     <ChevronLeft className="h-4 w-4" />
@@ -108,13 +125,15 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
                   </Button>
                 )}
                 <CardTitle>
-                  {selectedWorkflow 
-                    ? `Topic Details for Workflow: ${selectedWorkflow.workflowId}` 
-                    : "Grid Gain Messages"}
+                  {selectedTopic 
+                    ? `Message Details for Topic: ${selectedTopic.topic}`
+                    : selectedWorkflow 
+                      ? `Topic Details for Workflow: ${selectedWorkflow.workflowId}` 
+                      : "Grid Gain Messages"}
                 </CardTitle>
               </div>
               
-              {!selectedWorkflow && (
+              {!selectedWorkflow && !selectedTopic && (
                 <div className="w-full md:w-auto">
                   <SearchFilterBar
                     onSearchChange={onSearchChange}
@@ -129,13 +148,20 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
             <CardDescription>
               {isLoading 
                 ? "Loading data from API..." 
-                : selectedWorkflow 
-                  ? `${topicDetails.length} topic detail(s) found for workflow ${selectedWorkflow.workflowId}`
-                  : `${filteredMessages.length} message(s) found`}
+                : selectedTopic
+                  ? `Showing message details for topic ${selectedTopic.topic}`
+                  : selectedWorkflow 
+                    ? `${topicDetails.length} topic detail(s) found for workflow ${selectedWorkflow.workflowId}`
+                    : `${filteredMessages.length} message(s) found`}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {selectedWorkflow ? (
+            {selectedTopic ? (
+              <MessageDetailsGrid 
+                topic={selectedTopic.topic} 
+                onBack={handleBackToTopics}
+              />
+            ) : selectedWorkflow ? (
               <TopicDetailsTable
                 topicDetails={paginatedTopics}
                 currentPage={topicCurrentPage}

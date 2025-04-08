@@ -6,10 +6,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { Link } from "react-router-dom";
-import { TopicDetail } from "@/components/amps/TopicDetailsTable";
+import { TopicDetail } from "@/types";
 import { Sheet } from "@/components/ui/sheet";
 import TopicDetailsTable from "@/components/amps/TopicDetailsTable";
 import { useToast } from "@/components/ui/use-toast";
+import MessageDetailsGrid from "@/components/shared/MessageDetailsGrid";
 
 // Sample data for demonstrating the component
 const sampleTopicDetails: TopicDetail[] = [
@@ -57,6 +58,7 @@ const TopicDetailsPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedTopicDetail, setSelectedTopicDetail] = useState<TopicDetail | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showMessageDetails, setShowMessageDetails] = useState(false);
   const { toast } = useToast();
 
   // In a real app, fetch topic details based on the ID
@@ -66,11 +68,15 @@ const TopicDetailsPage = () => {
 
   const handleTopicDetailClick = (topicDetail: TopicDetail) => {
     setSelectedTopicDetail(topicDetail);
-    setIsDrawerOpen(true);
+    setShowMessageDetails(true);
     toast({
       title: "Topic Detail Selected",
       description: `Selected topic: ${topicDetail.topic}, Partition: ${topicDetail.partition}`,
     });
+  };
+  
+  const handleBackToTopics = () => {
+    setShowMessageDetails(false);
   };
 
   return (
@@ -89,20 +95,27 @@ const TopicDetailsPage = () => {
         </div>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Topic: {id}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <TopicDetailsTable 
-            topicDetails={topicDetails}
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onRowClick={handleTopicDetailClick}
-            onPageChange={setCurrentPage}
-          />
-        </CardContent>
-      </Card>
+      {showMessageDetails && selectedTopicDetail ? (
+        <MessageDetailsGrid 
+          topic={selectedTopicDetail.topic} 
+          onBack={handleBackToTopics}
+        />
+      ) : (
+        <Card>
+          <CardHeader>
+            <CardTitle>Topic: {id}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TopicDetailsTable 
+              topicDetails={topicDetails}
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onRowClick={handleTopicDetailClick}
+              onPageChange={setCurrentPage}
+            />
+          </CardContent>
+        </Card>
+      )}
 
       {selectedTopicDetail && (
         <Sheet
