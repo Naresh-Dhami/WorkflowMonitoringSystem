@@ -1,7 +1,9 @@
+
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import SearchFilterBar from "@/components/amps/SearchFilterBar";
 import MessagesTable from "@/components/amps/MessagesTable";
 import TopicDetailsTable, { TopicDetail } from "@/components/amps/TopicDetailsTable";
@@ -42,6 +44,7 @@ const AmpsContent: React.FC<AmpsContentProps> = ({
   messageTypes,
   ampsUrl
 }) => {
+  const navigate = useNavigate();
   const [selectedWorkflow, setSelectedWorkflow] = useState<AmpsMessage | null>(null);
   const [topicDetails, setTopicDetails] = useState<TopicDetail[]>([]);
   const [topicCurrentPage, setTopicCurrentPage] = useState(1);
@@ -73,13 +76,9 @@ const AmpsContent: React.FC<AmpsContentProps> = ({
 
   // Handle topic detail click
   const handleTopicClick = (topicDetail: TopicDetail) => {
-    // Pass the topic details to the parent component to show in the drawer
     if (selectedWorkflow) {
-      const enrichedMessage = {
-        ...selectedWorkflow,
-        topicDetail: topicDetail
-      };
-      onRowClick(enrichedMessage);
+      // Navigate to the topic details page when a topic is clicked
+      navigate(`/amps-topic/${topicDetail.id}`);
     }
   };
 
