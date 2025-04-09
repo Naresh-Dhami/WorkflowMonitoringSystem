@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import EnvironmentModal from "../EnvironmentModal";
 import { useNavigationDialog } from "@/hooks/useNavigationDialog";
+import ManageEnvironmentsModal from "../ManageEnvironmentsModal";
 
 interface HeaderSettingsMenuProps {
   onNewProcess: () => void;
@@ -26,6 +27,7 @@ const HeaderSettingsMenu = ({
 }: HeaderSettingsMenuProps) => {
   const { importEnvironments, exportEnvironments, addEnvironment } = useEnvironment();
   const [showEnvModal, setShowEnvModal] = useState(false);
+  const [showManageEnvsModal, setShowManageEnvsModal] = useState(false);
   const { handleDialogClose } = useNavigationDialog();
 
   const handleImportEnvironments = () => {
@@ -112,6 +114,11 @@ const HeaderSettingsMenu = ({
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Environment
           </DropdownMenuItem>
+          {/* Manage Environments Button */}
+          <DropdownMenuItem onClick={() => setShowManageEnvsModal(true)}>
+            <Settings className="mr-2 h-4 w-4" />
+            Manage Environments
+          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleNavItemClick(onAddNavItem)}>
             <PlusIcon className="mr-2 h-4 w-4" />
             Add Navigation Item
@@ -145,6 +152,14 @@ const HeaderSettingsMenu = ({
           isOpen={showEnvModal}
           onClose={() => setShowEnvModal(false)}
           onSave={handleSaveEnvironment}
+        />
+      )}
+
+      {/* Manage Environments Modal */}
+      {showManageEnvsModal && (
+        <ManageEnvironmentsModal
+          isOpen={showManageEnvsModal}
+          onClose={() => setShowManageEnvsModal(false)}
         />
       )}
     </>

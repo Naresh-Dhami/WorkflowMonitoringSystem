@@ -94,3 +94,31 @@ export const pollProcessStatus = async (
   // If we reach max attempts and status is still running, return as is
   return currentStatus;
 };
+
+// Function to make API calls to specific endpoints
+export const makeApiCall = async (endpoint: string, baseUrl: string, method: string = 'GET', body?: any): Promise<any> => {
+  // Ensure we use the environment's baseUrl properly
+  const fullEndpoint = baseUrl && endpoint ? `${baseUrl}${endpoint}` : endpoint;
+  console.log(`Making ${method} API call to ${fullEndpoint}`, { body });
+  
+  // In a real implementation, this would use fetch or axios
+  // For now, we'll simulate the API call with a timeout
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      // Randomly succeed or fail for demo purposes
+      if (Math.random() > 0.1) {
+        const response = {
+          status: 200,
+          data: {
+            success: true,
+            message: `Successfully executed ${method} on ${endpoint}`,
+            data: body ? { ...body, processed: true } : { result: "Success" }
+          }
+        };
+        resolve(response);
+      } else {
+        reject(new Error(`Failed to execute ${method} on ${endpoint}`));
+      }
+    }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds
+  });
+};

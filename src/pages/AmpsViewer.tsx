@@ -5,9 +5,19 @@ import MessageDetailsDrawer from "@/components/amps/MessageDetailsDrawer";
 import AmpsHeader from "@/components/amps/AmpsHeader";
 import AmpsContent from "@/components/amps/AmpsContent";
 import { useAmpsData } from "@/hooks/useAmpsData";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 const AmpsViewer = () => {
   const { currentEnvironment } = useEnvironment();
+  
+  useEffect(() => {
+    if (!currentEnvironment.ampsUrl) {
+      toast.warning("No AMPS URL configured for this environment. Please update the environment settings.", {
+        duration: 5000,
+      });
+    }
+  }, [currentEnvironment]);
   
   const {
     paginatedMessages,
@@ -35,7 +45,10 @@ const AmpsViewer = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <AmpsHeader environmentName={currentEnvironment.name} />
+      <AmpsHeader 
+        environmentName={currentEnvironment.name} 
+        ampsUrl={currentEnvironment.ampsUrl} 
+      />
       
       <AmpsContent
         isLoading={isLoading}
@@ -52,6 +65,7 @@ const AmpsViewer = () => {
         onPageChange={setCurrentPage}
         onWorkflowSearch={handleSearchWorkflow}
         messageTypes={messageTypes}
+        ampsUrl={currentEnvironment.ampsUrl}
       />
 
       <MessageDetailsDrawer
@@ -59,6 +73,7 @@ const AmpsViewer = () => {
         onOpenChange={setIsDrawerOpen}
         message={selectedMessage}
         environmentName={currentEnvironment.name}
+        ampsUrl={currentEnvironment.ampsUrl}
       />
     </div>
   );

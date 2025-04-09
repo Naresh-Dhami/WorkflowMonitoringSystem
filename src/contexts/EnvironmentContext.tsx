@@ -19,6 +19,7 @@ interface EnvironmentContextType {
   importEnvironments: (jsonString: string) => void;
   exportEnvironments: () => void;
   addEnvironment: (environment: Environment) => void;
+  updateEnvironment: (id: string, environment: Partial<Environment>) => void;
 }
 
 const defaultEnvironment = environmentsConfig.environments[0];
@@ -30,6 +31,7 @@ const EnvironmentContext = createContext<EnvironmentContextType>({
   importEnvironments: () => {},
   exportEnvironments: () => {},
   addEnvironment: () => {},
+  updateEnvironment: () => {},
 });
 
 export const useEnvironment = () => useContext(EnvironmentContext);
@@ -64,6 +66,28 @@ const flattenEnvironments = (environments: Environment[]): Environment[] => {
   
   flatten(environments);
   return result;
+};
+
+// Helper function to update an environment in a nested structure
+const updateEnvironmentInList = (
+  environments: Environment[], 
+  id: string, 
+  updates: Partial<Environment>
+): Environment[] => {
+  return environments.map(env => {
+    if (env.id === id) {
+      return { ...env, ...updates };
+    }
+    
+    if (env.children && env.children.length > 0) {
+      return {
+        ...env,
+        children: updateEnvironmentInList(env.children, id, updates)
+      };
+    }
+    
+    return env;
+  });
 };
 
 export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -106,6 +130,16 @@ export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
 
   const addEnvironment = (environment: Environment) => {
     setEnvironments(prev => [...prev, environment]);
+  };
+
+  const updateEnvironment = (id: string, updates: Partial<Environment>) => {
+    const updatedEnvironments = updateEnvironmentInList(environments, id, updates);
+    setEnvironments(updatedEnvironments);
+    
+    // If the current environment is being updated, update it as well
+    if (currentEnvironment.id === id) {
+      setCurrentEnvironment(prev => ({ ...prev, ...updates }));
+    }
   };
 
   const importEnvironments = (jsonString: string) => {
@@ -163,6 +197,7 @@ export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         importEnvironments,
         exportEnvironments,
         addEnvironment,
+        updateEnvironment,
       }}
     >
       {children}

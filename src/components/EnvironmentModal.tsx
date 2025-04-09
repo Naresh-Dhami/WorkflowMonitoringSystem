@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 import { useNavigationDialog } from "@/hooks/useNavigationDialog";
+import { Environment } from "@/contexts/EnvironmentContext";
 
 interface EnvironmentModalProps {
   isOpen: boolean;
@@ -24,12 +25,16 @@ interface EnvironmentModalProps {
     gridGainUrl?: string;
     ampsUrl?: string;
   }) => void;
+  environment?: Environment; // Existing environment for editing
+  mode?: 'create' | 'edit';
 }
 
 const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
   isOpen,
   onClose,
   onSave,
+  environment,
+  mode = 'create'
 }) => {
   const [name, setName] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
@@ -37,6 +42,17 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
   const [gridGainUrl, setGridGainUrl] = useState("");
   const [ampsUrl, setAmpsUrl] = useState("");
   const { handleDialogClose } = useNavigationDialog();
+
+  // Populate form with existing environment data when editing
+  useEffect(() => {
+    if (mode === 'edit' && environment) {
+      setName(environment.name || "");
+      setBaseUrl(environment.baseUrl || "");
+      setDescription(environment.description || "");
+      setGridGainUrl(environment.gridGainUrl || "");
+      setAmpsUrl(environment.ampsUrl || "");
+    }
+  }, [environment, mode]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,8 +71,8 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
       name,
       baseUrl,
       description,
-      gridGainUrl,
-      ampsUrl,
+      gridGainUrl: gridGainUrl.trim() || undefined,
+      ampsUrl: ampsUrl.trim() || undefined,
     });
 
     // Reset form
@@ -92,13 +108,18 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
     };
   }, []);
 
+  const title = mode === 'create' ? 'Add New Environment' : 'Edit Environment';
+  const description = mode === 'create' 
+    ? 'Create a new environment for your batch processing.'
+    : 'Update environment configuration.';
+
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[425px] z-[200]">
         <DialogHeader>
-          <DialogTitle>Add New Environment</DialogTitle>
+          <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            Create a new environment for your batch processing.
+            {description}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -169,7 +190,7 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit">Save</Button>
+            <Button type="submit">{mode === 'create' ? 'Create' : 'Update'}</Button>
           </DialogFooter>
         </form>
       </DialogContent>
