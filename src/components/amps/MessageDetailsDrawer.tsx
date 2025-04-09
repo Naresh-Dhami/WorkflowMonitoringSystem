@@ -1,4 +1,3 @@
-
 import { 
   Drawer,
   DrawerContent,
@@ -17,13 +16,15 @@ interface MessageDetailsDrawerProps {
   onOpenChange: (open: boolean) => void;
   message: AmpsMessage | null;
   environmentName: string;
+  ampsUrl?: string;
 }
 
 const MessageDetailsDrawer = ({
   open,
   onOpenChange,
   message,
-  environmentName
+  environmentName,
+  ampsUrl
 }: MessageDetailsDrawerProps) => {
   if (!message) return null;
 

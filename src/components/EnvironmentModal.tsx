@@ -38,7 +38,7 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
 }) => {
   const [name, setName] = useState("");
   const [baseUrl, setBaseUrl] = useState("");
-  const [description, setDescription] = useState("");
+  const [descriptionText, setDescriptionText] = useState("");
   const [gridGainUrl, setGridGainUrl] = useState("");
   const [ampsUrl, setAmpsUrl] = useState("");
   const { handleDialogClose } = useNavigationDialog();
@@ -48,7 +48,7 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
     if (mode === 'edit' && environment) {
       setName(environment.name || "");
       setBaseUrl(environment.baseUrl || "");
-      setDescription(environment.description || "");
+      setDescriptionText(environment.description || "");
       setGridGainUrl(environment.gridGainUrl || "");
       setAmpsUrl(environment.ampsUrl || "");
     }
@@ -70,7 +70,7 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
     onSave({
       name,
       baseUrl,
-      description,
+      description: descriptionText,
       gridGainUrl: gridGainUrl.trim() || undefined,
       ampsUrl: ampsUrl.trim() || undefined,
     });
@@ -78,7 +78,7 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
     // Reset form
     setName("");
     setBaseUrl("");
-    setDescription("");
+    setDescriptionText("");
     setGridGainUrl("");
     setAmpsUrl("");
     
@@ -90,7 +90,7 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
     // Reset form when closing
     setName("");
     setBaseUrl("");
-    setDescription("");
+    setDescriptionText("");
     setGridGainUrl("");
     setAmpsUrl("");
     onClose();
@@ -109,7 +109,7 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
   }, []);
 
   const title = mode === 'create' ? 'Add New Environment' : 'Edit Environment';
-  const description = mode === 'create' 
+  const modalDescription = mode === 'create' 
     ? 'Create a new environment for your batch processing.'
     : 'Update environment configuration.';
 
@@ -119,7 +119,7 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>
-            {description}
+            {modalDescription}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
@@ -179,8 +179,8 @@ const EnvironmentModal: React.FC<EnvironmentModalProps> = ({
               </Label>
               <Input
                 id="env-description"
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
+                value={descriptionText}
+                onChange={(e) => setDescriptionText(e.target.value)}
                 className="col-span-3"
                 placeholder="Production environment"
               />

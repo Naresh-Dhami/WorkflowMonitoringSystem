@@ -5,9 +5,10 @@ import { Menu } from "lucide-react";
 
 interface AmpsHeaderProps {
   environmentName: string;
+  ampsUrl?: string;
 }
 
-const AmpsHeader: React.FC<AmpsHeaderProps> = ({ environmentName }) => {
+const AmpsHeader: React.FC<AmpsHeaderProps> = ({ environmentName, ampsUrl }) => {
   return (
     <div className="bg-[#ea384c] py-6 mb-6">
       <div className="max-w-6xl mx-auto px-6 flex items-center">
@@ -16,6 +17,7 @@ const AmpsHeader: React.FC<AmpsHeaderProps> = ({ environmentName }) => {
           <h1 className="text-2xl font-bold tracking-tight text-white">Amps Message Viewer</h1>
           <div className="text-sm text-white/80 mt-1">
             Environment: <span className="font-medium">{environmentName}</span>
+            {ampsUrl && <span className="ml-2">(URL: {ampsUrl})</span>}
           </div>
         </div>
       </div>

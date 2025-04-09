@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -23,6 +22,7 @@ interface AmpsContentProps {
   onPageChange: (page: number) => void;
   onWorkflowSearch: (workflowId: string) => Promise<void>;
   messageTypes: string[];
+  ampsUrl?: string;
 }
 
 const AmpsContent: React.FC<AmpsContentProps> = ({
@@ -39,9 +39,9 @@ const AmpsContent: React.FC<AmpsContentProps> = ({
   onRowClick,
   onPageChange,
   onWorkflowSearch,
-  messageTypes
+  messageTypes,
+  ampsUrl
 }) => {
-  // State for selected workflow and topic details
   const [selectedWorkflow, setSelectedWorkflow] = useState<AmpsMessage | null>(null);
   const [topicDetails, setTopicDetails] = useState<TopicDetail[]>([]);
   const [topicCurrentPage, setTopicCurrentPage] = useState(1);
