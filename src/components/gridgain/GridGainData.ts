@@ -15,6 +15,11 @@ export interface GridGainMessage {
   status: string;
   type: string;
   environment?: string;
+  data?: {
+    HostId: string;
+    DcName: string;
+    DcUri: string;
+  };
 }
 
 // Sample data for demonstration

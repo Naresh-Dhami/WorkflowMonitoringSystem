@@ -112,7 +112,12 @@ const MessagesTable = ({
               </TableRow>
             ) : (
               sortedMessages.map((message) => {
-                const serverDetail = message.data;
+                const serverDetail = message.data || {
+                  HostId: message.workflowId,
+                  DcName: "N/A",
+                  DcUri: "N/A"
+                };
+                
                 return (
                   <TableRow 
                     key={message.id} 
@@ -127,13 +132,13 @@ const MessagesTable = ({
                       />
                     </TableCell>
                     <TableCell className="font-medium py-2">
-                      {serverDetail ? serverDetail.HostId : message.workflowId}
+                      {serverDetail.HostId}
                     </TableCell>
                     <TableCell className="py-2">
-                      {serverDetail ? serverDetail.DcName : "N/A"}
+                      {serverDetail.DcName}
                     </TableCell>
                     <TableCell className="py-2">
-                      {serverDetail ? serverDetail.DcUri : "N/A"}
+                      {serverDetail.DcUri}
                     </TableCell>
                   </TableRow>
                 );
