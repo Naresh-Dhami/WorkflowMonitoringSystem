@@ -87,71 +87,57 @@ const MessagesTable = ({
                 className={cn("sortable-header", sortField === "workflowId" && `sort-${sortDirection}`)}
                 onClick={() => handleSort("workflowId")}
               >
-                Workflow ID
+                Host ID
               </TableHead>
               <TableHead 
-                className={cn("sortable-header", sortField === "type" && `sort-${sortDirection}`)}
-                onClick={() => handleSort("type")}
+                className={cn("sortable-header", sortField === "details" && `sort-${sortDirection}`)}
+                onClick={() => handleSort("details")}
               >
-                Type
+                DC Name
               </TableHead>
               <TableHead 
                 className={cn("sortable-header", sortField === "status" && `sort-${sortDirection}`)}
                 onClick={() => handleSort("status")}
               >
-                Status
-              </TableHead>
-              <TableHead 
-                className={cn("sortable-header", sortField === "timestamp" && `sort-${sortDirection}`)}
-                onClick={() => handleSort("timestamp")}
-              >
-                Timestamp
+                DC URI
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedMessages.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-32 text-center">
+                <TableCell colSpan={4} className="h-32 text-center">
                   No results found
                 </TableCell>
               </TableRow>
             ) : (
-              sortedMessages.map((message) => (
-                <TableRow 
-                  key={message.id} 
-                  className="cursor-pointer hover:bg-muted/50"
-                  onClick={() => onRowClick(message)}
-                >
-                  <TableCell className="py-2">
-                    <Checkbox 
-                      checked={isSelected(message.id)} 
-                      onCheckedChange={() => {}}
-                      onClick={(e) => toggleSelection(message.id, e)} 
-                    />
-                  </TableCell>
-                  <TableCell className="font-medium py-2">{message.workflowId}</TableCell>
-                  <TableCell className="py-2">
-                    <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary">
-                      {message.type}
-                    </span>
-                  </TableCell>
-                  <TableCell className="py-2">
-                    <span className={cn(
-                      "inline-flex items-center px-2 py-1 rounded-md text-xs font-medium",
-                      message.status === "Completed" && "bg-green-100 text-green-800",
-                      message.status === "Running" && "bg-blue-100 text-blue-800",
-                      message.status === "Failed" && "bg-red-100 text-red-800",
-                      message.status === "Pending" && "bg-yellow-100 text-yellow-800"
-                    )}>
-                      {message.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-muted-foreground py-2">
-                    {new Date(message.timestamp).toLocaleString()}
-                  </TableCell>
-                </TableRow>
-              ))
+              sortedMessages.map((message) => {
+                const serverDetail = message.data;
+                return (
+                  <TableRow 
+                    key={message.id} 
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => onRowClick(message)}
+                  >
+                    <TableCell className="py-2">
+                      <Checkbox 
+                        checked={isSelected(message.id)} 
+                        onCheckedChange={() => {}}
+                        onClick={(e) => toggleSelection(message.id, e)} 
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium py-2">
+                      {serverDetail ? serverDetail.HostId : message.workflowId}
+                    </TableCell>
+                    <TableCell className="py-2">
+                      {serverDetail ? serverDetail.DcName : "N/A"}
+                    </TableCell>
+                    <TableCell className="py-2">
+                      {serverDetail ? serverDetail.DcUri : "N/A"}
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             )}
           </TableBody>
         </Table>
