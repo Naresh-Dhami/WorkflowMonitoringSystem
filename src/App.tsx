@@ -1,7 +1,7 @@
 
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Index from "./pages/Index"; // Fixed casing to match actual file
+import Index from "./pages/index"; // Fixed casing to match actual file
 import NotFound from "./pages/404";
 import AmpsViewer from "./pages/AmpsViewer";
 import GridGainViewer from "./pages/GridGainViewer";

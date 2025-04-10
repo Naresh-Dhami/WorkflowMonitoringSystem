@@ -49,7 +49,7 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
   const [selectedTopic, setSelectedTopic] = useState<TopicDetail | null>(null);
   
   // Calculate total pages for topic details
-  const topicItemsPerPage = 10;
+  const topicItemsPerPage = 20; // Updated to show 20 items per page
   const topicTotalPages = Math.ceil(topicDetails.length / topicItemsPerPage);
   const topicStartIndex = (topicCurrentPage - 1) * topicItemsPerPage;
   const paginatedTopics = topicDetails.slice(topicStartIndex, topicStartIndex + topicItemsPerPage);

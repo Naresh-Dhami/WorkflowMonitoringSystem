@@ -26,7 +26,7 @@ export function useAmpsData(environmentName: string) {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   
-  const itemsPerPage = 10;
+  const itemsPerPage = 20; // Updated to show 20 items per page
 
   // Load initial data
   useEffect(() => {
