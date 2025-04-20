@@ -1,4 +1,3 @@
-
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -9,7 +8,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import * as LucideIcons from "lucide-react";
-import { ExternalLink, Menu } from "lucide-react";
+import { ExternalLink, Menu, Navigation2, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -72,6 +71,7 @@ const NavigationMenuComponent = () => {
                   isActive("/") && "bg-accent text-accent-foreground"
                 )}
               >
+                <Navigation2 className="h-4 w-4 mr-2" />
                 XVA Dashboard
               </NavigationMenuLink>
             </Link>
@@ -84,6 +84,7 @@ const NavigationMenuComponent = () => {
                   isActive("/amps-viewer") && "bg-accent text-accent-foreground"
                 )}
               >
+                <ExternalLink className="h-4 w-4 mr-2" />
                 Amps Viewer
               </NavigationMenuLink>
             </Link>
@@ -96,6 +97,7 @@ const NavigationMenuComponent = () => {
                   isActive("/processes") && "bg-accent text-accent-foreground"
                 )}
               >
+                <Settings className="h-4 w-4 mr-2" />
                 XVA Processes
               </NavigationMenuLink>
             </Link>
@@ -108,6 +110,7 @@ const NavigationMenuComponent = () => {
                   isActive("/grid-gain-viewer") && "bg-accent text-accent-foreground"
                 )}
               >
+                <ExternalLink className="h-4 w-4 mr-2" />
                 Grid Gain Viewer
               </NavigationMenuLink>
             </Link>
@@ -120,7 +123,7 @@ const NavigationMenuComponent = () => {
                 <>
                   <NavigationMenuTrigger>
                     <div className="flex items-center">
-                      <DynamicIcon iconName={item.icon} />
+                      <Settings className="h-4 w-4 mr-2" />
                       <span>{item.title}</span>
                     </div>
                   </NavigationMenuTrigger>
@@ -141,7 +144,7 @@ const NavigationMenuComponent = () => {
                                 )}
                               >
                                 <div className="flex items-center text-sm font-medium leading-none">
-                                  <DynamicIcon iconName={child.icon || "ExternalLink"} />
+                                  <ExternalLink className="h-4 w-4 mr-2" />
                                   <span>{child.title}</span>
                                 </div>
                               </NavigationMenuLink>
@@ -154,7 +157,7 @@ const NavigationMenuComponent = () => {
                                 )}
                               >
                                 <div className="flex items-center text-sm font-medium leading-none">
-                                  <DynamicIcon iconName={child.icon || "ExternalLink"} />
+                                  <ExternalLink className="h-4 w-4 mr-2" />
                                   <span>{child.title}</span>
                                 </div>
                               </NavigationMenuLink>
@@ -179,7 +182,7 @@ const NavigationMenuComponent = () => {
                       )}
                     >
                       <div className="flex items-center">
-                        <DynamicIcon iconName={item.icon} />
+                        <ExternalLink className="h-4 w-4 mr-2" />
                         <span>{item.title}</span>
                       </div>
                     </NavigationMenuLink>
@@ -193,7 +196,7 @@ const NavigationMenuComponent = () => {
                       )}
                     >
                       <div className="flex items-center">
-                        <DynamicIcon iconName={item.icon} />
+                        <ExternalLink className="h-4 w-4 mr-2" />
                         <span>{item.title}</span>
                       </div>
                     </NavigationMenuLink>

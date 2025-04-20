@@ -19,13 +19,13 @@ const ProcessesPage = () => {
     testRuns,
     activeJobs,
     isLoading,
+    isRunningBatch,
+    batchProgress,
     addProcess,
     updateProcess,
     deleteProcess,
     runProcess,
-    runBatch,
-    batchProgress,
-    isRunning
+    runBatch
   } = useBatchJobs();
   
   // State for modals
@@ -89,7 +89,7 @@ const ProcessesPage = () => {
         />
         
         <ActiveJobsSection 
-          jobs={activeJobs}
+          activeJobs={activeJobs}
           onShowRunner={() => setShowBatchModal(true)}
         />
         
@@ -99,19 +99,17 @@ const ProcessesPage = () => {
         />
       </div>
       
-      {/* Batch Runner Modal */}
       {showBatchModal && (
         <BatchRunnerModal
           isOpen={showBatchModal}
           onClose={() => setShowBatchModal(false)}
           processes={processes}
           onRunBatch={runBatch}
-          isRunning={isRunning}
+          isRunning={isRunningBatch}
           batchProgress={batchProgress}
         />
       )}
       
-      {/* Process Config Modal */}
       {showConfigModal && (
         <ConfigModal
           isOpen={showConfigModal}
