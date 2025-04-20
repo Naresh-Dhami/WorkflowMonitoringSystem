@@ -1,7 +1,7 @@
 
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Index from "./pages/Index";
+import Index from "./pages/index";
 import NotFound from "./pages/404";
 import AmpsViewer from "./pages/AmpsViewer";
 import GridGainViewer from "./pages/GridGainViewer";
@@ -10,7 +10,7 @@ import AmpsTopicDetailsPage from "./pages/AmpsTopicDetailsPage";
 import { EnvironmentProvider } from "./contexts/EnvironmentContext";
 import { Toaster } from "sonner";
 import { SidebarProvider } from "./components/ui/sidebar";
-import AppSidebar from "./components/AppSidebar";
+import { AppSidebar } from "./components/AppSidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Header from "./components/Header";
 
