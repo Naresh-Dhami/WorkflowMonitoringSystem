@@ -11,28 +11,31 @@ import { EnvironmentProvider } from "./contexts/EnvironmentContext";
 import { Toaster } from "sonner";
 import { SidebarProvider } from "./components/ui/sidebar";
 import AppSidebar from "./components/AppSidebar";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 function App() {
   return (
     <EnvironmentProvider>
-      <SidebarProvider>
-        <Router>
-          <div className="app-container flex w-full">
-            <AppSidebar />
-            <div className="flex-1 min-h-screen">
-              <Toaster position="top-right" />
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/amps-viewer" element={<AmpsViewer />} />
-                <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
-                <Route path="/topic-details/:topicId" element={<TopicDetailsPage />} />
-                <Route path="/amps-topic/:topicId" element={<AmpsTopicDetailsPage />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+      <TooltipProvider>
+        <SidebarProvider>
+          <Router>
+            <div className="app-container flex w-full">
+              <AppSidebar />
+              <div className="flex-1 min-h-screen">
+                <Toaster position="top-right" />
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/amps-viewer" element={<AmpsViewer />} />
+                  <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
+                  <Route path="/topic-details/:topicId" element={<TopicDetailsPage />} />
+                  <Route path="/amps-topic/:topicId" element={<AmpsTopicDetailsPage />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </div>
             </div>
-          </div>
-        </Router>
-      </SidebarProvider>
+          </Router>
+        </SidebarProvider>
+      </TooltipProvider>
     </EnvironmentProvider>
   );
 }
