@@ -1,7 +1,6 @@
 
 import React from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
-import Index from "./pages/index";
 import NotFound from "./pages/404";
 import AmpsViewer from "./pages/AmpsViewer";
 import GridGainViewer from "./pages/GridGainViewer";
@@ -26,7 +25,7 @@ function App() {
                 <Header />
                 <Toaster position="top-right" />
                 <Routes>
-                  <Route path="/" element={<Index />} />
+                  <Route path="/" element={<AmpsViewer />} />
                   <Route path="/amps-viewer" element={<AmpsViewer />} />
                   <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
                   <Route path="/topic-details/:topicId" element={<TopicDetailsPage />} />

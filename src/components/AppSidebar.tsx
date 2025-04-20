@@ -13,7 +13,7 @@ import {
   SidebarGroupLabel
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { Home, ExternalLink, Menu, Settings, X } from "lucide-react";
+import { ExternalLink, Menu, Settings, X } from "lucide-react";
 import { useNavigation } from "@/hooks/useNavigation";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +27,6 @@ export function AppSidebar() {
   // Function to get Lucide icon from string
   const getIcon = (iconName: string) => {
     const icons: Record<string, React.ReactNode> = {
-      Home: <Home className="h-4 w-4" />,
       Settings: <Settings className="h-4 w-4" />,
       ExternalLink: <ExternalLink className="h-4 w-4" />,
       Menu: <Menu className="h-4 w-4" />
@@ -38,6 +37,13 @@ export function AppSidebar() {
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
+  };
+
+  // Function to handle navigation item click
+  const handleNavItemClick = (path: string) => {
+    if (path.startsWith('http')) {
+      window.open(path, '_blank');
+    }
   };
 
   return (
@@ -60,18 +66,6 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Main Navigation</SidebarGroupLabel>
           <SidebarMenu>
-            <SidebarMenuItem>
-              <SidebarMenuButton 
-                asChild 
-                isActive={isActive("/")}
-              >
-                <Link to="/">
-                  <Home className="h-4 w-4" />
-                  <span>Dashboard</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            
             <SidebarMenuItem>
               <SidebarMenuButton 
                 asChild 
@@ -103,21 +97,35 @@ export function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupLabel>Custom Navigation</SidebarGroupLabel>
             <SidebarMenu>
-              {navigationItems.map((item) => (
-                <SidebarMenuItem key={item.id}>
-                  <SidebarMenuButton 
-                    asChild 
-                    isActive={isActive(item.path)}
-                  >
-                    <Link to={item.path.startsWith('http') ? 
-                      `/${item.path.replace(/^https?:\/\//, '')}` : 
-                      item.path}>
-                      {getIcon(item.icon)}
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
+              {navigationItems.map((item) => {
+                const isExternal = item.path.startsWith('http');
+                
+                return (
+                  <SidebarMenuItem key={item.id}>
+                    {isExternal ? (
+                      <SidebarMenuButton 
+                        asChild 
+                        onClick={() => handleNavItemClick(item.path)}
+                      >
+                        <a href={item.path} target="_blank" rel="noopener noreferrer">
+                          {getIcon(item.icon)}
+                          <span>{item.title}</span>
+                        </a>
+                      </SidebarMenuButton>
+                    ) : (
+                      <SidebarMenuButton 
+                        asChild 
+                        isActive={isActive(item.path)}
+                      >
+                        <Link to={item.path}>
+                          {getIcon(item.icon)}
+                          <span>{item.title}</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    )}
+                  </SidebarMenuItem>
+                );
+              })}
             </SidebarMenu>
           </SidebarGroup>
         )}
