@@ -23,7 +23,9 @@ const ProcessesPage = () => {
     updateProcess,
     deleteProcess,
     runProcess,
-    runBatch
+    runBatch,
+    batchProgress,
+    isRunning
   } = useBatchJobs();
   
   // State for modals
@@ -54,8 +56,8 @@ const ProcessesPage = () => {
   };
   
   // Save a process (add new or update existing)
-  const handleSaveProcess = (process: ProcessConfig) => {
-    if (!process.id) {
+  const handleSaveProcess = (process: Omit<ProcessConfig, "id">) => {
+    if (!currentProcess) {
       // Add a new process
       const newProcess = {
         ...process,
@@ -64,7 +66,10 @@ const ProcessesPage = () => {
       addProcess(newProcess);
     } else {
       // Update an existing process
-      updateProcess(process);
+      updateProcess({
+        ...process,
+        id: currentProcess.id
+      });
     }
     setShowConfigModal(false);
   };
@@ -84,8 +89,8 @@ const ProcessesPage = () => {
         />
         
         <ActiveJobsSection 
-          activeJobs={activeJobs}
-          onRunBatch={() => setShowBatchModal(true)}
+          jobs={activeJobs}
+          onShowRunner={() => setShowBatchModal(true)}
         />
         
         <TestRunsSection 
@@ -101,6 +106,8 @@ const ProcessesPage = () => {
           onClose={() => setShowBatchModal(false)}
           processes={processes}
           onRunBatch={runBatch}
+          isRunning={isRunning}
+          batchProgress={batchProgress}
         />
       )}
       
@@ -109,7 +116,7 @@ const ProcessesPage = () => {
         <ConfigModal
           isOpen={showConfigModal}
           onClose={() => setShowConfigModal(false)}
-          initialProcess={currentProcess}
+          process={currentProcess}
           onSave={handleSaveProcess}
         />
       )}
