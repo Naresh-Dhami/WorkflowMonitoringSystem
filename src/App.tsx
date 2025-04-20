@@ -12,6 +12,7 @@ import { SidebarProvider } from "./components/ui/sidebar";
 import { AppSidebar } from "./components/AppSidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Header from "./components/Header";
+import ProcessesPage from "./pages/ProcessesPage";
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
                 <Toaster position="top-right" />
                 <Routes>
                   <Route path="/" element={<AmpsViewer />} />
+                  <Route path="/processes" element={<ProcessesPage />} />
                   <Route path="/amps-viewer" element={<AmpsViewer />} />
                   <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
                   <Route path="/topic-details/:topicId" element={<TopicDetailsPage />} />

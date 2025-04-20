@@ -13,7 +13,7 @@ import {
   SidebarGroupLabel
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Menu, Settings, X } from "lucide-react";
+import { ExternalLink, Menu, Settings, LayersIcon, X } from "lucide-react";
 import { useNavigation } from "@/hooks/useNavigation";
 import { cn } from "@/lib/utils";
 
@@ -43,7 +43,9 @@ export function AppSidebar() {
   const handleNavItemClick = (path: string) => {
     if (path.startsWith('http')) {
       window.open(path, '_blank');
+      return false; // Prevent default Link behavior
     }
+    return true; // Allow default Link behavior
   };
 
   return (
@@ -77,6 +79,18 @@ export function AppSidebar() {
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                asChild 
+                isActive={isActive("/processes")}
+              >
+                <Link to="/processes">
+                  <LayersIcon className="h-4 w-4" />
+                  <span>XVA Processes</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
             
             <SidebarMenuItem>
               <SidebarMenuButton 
@@ -105,7 +119,7 @@ export function AppSidebar() {
                     {isExternal ? (
                       <SidebarMenuButton 
                         asChild 
-                        onClick={() => handleNavItemClick(item.path)}
+                        onClick={() => window.open(item.path, '_blank')}
                       >
                         <a href={item.path} target="_blank" rel="noopener noreferrer">
                           {getIcon(item.icon)}

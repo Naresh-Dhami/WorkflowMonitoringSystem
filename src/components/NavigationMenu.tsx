@@ -52,6 +52,14 @@ const NavigationMenuComponent = () => {
     return <IconComponent className="h-4 w-4 mr-1" />;
   };
 
+  // Handle external URLs
+  const handleNavClick = (path: string, e: React.MouseEvent) => {
+    if (path.startsWith('http')) {
+      e.preventDefault();
+      window.open(path, '_blank');
+    }
+  };
+
   return (
     <div className="hidden md:block">
       <NavigationMenu>
@@ -77,6 +85,18 @@ const NavigationMenuComponent = () => {
                 )}
               >
                 Amps Viewer
+              </NavigationMenuLink>
+            </Link>
+          </NavigationMenuItem>
+          <NavigationMenuItem>
+            <Link to="/processes">
+              <NavigationMenuLink 
+                className={cn(
+                  "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
+                  isActive("/processes") && "bg-accent text-accent-foreground"
+                )}
+              >
+                XVA Processes
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
@@ -108,45 +128,77 @@ const NavigationMenuComponent = () => {
                     <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
                       {item.children.map((child) => (
                         <li key={child.id}>
-                          <Link 
-                            to={child.path.startsWith('http') ? 
-                              `/${child.path.replace(/^https?:\/\//, '')}` : 
-                              child.path}
-                          >
-                            <NavigationMenuLink
-                              className={cn(
-                                "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
-                              )}
+                          {child.path.startsWith('http') ? (
+                            <a 
+                              href={child.path}
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              onClick={(e) => handleNavClick(child.path, e)}
                             >
-                              <div className="flex items-center text-sm font-medium leading-none">
-                                <DynamicIcon iconName={child.icon || "ExternalLink"} />
-                                <span>{child.title}</span>
-                              </div>
-                            </NavigationMenuLink>
-                          </Link>
+                              <NavigationMenuLink
+                                className={cn(
+                                  "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                                )}
+                              >
+                                <div className="flex items-center text-sm font-medium leading-none">
+                                  <DynamicIcon iconName={child.icon || "ExternalLink"} />
+                                  <span>{child.title}</span>
+                                </div>
+                              </NavigationMenuLink>
+                            </a>
+                          ) : (
+                            <Link to={child.path}>
+                              <NavigationMenuLink
+                                className={cn(
+                                  "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+                                )}
+                              >
+                                <div className="flex items-center text-sm font-medium leading-none">
+                                  <DynamicIcon iconName={child.icon || "ExternalLink"} />
+                                  <span>{child.title}</span>
+                                </div>
+                              </NavigationMenuLink>
+                            </Link>
+                          )}
                         </li>
                       ))}
                     </ul>
                   </NavigationMenuContent>
                 </>
               ) : (
-                <Link 
-                  to={item.path.startsWith('http') ? 
-                    `/${item.path.replace(/^https?:\/\//, '')}` : 
-                    item.path}
-                >
-                  <NavigationMenuLink 
-                    className={cn(
-                      "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
-                      isActive(item.path) && "bg-accent text-accent-foreground"
-                    )}
+                item.path.startsWith('http') ? (
+                  <a 
+                    href={item.path}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    onClick={(e) => handleNavClick(item.path, e)}
                   >
-                    <div className="flex items-center">
-                      <DynamicIcon iconName={item.icon} />
-                      <span>{item.title}</span>
-                    </div>
-                  </NavigationMenuLink>
-                </Link>
+                    <NavigationMenuLink 
+                      className={cn(
+                        "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
+                      )}
+                    >
+                      <div className="flex items-center">
+                        <DynamicIcon iconName={item.icon} />
+                        <span>{item.title}</span>
+                      </div>
+                    </NavigationMenuLink>
+                  </a>
+                ) : (
+                  <Link to={item.path}>
+                    <NavigationMenuLink 
+                      className={cn(
+                        "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
+                        isActive(item.path) && "bg-accent text-accent-foreground"
+                      )}
+                    >
+                      <div className="flex items-center">
+                        <DynamicIcon iconName={item.icon} />
+                        <span>{item.title}</span>
+                      </div>
+                    </NavigationMenuLink>
+                  </Link>
+                )
               )}
             </NavigationMenuItem>
           ))}
