@@ -12,6 +12,7 @@ import { Toaster } from "sonner";
 import { SidebarProvider } from "./components/ui/sidebar";
 import AppSidebar from "./components/AppSidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import Header from "./components/Header";
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
             <div className="app-container flex w-full">
               <AppSidebar />
               <div className="flex-1 min-h-screen">
+                <Header />
                 <Toaster position="top-right" />
                 <Routes>
                   <Route path="/" element={<Index />} />
