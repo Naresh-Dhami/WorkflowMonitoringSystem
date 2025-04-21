@@ -8,29 +8,13 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, ArrowDownToLine, ArrowUpFromLine, Plus } from "lucide-react";
+import { ArrowDownToLine, ArrowUpFromLine, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useEnvironment, Environment } from "@/contexts/EnvironmentContext";
 import EnvironmentModal from "./EnvironmentModal";
 import { useNavigationDialog } from "@/hooks/useNavigationDialog";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import EnvironmentsList from "./environments/EnvironmentsList";
+import DeleteConfirmationDialog from "./navigation/DeleteConfirmationDialog";
 
 interface ManageEnvironmentsModalProps {
   isOpen: boolean;
@@ -41,7 +25,7 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { environments, updateEnvironment, addEnvironment, importEnvironments, exportEnvironments } = useEnvironment();
+  const { environments, updateEnvironment, addEnvironment, removeEnvironment, importEnvironments, exportEnvironments } = useEnvironment();
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
@@ -79,7 +63,6 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
 
   const confirmDelete = () => {
     if (selectedEnvironment) {
-      // Use environment context's methods to remove environment
       removeEnvironment(selectedEnvironment.id);
       toast.success(`Environment "${selectedEnvironment.name}" deleted successfully`);
       setDeleteAlertOpen(false);
@@ -152,17 +135,6 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
     toast.success('Environments exported successfully');
   };
 
-  // Function to remove environment - using the context method
-  const removeEnvironment = (id: string) => {
-    setEnvironments(prev => {
-      const filtered = prev.filter(env => env.id !== id);
-      return filtered;
-    });
-  };
-
-  // State for environments - needed to implement removal functionality
-  const [envs, setEnvironments] = useState(environments);
-
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -190,63 +162,11 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
             </div>
           </div>
           <div className="mt-4 max-h-[60vh] overflow-y-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Base URL</TableHead>
-                  <TableHead>GridGain URL</TableHead>
-                  <TableHead>AMPS URL</TableHead>
-                  <TableHead>Description</TableHead>
-                  <TableHead className="w-[100px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {flattenedEnvironments.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={6} className="text-center py-4 text-muted-foreground">
-                      No environments found. Add one to get started.
-                    </TableCell>
-                  </TableRow>
-                ) : (
-                  flattenedEnvironments.map((env) => (
-                    <TableRow key={env.id}>
-                      <TableCell className="font-medium">{env.name}</TableCell>
-                      <TableCell className="max-w-[150px] truncate" title={env.baseUrl}>
-                        {env.baseUrl}
-                      </TableCell>
-                      <TableCell className="max-w-[150px] truncate" title={env.gridGainUrl}>
-                        {env.gridGainUrl || "-"}
-                      </TableCell>
-                      <TableCell className="max-w-[150px] truncate" title={env.ampsUrl}>
-                        {env.ampsUrl || "-"}
-                      </TableCell>
-                      <TableCell className="max-w-[200px] truncate" title={env.description}>
-                        {env.description}
-                      </TableCell>
-                      <TableCell>
-                        <div className="flex space-x-2">
-                          <Button
-                            variant="outline"
-                            size="icon"
-                            onClick={() => handleEdit(env)}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            onClick={() => handleDelete(env)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
+            <EnvironmentsList
+              environments={flattenedEnvironments}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           </div>
         </DialogContent>
       </Dialog>
@@ -273,20 +193,13 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
         />
       )}
 
-      <AlertDialog open={deleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete the environment "{selectedEnvironment?.name}". This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmationDialog
+        isOpen={deleteAlertOpen}
+        onClose={() => setDeleteAlertOpen(false)}
+        onConfirm={confirmDelete}
+        title="Delete Environment"
+        description={`This will permanently delete the environment "${selectedEnvironment?.name}". This action cannot be undone.`}
+      />
     </>
   );
 };

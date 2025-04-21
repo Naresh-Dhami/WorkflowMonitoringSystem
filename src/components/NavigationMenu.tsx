@@ -1,4 +1,3 @@
-
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -25,6 +24,7 @@ interface NavigationItem {
 }
 
 const NavigationMenuComponent = () => {
+  
   const location = useLocation();
   const [customNavItems, setCustomNavItems] = useState<NavigationItem[]>([]);
   
@@ -44,9 +44,6 @@ const NavigationMenuComponent = () => {
   
   const isActive = (path: string) => location.pathname === path;
 
-  // We're using Settings icon for all navigation items
-  const NavIcon = Settings;
-
   const handleNavClick = (path: string, e: React.MouseEvent) => {
     if (path.startsWith('http')) {
       e.preventDefault();
@@ -58,6 +55,7 @@ const NavigationMenuComponent = () => {
     <div className="hidden md:block">
       <NavigationMenu>
         <NavigationMenuList>
+          {/* Default navigation items */}
           <NavigationMenuItem>
             <Link to="/">
               <NavigationMenuLink 
@@ -71,6 +69,8 @@ const NavigationMenuComponent = () => {
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
+          
+          {/* Other default navigation items */}
           <NavigationMenuItem>
             <Link to="/amps-viewer">
               <NavigationMenuLink 
@@ -110,10 +110,12 @@ const NavigationMenuComponent = () => {
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
+
           {/* Custom navigation items */}
           {customNavItems.map((item) => (
             <NavigationMenuItem key={item.id}>
               {item.children && item.children.length > 0 ? (
+                // Items with children
                 <>
                   <NavigationMenuTrigger>
                     <div className="flex items-center">
@@ -163,6 +165,7 @@ const NavigationMenuComponent = () => {
                   </NavigationMenuContent>
                 </>
               ) : (
+                // Single items
                 item.path.startsWith('http') ? (
                   <a 
                     href={item.path}

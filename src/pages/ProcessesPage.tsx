@@ -94,7 +94,7 @@ const ProcessesPage = () => {
             onRunProcess={handleRunProcess}
             onEditProcess={handleEditProcess}
             onDeleteProcess={handleDeleteProcess}
-            onRunBatch={handleRunBatch}
+            // Removed the onRunBatch prop since it's not defined in ProcessSectionProps
           />
         </div>
         
