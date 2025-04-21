@@ -5,7 +5,7 @@ import BatchCard from "@/components/BatchCard";
 import StatusBadge from "@/components/StatusBadge";
 import { BatchJob, TestRun } from "@/types";
 import { Button } from "@/components/ui/button";
-import { LayoutGrid, List, Plus } from "lucide-react";
+import { LayoutGrid, List, Plus, Pencil, Trash2 } from "lucide-react";
 
 interface ProcessSectionProps {
   processes: ProcessConfig[];
@@ -134,7 +134,8 @@ const ProcessSection = ({
                         size="sm"
                         onClick={() => onEditProcess(process)}
                       >
-                        Configure
+                        <Pencil className="h-4 w-4 mr-1" />
+                        Edit
                       </Button>
                       
                       <Button
@@ -143,6 +144,7 @@ const ProcessSection = ({
                         onClick={() => onDeleteProcess(process.id)}
                         className="text-destructive hover:bg-destructive/10"
                       >
+                        <Trash2 className="h-4 w-4 mr-1" />
                         Delete
                       </Button>
                       

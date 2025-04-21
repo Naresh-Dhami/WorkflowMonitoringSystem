@@ -30,37 +30,57 @@ export function useNavigation() {
   }, [navigationItems]);
 
   // Add a new navigation item
-  const addNavigationItem = useCallback((newItem: Omit<NavigationItem, 'id'>) => {
-    const item: NavigationItem = {
-      ...newItem,
-      id: Date.now().toString(),
-    };
-
-    if (item.parentId) {
+  const addNavigationItem = useCallback((newItem: NavigationItem) => {
+    if (newItem.parentId) {
       // Add as child to parent
       setNavigationItems(current => {
         const updated = [...current];
-        const parent = updated.find(i => i.id === item.parentId);
+        const parent = updated.find(i => i.id === newItem.parentId);
         
         if (parent) {
           if (!parent.children) {
             parent.children = [];
           }
-          parent.children.push(item);
+          parent.children.push(newItem);
         } else {
           // If parent not found, add as top-level
-          delete item.parentId;
-          updated.push(item);
+          delete newItem.parentId;
+          updated.push(newItem);
         }
         
         return updated;
       });
     } else {
       // Add as top-level item
-      setNavigationItems(current => [...current, item]);
+      setNavigationItems(current => [...current, newItem]);
     }
 
-    return item;
+    return newItem;
+  }, []);
+
+  // Edit navigation item
+  const editNavigationItem = useCallback((updatedItem: NavigationItem) => {
+    setNavigationItems(current => {
+      return current.map(item => {
+        if (item.id === updatedItem.id) {
+          return updatedItem;
+        }
+        
+        if (item.children) {
+          return {
+            ...item,
+            children: item.children.map(child => {
+              if (child.id === updatedItem.id) {
+                return updatedItem;
+              }
+              return child;
+            })
+          };
+        }
+        
+        return item;
+      });
+    });
   }, []);
 
   // Remove a navigation item
@@ -93,6 +113,7 @@ export function useNavigation() {
   return {
     navigationItems,
     addNavigationItem,
+    editNavigationItem,
     removeNavigationItem,
     importNavigationItems,
     exportNavigationItems

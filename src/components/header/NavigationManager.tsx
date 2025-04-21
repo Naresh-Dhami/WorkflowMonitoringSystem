@@ -1,16 +1,25 @@
+
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import * as LucideIcons from "lucide-react";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, Pencil, Trash2, Import, Export, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { NavigationItem, useNavigation } from "@/hooks/useNavigation";
 import NavigationItemForm from "@/components/navigation/NavigationItemForm";
 import { v4 as uuidv4 } from "uuid";
 import { useNavigationDialog } from "@/hooks/useNavigationDialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 // Dynamic icon component
 const DynamicIcon = ({ iconName }: { iconName: string }) => {
@@ -33,6 +42,8 @@ const NavigationManager = ({
 }: NavigationManagerProps) => {
   const { navigationItems, addNavigationItem, removeNavigationItem, importNavigationItems, exportNavigationItems } = useNavigation();
   const [editingItem, setEditingItem] = useState<NavigationItem | null>(null);
+  const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<NavigationItem | null>(null);
   const { handleDialogClose } = useNavigationDialog();
 
   const handleSaveItem = (formData: Omit<NavigationItem, "id">) => {
@@ -63,8 +74,21 @@ const NavigationManager = ({
     setTimeout(() => setShowNavDialog(true), 100);
   };
 
-  // Import navigation items
-  const importNavigation = () => {
+  const handleDelete = (item: NavigationItem) => {
+    setItemToDelete(item);
+    setDeleteAlertOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (itemToDelete) {
+      removeNavigationItem(itemToDelete.id);
+      toast.success(`Navigation item "${itemToDelete.title}" deleted successfully`);
+      setDeleteAlertOpen(false);
+      setItemToDelete(null);
+    }
+  };
+
+  const handleImportNavigation = () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = '.json';
@@ -95,8 +119,7 @@ const NavigationManager = ({
     input.click();
   };
 
-  // Export navigation items
-  const exportNavigation = () => {
+  const handleExportNavigation = () => {
     const items = exportNavigationItems();
     const dataStr = JSON.stringify(items, null, 2);
     const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
@@ -144,14 +167,24 @@ const NavigationManager = ({
           
           <div className="mt-6 space-y-6">
             <div className="flex justify-between">
-              <Button variant="outline" onClick={importNavigation}>
-                <DynamicIcon iconName="Upload" />
-                <span className="ml-2">Import</span>
+              <Button onClick={() => {
+                setShowNavManager(false);
+                setEditingItem(null);
+                setTimeout(() => setShowNavDialog(true), 100);
+              }}>
+                <Plus className="mr-2 h-4 w-4" />
+                Add Item
               </Button>
-              <Button variant="outline" onClick={exportNavigation}>
-                <DynamicIcon iconName="Download" />
-                <span className="ml-2">Export</span>
-              </Button>
+              <div className="flex space-x-2">
+                <Button variant="outline" onClick={handleImportNavigation}>
+                  <Import className="mr-2 h-4 w-4" />
+                  Import
+                </Button>
+                <Button variant="outline" onClick={handleExportNavigation}>
+                  <Export className="mr-2 h-4 w-4" />
+                  Export
+                </Button>
+              </div>
             </div>
             
             <div className="space-y-4">
@@ -170,15 +203,15 @@ const NavigationManager = ({
                             onClick={() => handleEdit(item)}
                             className="h-8 px-2"
                           >
-                            <DynamicIcon iconName="edit" />
+                            <Pencil className="h-4 w-4" />
                           </Button>
                           <Button 
                             variant="ghost" 
                             size="sm" 
-                            onClick={() => removeNavigationItem(item.id)}
+                            onClick={() => handleDelete(item)}
                             className="h-8 px-2 text-red-500 hover:text-red-700"
                           >
-                            <DynamicIcon iconName="X" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                           {item.path.startsWith('http') && (
                             <Button
@@ -187,7 +220,7 @@ const NavigationManager = ({
                               onClick={() => window.open(item.path, '_blank')}
                               className="h-8 px-2"
                             >
-                              <DynamicIcon iconName="external-link" />
+                              <ExternalLink className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
@@ -213,15 +246,15 @@ const NavigationManager = ({
                                     onClick={() => handleEdit(child)}
                                     className="h-7 px-2"
                                   >
-                                    <DynamicIcon iconName="edit" />
+                                    <Pencil className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={() => removeNavigationItem(child.id)}
+                                    onClick={() => handleDelete(child)}
                                     className="h-7 px-2 text-red-500 hover:text-red-700"
                                   >
-                                    <DynamicIcon iconName="X" />
+                                    <Trash2 className="h-4 w-4" />
                                   </Button>
                                   {child.path.startsWith('http') && (
                                     <Button
@@ -230,7 +263,7 @@ const NavigationManager = ({
                                       onClick={() => window.open(child.path, '_blank')}
                                       className="h-7 px-2"
                                     >
-                                      <DynamicIcon iconName="external-link" />
+                                      <ExternalLink className="h-4 w-4" />
                                     </Button>
                                   )}
                                 </div>
@@ -246,22 +279,26 @@ const NavigationManager = ({
                   ))}
                 </div>
               )}
-              
-              <Button 
-                className="w-full mt-4" 
-                onClick={() => {
-                  setShowNavManager(false);
-                  setEditingItem(null);
-                  setTimeout(() => setShowNavDialog(true), 100);
-                }}
-              >
-                <DynamicIcon iconName="plus" />
-                <span className="ml-2">Add New Item</span>
-              </Button>
             </div>
           </div>
         </SheetContent>
       </Sheet>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={deleteAlertOpen} onOpenChange={setDeleteAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the navigation item "{itemToDelete?.title}". This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmDelete}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 
@@ -281,55 +318,8 @@ const NavigationManager = ({
       return item;
     });
     
-    // Update the state with the updated navigation items
-    // Assuming you have a setNavigationItems function from useNavigation hook
-    // Replace setNavigationItems with the actual function name if it's different
-    // setNavigationItems(updatedItems);
-  }
-
-  function handleImportNavigation() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e: Event) => {
-      const target = e.target as HTMLInputElement;
-      if (!target.files?.length) return;
-      
-      const file = target.files[0];
-      const reader = new FileReader();
-      
-      reader.onload = (event) => {
-        try {
-          const content = event.target?.result as string;
-          const items = JSON.parse(content) as NavigationItem[];
-          importNavigationItems(items);
-          toast.success('Navigation imported successfully');
-          
-          // Force reload to update routes
-          window.location.reload();
-        } catch (error) {
-          console.error('Failed to import navigation:', error);
-          toast.error('Failed to import navigation');
-        }
-      };
-      
-      reader.readAsText(file);
-    };
-    input.click();
-  }
-
-  function handleExportNavigation() {
-    const items = exportNavigationItems();
-    const dataStr = JSON.stringify(items, null, 2);
-    const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
-    
-    const exportFileDefaultName = 'navigation.json';
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileDefaultName);
-    linkElement.click();
-    
-    toast.success('Navigation exported successfully');
+    // Update navigation items
+    importNavigationItems(updatedItems);
   }
 };
 

@@ -1,7 +1,8 @@
+
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useEnvironment } from "@/contexts/EnvironmentContext";
-import { PlusIcon, Settings } from "lucide-react";
+import { Settings, Plus, Import, Export, FileEdit, Layers } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
@@ -104,39 +105,39 @@ const HeaderSettingsMenu = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 bg-white z-[200]">
           <DropdownMenuItem onClick={() => handleNavItemClick(onNewProcess)}>
-            <Settings className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" />
             Add Process
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowEnvModal(true)}>
-            <Settings className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" />
             Add Environment
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowManageEnvsModal(true)}>
-            <Settings className="mr-2 h-4 w-4" />
+            <Layers className="mr-2 h-4 w-4" />
             Manage Environments
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleImportEnvironments}>
-            <Settings className="mr-2 h-4 w-4" />
+            <Import className="mr-2 h-4 w-4" />
             Import Environments
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleExportEnvironments}>
-            <Settings className="mr-2 h-4 w-4" />
+            <Export className="mr-2 h-4 w-4" />
             Export Environments
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleNavItemClick(onAddNavItem)}>
-            <Settings className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 h-4 w-4" />
             Add Navigation Item
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleNavItemClick(onManageNavItems)}>
-            <Settings className="mr-2 h-4 w-4" />
+            <Layers className="mr-2 h-4 w-4" />
             Manage Navigation Items
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleNavItemClick(onImportNavigation)}>
-            <Settings className="mr-2 h-4 w-4" />
+            <Import className="mr-2 h-4 w-4" />
             Import Navigation
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleNavItemClick(onExportNavigation)}>
-            <Settings className="mr-2 h-4 w-4" />
+            <Export className="mr-2 h-4 w-4" />
             Export Navigation
           </DropdownMenuItem>
         </DropdownMenuContent>

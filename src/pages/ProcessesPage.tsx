@@ -90,7 +90,7 @@ const ProcessesPage = () => {
         
         <ActiveJobsSection 
           activeJobs={activeJobs}
-          onShowRunner={() => setShowBatchModal(true)}
+          onRunBatch={() => setShowBatchModal(true)}
         />
         
         <TestRunsSection 
@@ -114,7 +114,7 @@ const ProcessesPage = () => {
         <ConfigModal
           isOpen={showConfigModal}
           onClose={() => setShowConfigModal(false)}
-          process={currentProcess}
+          process={currentProcess || undefined}
           onSave={handleSaveProcess}
         />
       )}
