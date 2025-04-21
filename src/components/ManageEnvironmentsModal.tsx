@@ -41,27 +41,23 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { environments, updateEnvironment, deleteEnvironment, importEnvironments, exportEnvironments, addEnvironment } = useEnvironment();
+  const { environments, updateEnvironment, removeEnvironment, importEnvironments, exportEnvironments, addEnvironment } = useEnvironment();
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
   const [selectedEnvironment, setSelectedEnvironment] = useState<Environment | null>(null);
   const { handleDialogClose } = useNavigationDialog();
   
-  // Flatten environments for display
   const flattenedEnvironments = React.useMemo(() => {
     const result: Environment[] = [];
-    
     const flatten = (envs: Environment[]) => {
       for (const env of envs) {
         result.push(env);
-        
         if (env.children && env.children.length > 0) {
           flatten(env.children);
         }
       }
     };
-    
     flatten(environments);
     return result;
   }, [environments]);
@@ -83,7 +79,7 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
 
   const confirmDelete = () => {
     if (selectedEnvironment) {
-      deleteEnvironment(selectedEnvironment.id);
+      removeEnvironment(selectedEnvironment.id);
       toast.success(`Environment "${selectedEnvironment.name}" deleted successfully`);
       setDeleteAlertOpen(false);
       setSelectedEnvironment(null);
@@ -105,12 +101,9 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
       id: crypto.randomUUID(),
       ...envData
     };
-    
     addEnvironment(newEnvironment);
     setAddModalOpen(false);
     toast.success(`Environment "${envData.name}" added successfully`);
-    
-    // Fix any stuck modal issues
     handleDialogClose();
   };
 
@@ -136,10 +129,8 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
     input.onchange = (e: Event) => {
       const target = e.target as HTMLInputElement;
       if (!target.files?.length) return;
-      
       const file = target.files[0];
       const reader = new FileReader();
-      
       reader.onload = (event) => {
         try {
           const content = event.target?.result as string;
@@ -150,7 +141,6 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
           toast.error('Failed to import environments');
         }
       };
-      
       reader.readAsText(file);
     };
     input.click();
@@ -171,7 +161,6 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
               View and edit your environments for batch processing.
             </DialogDescription>
           </DialogHeader>
-          
           <div className="flex justify-between items-center my-4">
             <Button onClick={handleAddEnvironment}>
               <Plus className="mr-2 h-4 w-4" />
@@ -188,7 +177,6 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
               </Button>
             </div>
           </div>
-          
           <div className="mt-4 max-h-[60vh] overflow-y-auto">
             <Table>
               <TableHeader>
@@ -256,7 +244,7 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
           isOpen={addModalOpen}
           onClose={() => setAddModalOpen(false)}
           onSave={handleSaveNewEnvironment}
-          mode="add"
+          mode="create"
         />
       )}
 

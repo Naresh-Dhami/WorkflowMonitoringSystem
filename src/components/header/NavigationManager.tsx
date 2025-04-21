@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import * as LucideIcons from "lucide-react";
-import { ExternalLink, Pencil, Trash2, Import, Export, Plus } from "lucide-react";
+import { Pencil, Trash2, Import, Export, Plus, Settings } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { NavigationItem, useNavigation } from "@/hooks/useNavigation";
@@ -23,7 +23,7 @@ import {
 
 // Dynamic icon component
 const DynamicIcon = ({ iconName }: { iconName: string }) => {
-  const IconComponent = (LucideIcons as any)[iconName] || ExternalLink;
+  const IconComponent = (LucideIcons as any)[iconName] || Settings;
   return <IconComponent className="h-4 w-4" />;
 };
 
@@ -48,18 +48,18 @@ const NavigationManager = ({
 
   const handleSaveItem = (formData: Omit<NavigationItem, "id">) => {
     if (editingItem) {
-      // Update existing item
       const updatedItem = {
         ...formData,
-        id: editingItem.id
+        id: editingItem.id,
+        icon: "settings"
       };
       updateNavigationItem(updatedItem);
       toast.success("Navigation item updated successfully");
     } else {
-      // Add new item
       const newItem = {
         ...formData,
-        id: uuidv4()
+        id: uuidv4(),
+        icon: "settings"
       };
       addNavigationItem(newItem);
       toast.success("Navigation item added successfully");
@@ -95,25 +95,20 @@ const NavigationManager = ({
     input.onchange = (e: Event) => {
       const target = e.target as HTMLInputElement;
       if (!target.files?.length) return;
-      
       const file = target.files[0];
       const reader = new FileReader();
-      
       reader.onload = (event) => {
         try {
           const content = event.target?.result as string;
           const items = JSON.parse(content) as NavigationItem[];
           importNavigationItems(items);
           toast.success('Navigation imported successfully');
-          
-          // Force reload to update routes
           window.location.reload();
         } catch (error) {
           console.error('Failed to import navigation:', error);
           toast.error('Failed to import navigation');
         }
       };
-      
       reader.readAsText(file);
     };
     input.click();
@@ -123,13 +118,11 @@ const NavigationManager = ({
     const items = exportNavigationItems();
     const dataStr = JSON.stringify(items, null, 2);
     const dataUri = `data:application/json;charset=utf-8,${encodeURIComponent(dataStr)}`;
-    
     const exportFileDefaultName = 'navigation.json';
     const linkElement = document.createElement('a');
     linkElement.setAttribute('href', dataUri);
     linkElement.setAttribute('download', exportFileDefaultName);
     linkElement.click();
-    
     toast.success('Navigation exported successfully');
   };
 
@@ -146,7 +139,6 @@ const NavigationManager = ({
               {editingItem ? "Edit the navigation item details below." : "Add a new navigation item to the sidebar menu."}
             </DialogDescription>
           </DialogHeader>
-          
           <NavigationItemForm
             initialData={editingItem}
             onSubmit={handleSaveItem}
@@ -164,7 +156,6 @@ const NavigationManager = ({
           <SheetHeader>
             <SheetTitle>Manage Navigation Items</SheetTitle>
           </SheetHeader>
-          
           <div className="mt-6 space-y-6">
             <div className="flex justify-between">
               <Button onClick={() => {
@@ -186,7 +177,6 @@ const NavigationManager = ({
                 </Button>
               </div>
             </div>
-            
             <div className="space-y-4">
               {navigationItems.length === 0 ? (
                 <p className="text-muted-foreground">No navigation items yet.</p>
@@ -220,7 +210,7 @@ const NavigationManager = ({
                               onClick={() => window.open(item.path, '_blank')}
                               className="h-8 px-2"
                             >
-                              <ExternalLink className="h-4 w-4" />
+                              <Settings className="h-4 w-4" />
                             </Button>
                           )}
                         </div>
@@ -229,9 +219,8 @@ const NavigationManager = ({
                         Path: {item.path}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        Icon: {item.icon}
+                        Icon: settings
                       </div>
-                      
                       {/* Show children if any */}
                       {item.children && item.children.length > 0 && (
                         <div className="pl-4 border-l mt-2 space-y-2">
@@ -263,7 +252,7 @@ const NavigationManager = ({
                                       onClick={() => window.open(child.path, '_blank')}
                                       className="h-7 px-2"
                                     >
-                                      <ExternalLink className="h-4 w-4" />
+                                      <Settings className="h-4 w-4" />
                                     </Button>
                                   )}
                                 </div>
@@ -301,7 +290,6 @@ const NavigationManager = ({
       </AlertDialog>
     </>
   );
-
   function updateNavigationItem(updatedItem: NavigationItem) {
     const updatedItems = navigationItems.map(item => {
       if (item.id === updatedItem.id) {
@@ -317,10 +305,7 @@ const NavigationManager = ({
       }
       return item;
     });
-    
-    // Update navigation items
     importNavigationItems(updatedItems);
   }
 };
-
 export default NavigationManager;

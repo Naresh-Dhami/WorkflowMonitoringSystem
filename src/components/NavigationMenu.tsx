@@ -1,3 +1,4 @@
+
 import {
   NavigationMenu,
   NavigationMenuContent,
@@ -8,7 +9,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import * as LucideIcons from "lucide-react";
-import { ExternalLink, Menu, Navigation2, Settings } from "lucide-react";
+import { Settings, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "./ui/button";
@@ -29,13 +30,12 @@ const NavigationMenuComponent = () => {
   const [customNavItems, setCustomNavItems] = useState<NavigationItem[]>([]);
   
   useEffect(() => {
-    // Load custom navigation items from localStorage
     try {
       const saved = localStorage.getItem('batchConnector.navigation');
       if (saved) {
         const items = JSON.parse(saved);
         if (Array.isArray(items)) {
-          setCustomNavItems(items.filter(item => !item.parentId)); // Only top-level items
+          setCustomNavItems(items.filter(item => !item.parentId));
         }
       }
     } catch (e) {
@@ -45,13 +45,9 @@ const NavigationMenuComponent = () => {
   
   const isActive = (path: string) => location.pathname === path;
 
-  // Dynamic icon component
-  const DynamicIcon = ({ iconName }: { iconName: string }) => {
-    const IconComponent = (LucideIcons as any)[iconName] || ExternalLink;
-    return <IconComponent className="h-4 w-4 mr-1" />;
-  };
+  // Dynamic icon component - always use settings now
+  const DynamicIcon = () => <Settings className="h-4 w-4 mr-1" />;
 
-  // Handle external URLs
   const handleNavClick = (path: string, e: React.MouseEvent) => {
     if (path.startsWith('http')) {
       e.preventDefault();
@@ -71,7 +67,7 @@ const NavigationMenuComponent = () => {
                   isActive("/") && "bg-accent text-accent-foreground"
                 )}
               >
-                <Navigation2 className="h-4 w-4 mr-2" />
+                <Settings className="h-4 w-4 mr-2" />
                 XVA Dashboard
               </NavigationMenuLink>
             </Link>
@@ -84,7 +80,7 @@ const NavigationMenuComponent = () => {
                   isActive("/amps-viewer") && "bg-accent text-accent-foreground"
                 )}
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <Settings className="h-4 w-4 mr-2" />
                 Amps Viewer
               </NavigationMenuLink>
             </Link>
@@ -110,12 +106,11 @@ const NavigationMenuComponent = () => {
                   isActive("/grid-gain-viewer") && "bg-accent text-accent-foreground"
                 )}
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <Settings className="h-4 w-4 mr-2" />
                 Grid Gain Viewer
               </NavigationMenuLink>
             </Link>
           </NavigationMenuItem>
-          
           {/* Custom navigation items */}
           {customNavItems.map((item) => (
             <NavigationMenuItem key={item.id}>
@@ -134,7 +129,7 @@ const NavigationMenuComponent = () => {
                           {child.path.startsWith('http') ? (
                             <a 
                               href={child.path}
-                              target="_blank" 
+                              target="_blank"
                               rel="noopener noreferrer"
                               onClick={(e) => handleNavClick(child.path, e)}
                             >
@@ -144,7 +139,7 @@ const NavigationMenuComponent = () => {
                                 )}
                               >
                                 <div className="flex items-center text-sm font-medium leading-none">
-                                  <ExternalLink className="h-4 w-4 mr-2" />
+                                  <Settings className="h-4 w-4 mr-2" />
                                   <span>{child.title}</span>
                                 </div>
                               </NavigationMenuLink>
@@ -157,7 +152,7 @@ const NavigationMenuComponent = () => {
                                 )}
                               >
                                 <div className="flex items-center text-sm font-medium leading-none">
-                                  <ExternalLink className="h-4 w-4 mr-2" />
+                                  <Settings className="h-4 w-4 mr-2" />
                                   <span>{child.title}</span>
                                 </div>
                               </NavigationMenuLink>
@@ -172,7 +167,7 @@ const NavigationMenuComponent = () => {
                 item.path.startsWith('http') ? (
                   <a 
                     href={item.path}
-                    target="_blank" 
+                    target="_blank"
                     rel="noopener noreferrer"
                     onClick={(e) => handleNavClick(item.path, e)}
                   >
@@ -182,7 +177,7 @@ const NavigationMenuComponent = () => {
                       )}
                     >
                       <div className="flex items-center">
-                        <ExternalLink className="h-4 w-4 mr-2" />
+                        <Settings className="h-4 w-4 mr-2" />
                         <span>{item.title}</span>
                       </div>
                     </NavigationMenuLink>
@@ -196,7 +191,7 @@ const NavigationMenuComponent = () => {
                       )}
                     >
                       <div className="flex items-center">
-                        <ExternalLink className="h-4 w-4 mr-2" />
+                        <Settings className="h-4 w-4 mr-2" />
                         <span>{item.title}</span>
                       </div>
                     </NavigationMenuLink>

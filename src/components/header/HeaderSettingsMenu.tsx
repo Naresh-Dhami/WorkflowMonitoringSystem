@@ -2,13 +2,14 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useEnvironment } from "@/contexts/EnvironmentContext";
-import { Settings, Plus, Import, Export, FileEdit, Layers } from "lucide-react";
+import { Settings, Plus, Import, Export, Layers } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
 import EnvironmentModal from "../EnvironmentModal";
 import { useNavigationDialog } from "@/hooks/useNavigationDialog";
 import ManageEnvironmentsModal from "../ManageEnvironmentsModal";
+import ManageNavigationModal from "../navigation/ManageNavigationModal";
 
 interface HeaderSettingsMenuProps {
   onNewProcess: () => void;
@@ -28,6 +29,7 @@ const HeaderSettingsMenu = ({
   const { importEnvironments, exportEnvironments, addEnvironment } = useEnvironment();
   const [showEnvModal, setShowEnvModal] = useState(false);
   const [showManageEnvsModal, setShowManageEnvsModal] = useState(false);
+  const [showManageNavModal, setShowManageNavModal] = useState(false);
   const { handleDialogClose } = useNavigationDialog();
 
   const handleImportEnvironments = () => {
@@ -37,10 +39,8 @@ const HeaderSettingsMenu = ({
     input.onchange = (e: Event) => {
       const target = e.target as HTMLInputElement;
       if (!target.files?.length) return;
-      
       const file = target.files[0];
       const reader = new FileReader();
-      
       reader.onload = (event) => {
         try {
           const content = event.target?.result as string;
@@ -51,7 +51,6 @@ const HeaderSettingsMenu = ({
           toast.error('Failed to import environments');
         }
       };
-      
       reader.readAsText(file);
     };
     input.click();
@@ -62,11 +61,10 @@ const HeaderSettingsMenu = ({
     toast.success('Environments exported successfully');
   };
 
-  // Handle adding a new environment
-  const handleSaveEnvironment = (envData: { 
-    name: string; 
-    baseUrl: string; 
-    description: string; 
+  const handleSaveEnvironment = (envData: {
+    name: string;
+    baseUrl: string;
+    description: string;
     gridGainUrl?: string;
     ampsUrl?: string;
   }) => {
@@ -74,18 +72,14 @@ const HeaderSettingsMenu = ({
       id: uuidv4(),
       ...envData
     };
-    
     addEnvironment(newEnvironment);
     setShowEnvModal(false);
     toast.success(`Environment "${envData.name}" added successfully`);
-    
-    // Fix any stuck modal issues
     handleDialogClose();
   };
 
   const handleNavItemClick = (handler: () => void) => {
     handler();
-    // Fix any focus trap issues after dialog closes
     setTimeout(() => {
       handleDialogClose();
     }, 100);
@@ -128,7 +122,7 @@ const HeaderSettingsMenu = ({
             <Plus className="mr-2 h-4 w-4" />
             Add Navigation Item
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => handleNavItemClick(onManageNavItems)}>
+          <DropdownMenuItem onClick={() => setShowManageNavModal(true)}>
             <Layers className="mr-2 h-4 w-4" />
             Manage Navigation Items
           </DropdownMenuItem>
@@ -155,6 +149,12 @@ const HeaderSettingsMenu = ({
         <ManageEnvironmentsModal
           isOpen={showManageEnvsModal}
           onClose={() => setShowManageEnvsModal(false)}
+        />
+      )}
+      {showManageNavModal && (
+        <ManageNavigationModal
+          isOpen={showManageNavModal}
+          onClose={() => setShowManageNavModal(false)}
         />
       )}
     </>

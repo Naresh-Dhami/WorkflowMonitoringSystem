@@ -11,10 +11,9 @@ import { ProcessConfig } from "@/types";
 import { v4 as uuidv4 } from "uuid";
 
 const ProcessesPage = () => {
-  usePageTitle("XVA Processes");
-  
-  // Use batch jobs hook to manage processes
-  const { 
+  usePageTitle();
+
+  const {
     processes,
     testRuns,
     activeJobs,
@@ -25,58 +24,59 @@ const ProcessesPage = () => {
     updateProcess,
     deleteProcess,
     runProcess,
-    runBatch
+    runBatch,
   } = useBatchJobs();
-  
+
   // State for modals
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [currentProcess, setCurrentProcess] = useState<ProcessConfig | null>(null);
-  
+
   // Creating a new process
   const handleNewProcess = () => {
     setCurrentProcess(null);
     setShowConfigModal(true);
   };
-  
+
   // Editing an existing process
   const handleEditProcess = (process: ProcessConfig) => {
     setCurrentProcess(process);
     setShowConfigModal(true);
   };
-  
+
   // Run a single process
   const handleRunProcess = (processId: string) => {
     runProcess(processId);
   };
-  
+
   // Delete a process
   const handleDeleteProcess = (processId: string) => {
     deleteProcess(processId);
   };
-  
+
   // Save a process (add new or update existing)
   const handleSaveProcess = (process: Omit<ProcessConfig, "id">) => {
     if (!currentProcess) {
       // Add a new process
       const newProcess = {
         ...process,
-        id: uuidv4()
+        id: uuidv4(),
       };
       addProcess(newProcess);
     } else {
       // Update an existing process
       updateProcess({
         ...process,
-        id: currentProcess.id
+        id: currentProcess.id,
       });
     }
     setShowConfigModal(false);
   };
-  
+
   return (
-    <div className="container p-4 pb-20 max-w-6xl mx-auto">
-      <div className="space-y-8">
+    <div className="container p-4 max-w-5xl mx-auto">
+      <h2 className="text-2xl font-bold mb-6">XVA Processes</h2>
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
         <ProcessSection
           processes={processes}
           testRuns={testRuns}
@@ -87,18 +87,14 @@ const ProcessesPage = () => {
           onEditProcess={handleEditProcess}
           onDeleteProcess={handleDeleteProcess}
         />
-        
-        <ActiveJobsSection 
-          activeJobs={activeJobs}
-          onRunBatch={() => setShowBatchModal(true)}
-        />
-        
-        <TestRunsSection 
-          testRuns={testRuns}
-          processes={processes}
-        />
       </div>
-      
+      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
+        <ActiveJobsSection activeJobs={activeJobs} />
+      </div>
+      <div className="bg-white rounded-lg shadow-md p-6">
+        <TestRunsSection testRuns={testRuns} processes={processes} />
+      </div>
+      {/* Batch Modal */}
       {showBatchModal && (
         <BatchRunnerModal
           isOpen={showBatchModal}
@@ -109,7 +105,7 @@ const ProcessesPage = () => {
           batchProgress={batchProgress}
         />
       )}
-      
+      {/* Config Modal */}
       {showConfigModal && (
         <ConfigModal
           isOpen={showConfigModal}
