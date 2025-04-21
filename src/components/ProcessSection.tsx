@@ -16,6 +16,7 @@ interface ProcessSectionProps {
   onRunProcess: (processId: string) => void;
   onEditProcess: (process: ProcessConfig) => void;
   onDeleteProcess: (processId: string) => void;
+  onRunBatch?: () => void;
 }
 
 const ProcessSection = ({
@@ -27,6 +28,7 @@ const ProcessSection = ({
   onRunProcess,
   onEditProcess,
   onDeleteProcess,
+  onRunBatch,
 }: ProcessSectionProps) => {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
@@ -66,6 +68,18 @@ const ProcessSection = ({
           >
             <List className="h-4 w-4" />
           </Button>
+          
+          {processes.length > 0 && onRunBatch && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={onRunBatch}
+              className="ml-2"
+              disabled={isLoading}
+            >
+              Run Batch
+            </Button>
+          )}
         </div>
       </div>
       

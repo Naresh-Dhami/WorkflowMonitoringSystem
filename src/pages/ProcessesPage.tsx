@@ -9,20 +9,26 @@ import BatchRunnerModal from "@/components/BatchRunnerModal";
 import ConfigModal from "@/components/ConfigModal";
 import { ProcessConfig } from "@/types";
 import { v4 as uuidv4 } from "uuid";
+import { useProcesses } from "@/hooks/useProcesses";
+import { toast } from "sonner";
+import DeleteConfirmationDialog from "@/components/navigation/DeleteConfirmationDialog";
 
 const ProcessesPage = () => {
   usePageTitle();
 
   const {
-    processes,
+    processes: processConfigs,
+    addProcess,
+    updateProcess,
+    deleteProcess
+  } = useProcesses();
+
+  const {
     testRuns,
     activeJobs,
     isLoading,
     isRunningBatch,
     batchProgress,
-    addProcess,
-    updateProcess,
-    deleteProcess,
     runProcess,
     runBatch,
   } = useBatchJobs();
@@ -31,6 +37,8 @@ const ProcessesPage = () => {
   const [showBatchModal, setShowBatchModal] = useState(false);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [currentProcess, setCurrentProcess] = useState<ProcessConfig | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [processToDelete, setProcessToDelete] = useState<string | null>(null);
 
   // Creating a new process
   const handleNewProcess = () => {
@@ -51,24 +59,37 @@ const ProcessesPage = () => {
 
   // Delete a process
   const handleDeleteProcess = (processId: string) => {
-    deleteProcess(processId);
+    setProcessToDelete(processId);
+    setShowDeleteDialog(true);
+  };
+
+  // Confirm delete process
+  const confirmDeleteProcess = () => {
+    if (processToDelete) {
+      deleteProcess(processToDelete);
+      toast.success("Process deleted successfully");
+      setProcessToDelete(null);
+      setShowDeleteDialog(false);
+    }
   };
 
   // Save a process (add new or update existing)
   const handleSaveProcess = (process: Omit<ProcessConfig, "id">) => {
     if (!currentProcess) {
-      // Add a new process
+      // Add a new process with a unique ID
       const newProcess = {
         ...process,
         id: uuidv4(),
       };
       addProcess(newProcess);
+      toast.success(`Process "${newProcess.name}" created successfully`);
     } else {
       // Update an existing process
       updateProcess({
         ...process,
         id: currentProcess.id,
       });
+      toast.success(`Process "${process.name}" updated successfully`);
     }
     setShowConfigModal(false);
   };
@@ -86,7 +107,7 @@ const ProcessesPage = () => {
         {/* Processes Section */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <ProcessSection
-            processes={processes}
+            processes={processConfigs}
             testRuns={testRuns}
             activeJobs={activeJobs}
             isLoading={isLoading}
@@ -94,7 +115,7 @@ const ProcessesPage = () => {
             onRunProcess={handleRunProcess}
             onEditProcess={handleEditProcess}
             onDeleteProcess={handleDeleteProcess}
-            // Removed the onRunBatch prop since it's not defined in ProcessSectionProps
+            onRunBatch={handleRunBatch}
           />
         </div>
         
@@ -105,7 +126,7 @@ const ProcessesPage = () => {
         
         {/* Test Runs Section */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <TestRunsSection testRuns={testRuns} processes={processes} />
+          <TestRunsSection testRuns={testRuns} processes={processConfigs} />
         </div>
       </div>
       
@@ -114,7 +135,7 @@ const ProcessesPage = () => {
         <BatchRunnerModal
           isOpen={showBatchModal}
           onClose={() => setShowBatchModal(false)}
-          processes={processes}
+          processes={processConfigs}
           onRunBatch={runBatch}
           isRunning={isRunningBatch}
           batchProgress={batchProgress}
@@ -130,6 +151,15 @@ const ProcessesPage = () => {
           onSave={handleSaveProcess}
         />
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmationDialog
+        isOpen={showDeleteDialog}
+        onClose={() => setShowDeleteDialog(false)}
+        onConfirm={confirmDeleteProcess}
+        title="Delete Process"
+        description="Are you sure you want to delete this process? This action cannot be undone."
+      />
     </div>
   );
 };
