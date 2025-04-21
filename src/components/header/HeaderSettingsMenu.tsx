@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { useEnvironment } from "@/contexts/EnvironmentContext";
-import { Settings, Plus, Import, Export, Layers } from "lucide-react";
+import { Settings, Plus, ArrowDownToLine, ArrowUpFromLine, Layers } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { v4 as uuidv4 } from "uuid";
@@ -111,11 +111,11 @@ const HeaderSettingsMenu = ({
             Manage Environments
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleImportEnvironments}>
-            <Import className="mr-2 h-4 w-4" />
+            <ArrowDownToLine className="mr-2 h-4 w-4" />
             Import Environments
           </DropdownMenuItem>
           <DropdownMenuItem onClick={handleExportEnvironments}>
-            <Export className="mr-2 h-4 w-4" />
+            <ArrowUpFromLine className="mr-2 h-4 w-4" />
             Export Environments
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleNavItemClick(onAddNavItem)}>
@@ -127,11 +127,11 @@ const HeaderSettingsMenu = ({
             Manage Navigation Items
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleNavItemClick(onImportNavigation)}>
-            <Import className="mr-2 h-4 w-4" />
+            <ArrowDownToLine className="mr-2 h-4 w-4" />
             Import Navigation
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => handleNavItemClick(onExportNavigation)}>
-            <Export className="mr-2 h-4 w-4" />
+            <ArrowUpFromLine className="mr-2 h-4 w-4" />
             Export Navigation
           </DropdownMenuItem>
         </DropdownMenuContent>

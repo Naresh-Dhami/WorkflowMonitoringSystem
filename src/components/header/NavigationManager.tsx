@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import * as LucideIcons from "lucide-react";
-import { Pencil, Trash2, Import, Export, Plus, Settings } from "lucide-react";
+import { Pencil, Trash2, ArrowDownToLine, ArrowUpFromLine, Plus, Settings } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { NavigationItem, useNavigation } from "@/hooks/useNavigation";
@@ -168,11 +168,11 @@ const NavigationManager = ({
               </Button>
               <div className="flex space-x-2">
                 <Button variant="outline" onClick={handleImportNavigation}>
-                  <Import className="mr-2 h-4 w-4" />
+                  <ArrowDownToLine className="mr-2 h-4 w-4" />
                   Import
                 </Button>
                 <Button variant="outline" onClick={handleExportNavigation}>
-                  <Export className="mr-2 h-4 w-4" />
+                  <ArrowUpFromLine className="mr-2 h-4 w-4" />
                   Export
                 </Button>
               </div>

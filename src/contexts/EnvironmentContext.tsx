@@ -20,6 +20,7 @@ interface EnvironmentContextType {
   exportEnvironments: () => void;
   addEnvironment: (environment: Environment) => void;
   updateEnvironment: (id: string, environment: Partial<Environment>) => void;
+  removeEnvironment: (id: string) => void;
 }
 
 const defaultEnvironment = environmentsConfig.environments[0];
@@ -32,6 +33,7 @@ const EnvironmentContext = createContext<EnvironmentContextType>({
   exportEnvironments: () => {},
   addEnvironment: () => {},
   updateEnvironment: () => {},
+  removeEnvironment: () => {},
 });
 
 export const useEnvironment = () => useContext(EnvironmentContext);
@@ -90,6 +92,26 @@ const updateEnvironmentInList = (
   });
 };
 
+// Helper function to remove an environment by ID
+const removeEnvironmentFromList = (
+  environments: Environment[],
+  id: string
+): Environment[] => {
+  // Filter out the environment with the matching ID at the current level
+  const filtered = environments.filter(env => env.id !== id);
+  
+  // Also check child environments
+  return filtered.map(env => {
+    if (env.children && env.children.length > 0) {
+      return {
+        ...env,
+        children: removeEnvironmentFromList(env.children, id)
+      };
+    }
+    return env;
+  });
+};
+
 export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [environments, setEnvironments] = useState<Environment[]>(() => {
     // Try to get the saved environments from localStorage
@@ -139,6 +161,18 @@ export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // If the current environment is being updated, update it as well
     if (currentEnvironment.id === id) {
       setCurrentEnvironment(prev => ({ ...prev, ...updates }));
+    }
+  };
+
+  const removeEnvironment = (id: string) => {
+    // Remove the environment from the list
+    const updatedEnvironments = removeEnvironmentFromList(environments, id);
+    setEnvironments(updatedEnvironments);
+    
+    // If the current environment is being removed, reset to the first one
+    if (currentEnvironment.id === id && updatedEnvironments.length > 0) {
+      setCurrentEnvironment(updatedEnvironments[0]);
+      localStorage.setItem("batchConnector.environment", updatedEnvironments[0].id);
     }
   };
 
@@ -198,6 +232,7 @@ export const EnvironmentProvider: React.FC<{ children: React.ReactNode }> = ({ c
         exportEnvironments,
         addEnvironment,
         updateEnvironment,
+        removeEnvironment,
       }}
     >
       {children}

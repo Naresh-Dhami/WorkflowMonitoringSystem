@@ -8,7 +8,6 @@ import {
   NavigationMenuTrigger
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
-import * as LucideIcons from "lucide-react";
 import { Settings, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
@@ -45,8 +44,8 @@ const NavigationMenuComponent = () => {
   
   const isActive = (path: string) => location.pathname === path;
 
-  // Dynamic icon component - always use settings now
-  const DynamicIcon = () => <Settings className="h-4 w-4 mr-1" />;
+  // We're using Settings icon for all navigation items
+  const NavIcon = Settings;
 
   const handleNavClick = (path: string, e: React.MouseEvent) => {
     if (path.startsWith('http')) {

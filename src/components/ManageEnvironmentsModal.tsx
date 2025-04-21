@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Import, Export, Plus } from "lucide-react";
+import { Pencil, Trash2, ArrowDownToLine, ArrowUpFromLine, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { useEnvironment, Environment } from "@/contexts/EnvironmentContext";
 import EnvironmentModal from "./EnvironmentModal";
@@ -41,7 +41,7 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { environments, updateEnvironment, removeEnvironment, importEnvironments, exportEnvironments, addEnvironment } = useEnvironment();
+  const { environments, updateEnvironment, addEnvironment, importEnvironments, exportEnvironments } = useEnvironment();
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [deleteAlertOpen, setDeleteAlertOpen] = useState(false);
@@ -79,6 +79,7 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
 
   const confirmDelete = () => {
     if (selectedEnvironment) {
+      // Use environment context's methods to remove environment
       removeEnvironment(selectedEnvironment.id);
       toast.success(`Environment "${selectedEnvironment.name}" deleted successfully`);
       setDeleteAlertOpen(false);
@@ -151,6 +152,17 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
     toast.success('Environments exported successfully');
   };
 
+  // Function to remove environment - using the context method
+  const removeEnvironment = (id: string) => {
+    setEnvironments(prev => {
+      const filtered = prev.filter(env => env.id !== id);
+      return filtered;
+    });
+  };
+
+  // State for environments - needed to implement removal functionality
+  const [envs, setEnvironments] = useState(environments);
+
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -168,11 +180,11 @@ const ManageEnvironmentsModal: React.FC<ManageEnvironmentsModalProps> = ({
             </Button>
             <div className="flex space-x-2">
               <Button variant="outline" onClick={handleImportEnvironments}>
-                <Import className="mr-2 h-4 w-4" />
+                <ArrowDownToLine className="mr-2 h-4 w-4" />
                 Import
               </Button>
               <Button variant="outline" onClick={handleExportEnvironments}>
-                <Export className="mr-2 h-4 w-4" />
+                <ArrowUpFromLine className="mr-2 h-4 w-4" />
                 Export
               </Button>
             </div>

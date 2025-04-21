@@ -73,27 +73,42 @@ const ProcessesPage = () => {
     setShowConfigModal(false);
   };
 
+  // Function to run batch processes
+  const handleRunBatch = () => {
+    setShowBatchModal(true);
+  };
+
   return (
     <div className="container p-4 max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold mb-6">XVA Processes</h2>
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <ProcessSection
-          processes={processes}
-          testRuns={testRuns}
-          activeJobs={activeJobs}
-          isLoading={isLoading}
-          onNewProcess={handleNewProcess}
-          onRunProcess={handleRunProcess}
-          onEditProcess={handleEditProcess}
-          onDeleteProcess={handleDeleteProcess}
-        />
+      
+      <div className="grid gap-6">
+        {/* Processes Section */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <ProcessSection
+            processes={processes}
+            testRuns={testRuns}
+            activeJobs={activeJobs}
+            isLoading={isLoading}
+            onNewProcess={handleNewProcess}
+            onRunProcess={handleRunProcess}
+            onEditProcess={handleEditProcess}
+            onDeleteProcess={handleDeleteProcess}
+            onRunBatch={handleRunBatch}
+          />
+        </div>
+        
+        {/* Active Jobs Section */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <ActiveJobsSection activeJobs={activeJobs} />
+        </div>
+        
+        {/* Test Runs Section */}
+        <div className="bg-white rounded-lg shadow-md p-6">
+          <TestRunsSection testRuns={testRuns} processes={processes} />
+        </div>
       </div>
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <ActiveJobsSection activeJobs={activeJobs} />
-      </div>
-      <div className="bg-white rounded-lg shadow-md p-6">
-        <TestRunsSection testRuns={testRuns} processes={processes} />
-      </div>
+      
       {/* Batch Modal */}
       {showBatchModal && (
         <BatchRunnerModal
@@ -105,6 +120,7 @@ const ProcessesPage = () => {
           batchProgress={batchProgress}
         />
       )}
+      
       {/* Config Modal */}
       {showConfigModal && (
         <ConfigModal

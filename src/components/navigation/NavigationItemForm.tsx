@@ -28,12 +28,14 @@ interface NavigationItemFormProps {
   initialData?: NavigationItem;
   onSubmit: (data: NavigationFormData) => void;
   onCancel: () => void;
+  mode?: 'create' | 'edit';
 }
 
 const NavigationItemForm = ({
   initialData,
   onSubmit,
-  onCancel
+  onCancel,
+  mode = 'create'
 }: NavigationItemFormProps) => {
   const form = useForm<NavigationFormData>({
     resolver: zodResolver(navigationItemSchema),

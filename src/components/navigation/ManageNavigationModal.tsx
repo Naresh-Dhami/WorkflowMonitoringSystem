@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Pencil, Trash2, Import, Export, Plus, Settings } from "lucide-react";
+import { Pencil, Trash2, ArrowDownToLine, ArrowUpFromLine, Plus, Settings } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigation, NavigationItem } from "@/hooks/useNavigation";
 import NavigationItemForm from "./NavigationItemForm";
@@ -154,11 +154,11 @@ const ManageNavigationModal: React.FC<ManageNavigationModalProps> = ({
             </Button>
             <div className="flex space-x-2">
               <Button variant="outline" onClick={handleImportNavigation}>
-                <Import className="mr-2 h-4 w-4" />
+                <ArrowDownToLine className="mr-2 h-4 w-4" />
                 Import
               </Button>
               <Button variant="outline" onClick={handleExportNavigation}>
-                <Export className="mr-2 h-4 w-4" />
+                <ArrowUpFromLine className="mr-2 h-4 w-4" />
                 Export
               </Button>
             </div>
@@ -219,21 +219,19 @@ const ManageNavigationModal: React.FC<ManageNavigationModalProps> = ({
 
       {addModalOpen && (
         <NavigationItemForm
-          isOpen={addModalOpen}
-          onClose={() => setAddModalOpen(false)}
           onSubmit={handleSaveNewNavigation}
+          onCancel={() => setAddModalOpen(false)}
           mode="create"
         />
       )}
 
       {editModalOpen && selectedItem && (
         <NavigationItemForm
-          isOpen={editModalOpen}
-          onClose={() => {
+          onSubmit={handleSaveNavigation}
+          onCancel={() => {
             setEditModalOpen(false);
             setSelectedItem(null);
           }}
-          onSubmit={handleSaveNavigation}
           initialData={selectedItem}
           mode="edit"
         />
