@@ -4,14 +4,15 @@ import { toast } from "sonner";
 import { BatchJob, TestRun, ProcessConfig } from "@/types";
 import { triggerProcess } from "@/utils/api/processes";
 import { useEnvironment } from "@/contexts/EnvironmentContext";
+import { useProcesses } from "./useProcesses";
 
 export function useJobRunner(
-  processes: ProcessConfig[],
   addTestRun: (testRun: TestRun) => void,
   addJob: (job: BatchJob) => void,
   updateJob: (jobId: string, updates: Partial<BatchJob>) => void
 ) {
   const { currentEnvironment } = useEnvironment();
+  const { processes } = useProcesses();
   
   // Function to trigger a process execution
   const runProcess = useCallback(async (processId: string) => {

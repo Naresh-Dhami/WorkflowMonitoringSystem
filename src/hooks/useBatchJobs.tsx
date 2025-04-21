@@ -1,11 +1,9 @@
 
 import { useState } from "react";
-import { useProcesses } from "./useProcesses";
 import { useTestRuns } from "./useTestRuns";
 import { useActiveJobs } from "./useActiveJobs";
 import { useJobRunner } from "./useJobRunner";
 import { useBatchRunner } from "./useBatchRunner";
-import { defaultProcesses } from "@/utils/api/defaultConfigs";
 import { BatchJob, ProcessConfig } from "@/types";
 
 export function useBatchJobs() {
@@ -13,21 +11,11 @@ export function useBatchJobs() {
   const [isLoading, setIsLoading] = useState(false);
   
   // Use the extracted hooks
-  const { processes, addProcess, updateProcess, deleteProcess } = useProcesses();
   const { testRuns, addTestRun } = useTestRuns();
   const { activeJobs, addJob, updateJob } = useActiveJobs();
   
-  // Create initial processes if none exist
-  if (processes.length === 0) {
-    // Add default processes
-    defaultProcesses.forEach(process => {
-      addProcess(process);
-    });
-  }
-  
   // Use the job runner
   const { runProcess: runProcessBase } = useJobRunner(
-    processes,
     addTestRun,
     addJob,
     updateJob
@@ -40,7 +28,6 @@ export function useBatchJobs() {
     batchProgress,
     batchResults
   } = useBatchRunner(
-    processes,
     addTestRun,
     addJob,
     updateJob
@@ -67,16 +54,12 @@ export function useBatchJobs() {
   };
   
   return {
-    processes,
     testRuns,
     activeJobs,
     isLoading,
     isRunningBatch,
     batchProgress,
     batchResults,
-    addProcess,
-    updateProcess,
-    deleteProcess,
     runProcess,
     runBatch
   };

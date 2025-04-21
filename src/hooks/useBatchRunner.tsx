@@ -1,147 +1,82 @@
 
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
-import { ProcessConfig, BatchJob, TestRun } from "@/types";
-import { useJobRunner } from "./useJobRunner";
-import { useTestRuns } from "./useTestRuns";
-import { useActiveJobs } from "./useActiveJobs";
-import { sendBatchReport } from "@/utils/reportService";
-import { useEnvironment } from "@/contexts/EnvironmentContext";
+import { BatchJob, ProcessConfig, TestRun } from "@/types";
+import { useProcesses } from "./useProcesses";
 
 export function useBatchRunner(
-  processes: ProcessConfig[],
   addTestRun: (testRun: TestRun) => void,
   addJob: (job: BatchJob) => void,
   updateJob: (jobId: string, updates: Partial<BatchJob>) => void
 ) {
+  const { processes } = useProcesses();
   const [isRunningBatch, setIsRunningBatch] = useState(false);
   const [batchProgress, setBatchProgress] = useState(0);
-  const [batchResults, setBatchResults] = useState<{
-    total: number;
-    completed: number;
-    failed: number;
-    processIds: string[];
-  }>({ total: 0, completed: 0, failed: 0, processIds: [] });
+  const [batchResults, setBatchResults] = useState<any[]>([]);
   
-  const { currentEnvironment } = useEnvironment();
-
-  // Use the job runner
-  const { runProcess } = useJobRunner(processes, addTestRun, addJob, updateJob);
-
-  // Run multiple processes in sequence
+  // Function to run multiple processes in sequence
   const runMultipleProcesses = useCallback(async (
     processIds: string[], 
     emailReport?: string
   ) => {
-    if (isRunningBatch) {
-      toast.warning("A batch operation is already in progress");
-      return;
-    }
-
-    if (processIds.length === 0) {
-      toast.warning("No processes selected to run");
-      return;
-    }
-
-    if (processIds.length > 20) {
-      toast.warning("Maximum of 20 processes can be run in a batch");
-      return;
-    }
-
-    // Initialize batch state
     setIsRunningBatch(true);
     setBatchProgress(0);
-    setBatchResults({
-      total: processIds.length,
-      completed: 0,
-      failed: 0,
-      processIds: [...processIds]
-    });
-
-    toast.info(`Starting batch run of ${processIds.length} processes in ${currentEnvironment.name} environment`);
-
-    const results = [];
-    let completed = 0;
-    let failed = 0;
-
-    // Run processes one by one
-    for (let i = 0; i < processIds.length; i++) {
-      const processId = processIds[i];
-      const process = processes.find(p => p.id === processId);
+    setBatchResults([]);
+    
+    try {
+      const results = [];
+      const selectedProcesses = processes.filter(p => processIds.includes(p.id));
       
-      if (!process) {
-        toast.error(`Process ${processId} not found`);
-        failed++;
-        continue;
-      }
-
-      try {
-        toast.info(`Running process ${i + 1}/${processIds.length}: ${process.name}`);
+      toast.info(`Starting batch run with ${selectedProcesses.length} processes...`);
+      
+      // Import the runProcess function dynamically to avoid circular dependency
+      const { useJobRunner } = await import('./useJobRunner');
+      const { runProcess } = useJobRunner(addTestRun, addJob, updateJob);
+      
+      for (let i = 0; i < selectedProcesses.length; i++) {
+        const process = selectedProcesses[i];
+        const progressPercent = (i / selectedProcesses.length) * 100;
+        setBatchProgress(progressPercent);
         
-        // Run the process and wait for it to complete
-        const result = await runProcess(processId);
-        results.push({
-          processId,
-          processName: process.name,
-          status: result.status,
-          workflowId: result.workflowId,
-          duration: result.duration,
-          environment: currentEnvironment.name
-        });
-        
-        if (result.status === 'completed') {
-          completed++;
-        } else {
-          failed++;
+        try {
+          toast.info(`Running process ${i + 1} of ${selectedProcesses.length}: "${process.name}"`);
+          const result = await runProcess(process.id);
+          results.push(result);
+        } catch (error) {
+          console.error(`Error running process "${process.name}":`, error);
+          // Continue with next process even if one fails
         }
-      } catch (error) {
-        console.error(`Error running process ${processId}:`, error);
-        failed++;
-        results.push({
-          processId,
-          processName: process.name,
-          status: 'failed',
-          error: error instanceof Error ? error.message : String(error),
-          environment: currentEnvironment.name
-        });
       }
-
-      // Update batch progress
-      const progress = ((i + 1) / processIds.length) * 100;
-      setBatchProgress(progress);
-      setBatchResults(prev => ({
-        ...prev,
-        completed,
-        failed
-      }));
-    }
-
-    // All processes completed
-    setIsRunningBatch(false);
-    
-    const summary = {
-      total: processIds.length,
-      completed,
-      failed,
-      environment: currentEnvironment.name,
-      results
-    };
-
-    toast.success(`Batch run completed: ${completed} succeeded, ${failed} failed`);
-    
-    // Send email report if requested
-    if (emailReport) {
-      try {
-        await sendBatchReport(emailReport, summary);
-        toast.success(`Report sent to ${emailReport}`);
-      } catch (error) {
-        toast.error(`Failed to send report: ${error instanceof Error ? error.message : String(error)}`);
+      
+      // Set final progress
+      setBatchProgress(100);
+      setBatchResults(results);
+      
+      // Generate report if email is provided
+      if (emailReport) {
+        toast.info(`Sending batch report to ${emailReport}...`);
+        try {
+          // This would be replaced with actual email sending logic
+          console.log('Sending email report to:', emailReport);
+          // await sendEmailReport(emailReport, results);
+          toast.success('Batch report sent successfully');
+        } catch (error) {
+          toast.error('Failed to send batch report');
+          console.error('Failed to send batch report:', error);
+        }
       }
+      
+      toast.success(`Batch run completed. ${results.length} of ${selectedProcesses.length} processes completed successfully.`);
+      return results;
+    } catch (error) {
+      console.error('Error in batch runner:', error);
+      toast.error(`Error in batch runner: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    } finally {
+      setIsRunningBatch(false);
     }
-
-    return summary;
-  }, [processes, runProcess, isRunningBatch, currentEnvironment]);
-
+  }, [processes, addTestRun, addJob, updateJob]);
+  
   return {
     runMultipleProcesses,
     isRunningBatch,

@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useBatchJobs } from "@/hooks/useBatchJobs";
+import { useProcesses } from "@/hooks/useProcesses";
 import ProcessSection from "@/components/ProcessSection";
 import ActiveJobsSection from "@/components/ActiveJobsSection";
 import TestRunsSection from "@/components/TestRunsSection";
@@ -9,15 +10,15 @@ import BatchRunnerModal from "@/components/BatchRunnerModal";
 import ConfigModal from "@/components/ConfigModal";
 import { ProcessConfig } from "@/types";
 import { v4 as uuidv4 } from "uuid";
-import { useProcesses } from "@/hooks/useProcesses";
 import { toast } from "sonner";
 import DeleteConfirmationDialog from "@/components/navigation/DeleteConfirmationDialog";
 
 const ProcessesPage = () => {
   usePageTitle();
 
+  // Use the hooks for processes and batch jobs
   const {
-    processes: processConfigs,
+    processes,
     addProcess,
     updateProcess,
     deleteProcess
@@ -42,7 +43,7 @@ const ProcessesPage = () => {
 
   // Creating a new process
   const handleNewProcess = () => {
-    setCurrentProcess(null);
+    setCurrentProcess(null); // Set to null to indicate new process
     setShowConfigModal(true);
   };
 
@@ -107,7 +108,7 @@ const ProcessesPage = () => {
         {/* Processes Section */}
         <div className="bg-white rounded-lg shadow-md p-6">
           <ProcessSection
-            processes={processConfigs}
+            processes={processes}
             testRuns={testRuns}
             activeJobs={activeJobs}
             isLoading={isLoading}
@@ -126,7 +127,7 @@ const ProcessesPage = () => {
         
         {/* Test Runs Section */}
         <div className="bg-white rounded-lg shadow-md p-6">
-          <TestRunsSection testRuns={testRuns} processes={processConfigs} />
+          <TestRunsSection testRuns={testRuns} processes={processes} />
         </div>
       </div>
       
@@ -135,7 +136,7 @@ const ProcessesPage = () => {
         <BatchRunnerModal
           isOpen={showBatchModal}
           onClose={() => setShowBatchModal(false)}
-          processes={processConfigs}
+          processes={processes}
           onRunBatch={runBatch}
           isRunning={isRunningBatch}
           batchProgress={batchProgress}
