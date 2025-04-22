@@ -1,15 +1,14 @@
 
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Trash2, Plus, Save, ArrowDown } from "lucide-react";
+import { Plus, Save } from "lucide-react";
 import { ApiConfig, ProcessConfig } from "@/types";
-import { useState, useEffect } from "react";
-import { cn } from "@/lib/utils";
+import { v4 as uuidv4 } from "uuid";
+import ProcessForm from "./process/ProcessForm";
+import StepConfig from "./process/StepConfig";
 
 interface ConfigModalProps {
   isOpen: boolean;
@@ -18,7 +17,7 @@ interface ConfigModalProps {
   onSave: (process: ProcessConfig) => void;
 }
 
-const ConfigModal = ({ isOpen, onClose, process, onSave }: ConfigModalProps) => {
+const ConfigModal: React.FC<ConfigModalProps> = ({ isOpen, onClose, process, onSave }) => {
   const [activeProcess, setActiveProcess] = useState<ProcessConfig>({
     id: '',
     name: '',
@@ -29,7 +28,6 @@ const ConfigModal = ({ isOpen, onClose, process, onSave }: ConfigModalProps) => 
   
   const [activeTab, setActiveTab] = useState('general');
   
-  // Initialize form when modal opens or process changes
   useEffect(() => {
     if (process) {
       setActiveProcess({ ...process });
@@ -67,19 +65,13 @@ const ConfigModal = ({ isOpen, onClose, process, onSave }: ConfigModalProps) => 
   const updateStep = (index: number, updatedStep: ApiConfig) => {
     const newSteps = [...activeProcess.steps];
     newSteps[index] = updatedStep;
-    
-    setActiveProcess({
-      ...activeProcess,
-      steps: newSteps
-    });
+    setActiveProcess({ ...activeProcess, steps: newSteps });
   };
   
   const removeStep = (index: number) => {
-    const newSteps = activeProcess.steps.filter((_, i) => i !== index);
-    
     setActiveProcess({
       ...activeProcess,
-      steps: newSteps
+      steps: activeProcess.steps.filter((_, i) => i !== index)
     });
   };
   
@@ -91,10 +83,7 @@ const ConfigModal = ({ isOpen, onClose, process, onSave }: ConfigModalProps) => 
     newSteps[index] = newSteps[index + 1];
     newSteps[index + 1] = temp;
     
-    setActiveProcess({
-      ...activeProcess,
-      steps: newSteps
-    });
+    setActiveProcess({ ...activeProcess, steps: newSteps });
   };
   
   return (
@@ -123,39 +112,7 @@ const ConfigModal = ({ isOpen, onClose, process, onSave }: ConfigModalProps) => 
           </TabsList>
           
           <TabsContent value="general" className="space-y-4 animate-fade-in">
-            <div className="space-y-2">
-              <Label htmlFor="name">Process Name</Label>
-              <Input
-                id="name"
-                value={activeProcess.name}
-                onChange={(e) => setActiveProcess({ ...activeProcess, name: e.target.value })}
-                placeholder="Enter process name"
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
-              <Textarea
-                id="description"
-                value={activeProcess.description}
-                onChange={(e) => setActiveProcess({ ...activeProcess, description: e.target.value })}
-                placeholder="Enter process description"
-                rows={3}
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="completion-endpoint">Completion Check Endpoint (Optional)</Label>
-              <Input
-                id="completion-endpoint"
-                value={activeProcess.completionCheckEndpoint || ''}
-                onChange={(e) => setActiveProcess({ ...activeProcess, completionCheckEndpoint: e.target.value })}
-                placeholder="/api/process/status"
-              />
-              <p className="text-xs text-muted-foreground">
-                Endpoint to check if the process has completed after all steps have run
-              </p>
-            </div>
+            <ProcessForm process={activeProcess} onUpdate={setActiveProcess} />
           </TabsContent>
           
           <TabsContent value="steps" className="space-y-6 animate-fade-in">
@@ -170,102 +127,15 @@ const ConfigModal = ({ isOpen, onClose, process, onSave }: ConfigModalProps) => 
             ) : (
               <>
                 {activeProcess.steps.map((step, index) => (
-                  <div
+                  <StepConfig
                     key={step.id}
-                    className={cn(
-                      "p-4 rounded-md border",
-                      "transition-all duration-200",
-                      "neo hover:shadow"
-                    )}
-                  >
-                    <div className="flex justify-between items-center mb-3">
-                      <h4 className="font-medium">Step {index + 1}</h4>
-                      <div className="flex space-x-1">
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7"
-                          onClick={() => moveStepDown(index)}
-                          disabled={index === activeProcess.steps.length - 1}
-                        >
-                          <ArrowDown className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="ghost"
-                          className="h-7 w-7 text-destructive hover:text-destructive/90 hover:bg-destructive/10"
-                          onClick={() => removeStep(index)}
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-                    
-                    <div className="grid gap-3">
-                      <div className="grid grid-cols-2 gap-3">
-                        <div className="space-y-1">
-                          <Label htmlFor={`step-${index}-name`} className="text-xs">Name</Label>
-                          <Input
-                            id={`step-${index}-name`}
-                            value={step.name}
-                            onChange={(e) => updateStep(index, { ...step, name: e.target.value })}
-                            placeholder="Step name"
-                            className="h-8"
-                          />
-                        </div>
-                        <div className="space-y-1">
-                          <Label htmlFor={`step-${index}-method`} className="text-xs">Method</Label>
-                          <select
-                            id={`step-${index}-method`}
-                            value={step.method}
-                            onChange={(e) => updateStep(index, { 
-                              ...step, 
-                              method: e.target.value as 'GET' | 'POST' | 'PUT' | 'DELETE' 
-                            })}
-                            className="h-8 w-full rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm"
-                          >
-                            <option>GET</option>
-                            <option>POST</option>
-                            <option>PUT</option>
-                            <option>DELETE</option>
-                          </select>
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-1">
-                        <Label htmlFor={`step-${index}-endpoint`} className="text-xs">Endpoint</Label>
-                        <Input
-                          id={`step-${index}-endpoint`}
-                          value={step.endpoint}
-                          onChange={(e) => updateStep(index, { ...step, endpoint: e.target.value })}
-                          placeholder="/api/endpoint"
-                          className="h-8"
-                        />
-                      </div>
-                      
-                      {(step.method === 'POST' || step.method === 'PUT') && (
-                        <div className="space-y-1">
-                          <Label htmlFor={`step-${index}-body`} className="text-xs">Request Body (JSON)</Label>
-                          <Textarea
-                            id={`step-${index}-body`}
-                            value={step.body ? JSON.stringify(step.body, null, 2) : ''}
-                            onChange={(e) => {
-                              try {
-                                const body = e.target.value ? JSON.parse(e.target.value) : undefined;
-                                updateStep(index, { ...step, body });
-                              } catch (error) {
-                                // Allow invalid JSON during typing
-                                // It will be validated on save
-                              }
-                            }}
-                            placeholder='{"key": "value"}'
-                            rows={3}
-                            className="font-mono text-xs"
-                          />
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                    step={step}
+                    index={index}
+                    totalSteps={activeProcess.steps.length}
+                    onUpdate={updateStep}
+                    onDelete={removeStep}
+                    onMoveDown={moveStepDown}
+                  />
                 ))}
                 
                 <Button 
