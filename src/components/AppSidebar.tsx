@@ -24,28 +24,8 @@ export function AppSidebar() {
 
   const isActive = (path: string) => location.pathname === path;
   
-  // Function to get Lucide icon from string
-  const getIcon = (iconName: string) => {
-    const icons: Record<string, React.ReactNode> = {
-      Settings: <Settings className="h-4 w-4" />,
-      ExternalLink: <ExternalLink className="h-4 w-4" />,
-      Menu: <Menu className="h-4 w-4" />
-    };
-    
-    return icons[iconName] || <ExternalLink className="h-4 w-4" />;
-  };
-
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
-  };
-
-  // Function to handle navigation item click
-  const handleNavItemClick = (path: string) => {
-    if (path.startsWith('http')) {
-      window.open(path, '_blank');
-      return false; // Prevent default Link behavior
-    }
-    return true; // Allow default Link behavior
   };
 
   return (
@@ -71,11 +51,11 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton 
                 asChild 
-                isActive={isActive("/amps-viewer")}
+                isActive={isActive("/processes")}
               >
-                <Link to="/amps-viewer">
-                  <ExternalLink className="h-4 w-4" />
-                  <span>AMPS Viewer</span>
+                <Link to="/processes">
+                  <LayersIcon className="h-4 w-4" />
+                  <span>XVA Processes</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -83,11 +63,11 @@ export function AppSidebar() {
             <SidebarMenuItem>
               <SidebarMenuButton 
                 asChild 
-                isActive={isActive("/processes")}
+                isActive={isActive("/amps-viewer")}
               >
-                <Link to="/processes">
-                  <LayersIcon className="h-4 w-4" />
-                  <span>XVA Processes</span>
+                <Link to="/amps-viewer">
+                  <ExternalLink className="h-4 w-4" />
+                  <span>AMPS Viewer</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -111,35 +91,26 @@ export function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupLabel>Custom Navigation</SidebarGroupLabel>
             <SidebarMenu>
-              {navigationItems.map((item) => {
-                const isExternal = item.path.startsWith('http');
-                
-                return (
-                  <SidebarMenuItem key={item.id}>
-                    {isExternal ? (
-                      <SidebarMenuButton 
-                        asChild 
-                        onClick={() => window.open(item.path, '_blank')}
-                      >
-                        <a href={item.path} target="_blank" rel="noopener noreferrer">
-                          {getIcon(item.icon)}
-                          <span>{item.title}</span>
-                        </a>
-                      </SidebarMenuButton>
+              {navigationItems.map((item) => (
+                <SidebarMenuItem key={item.id}>
+                  <SidebarMenuButton 
+                    asChild 
+                    isActive={isActive(item.path)}
+                  >
+                    {item.path.startsWith('http') ? (
+                      <a href={item.path} target="_blank" rel="noopener noreferrer">
+                        <Settings className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </a>
                     ) : (
-                      <SidebarMenuButton 
-                        asChild 
-                        isActive={isActive(item.path)}
-                      >
-                        <Link to={item.path}>
-                          {getIcon(item.icon)}
-                          <span>{item.title}</span>
-                        </Link>
-                      </SidebarMenuButton>
+                      <Link to={item.path}>
+                        <Settings className="h-4 w-4" />
+                        <span>{item.title}</span>
+                      </Link>
                     )}
-                  </SidebarMenuItem>
-                );
-              })}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
             </SidebarMenu>
           </SidebarGroup>
         )}

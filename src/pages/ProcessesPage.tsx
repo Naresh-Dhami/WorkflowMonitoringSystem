@@ -102,7 +102,16 @@ const ProcessesPage = () => {
 
   return (
     <div className="container p-4 max-w-5xl mx-auto">
-      <h2 className="text-2xl font-bold mb-6">XVA Processes</h2>
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold">XVA Processes</h2>
+        <Button 
+          onClick={handleNewProcess}
+          className="btn-animation"
+        >
+          <Plus className="mr-2 h-4 w-4" />
+          Add Process
+        </Button>
+      </div>
       
       <div className="grid gap-6">
         {/* Processes Section */}

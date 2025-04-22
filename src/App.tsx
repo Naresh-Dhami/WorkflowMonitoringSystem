@@ -1,6 +1,6 @@
 
 import React from "react";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
 import NotFound from "./pages/404";
 import AmpsViewer from "./pages/AmpsViewer";
 import GridGainViewer from "./pages/GridGainViewer";
@@ -26,7 +26,7 @@ function App() {
                 <Header />
                 <Toaster position="top-right" />
                 <Routes>
-                  <Route path="/" element={<AmpsViewer />} />
+                  <Route path="/" element={<Navigate to="/processes" replace />} />
                   <Route path="/processes" element={<ProcessesPage />} />
                   <Route path="/amps-viewer" element={<AmpsViewer />} />
                   <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
