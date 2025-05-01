@@ -33,6 +33,12 @@ const GridGainViewer = () => {
     setIsDrawerOpen(true);
   };
 
+  // Handle row click - this should not open the drawer
+  const handleRowClick = (message: any) => {
+    // Do nothing, as requested
+    console.log("Row clicked, but drawer not opened");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <GridGainHeader environmentName={currentEnvironment.name} />
@@ -48,8 +54,8 @@ const GridGainViewer = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         environmentName={currentEnvironment.name}
-        onRowClick={() => {}} // Empty function to prevent row click action
-        onDetailButtonClick={handleDetailButtonClick} // This was missing in GridGainContent props
+        onRowClick={handleRowClick}
+        onDetailButtonClick={handleDetailButtonClick}
         onPageChange={setCurrentPage}
         onWorkflowSearch={handleSearchWorkflow}
         messageTypes={messageTypes}

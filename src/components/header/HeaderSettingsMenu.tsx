@@ -99,8 +99,8 @@ const HeaderSettingsMenu = ({
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 bg-white z-[200]">
           <DropdownMenuItem onClick={() => handleNavItemClick(onNewProcess)}>
-            <Plus className="mr-2 h-4 w-4" />
-            Add Process
+            <Layers className="mr-2 h-4 w-4" />
+            Manage Processes
           </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setShowEnvModal(true)}>
             <Plus className="mr-2 h-4 w-4" />

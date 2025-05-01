@@ -13,6 +13,7 @@ interface MessagesTableProps {
   totalPages: number;
   environmentName: string;
   onRowClick: (message: GridGainMessage) => void;
+  onDetailButtonClick: (message: GridGainMessage) => void; // Added this prop
   onPageChange: (page: number) => void;
 }
 
@@ -22,6 +23,7 @@ const MessagesTable = ({
   totalPages,
   environmentName,
   onRowClick,
+  onDetailButtonClick, // Added this prop
   onPageChange
 }: MessagesTableProps) => {
   const [sortField, setSortField] = useState<keyof GridGainMessage>("timestamp");
@@ -101,12 +103,13 @@ const MessagesTable = ({
               >
                 DC URI
               </TableHead>
+              <TableHead className="w-[100px]">Actions</TableHead> {/* Added Actions column */}
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedMessages.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={4} className="h-32 text-center">
+                <TableCell colSpan={5} className="h-32 text-center"> {/* Updated colspan to 5 */}
                   No results found
                 </TableCell>
               </TableRow>
@@ -124,7 +127,7 @@ const MessagesTable = ({
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => onRowClick(message)}
                   >
-                    <TableCell className="py-2">
+                    <TableCell className="py-2" onClick={(e) => e.stopPropagation()}>
                       <Checkbox 
                         checked={isSelected(message.id)} 
                         onCheckedChange={() => {}}
@@ -139,6 +142,18 @@ const MessagesTable = ({
                     </TableCell>
                     <TableCell className="py-2">
                       {serverDetail.DcUri}
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <Button 
+                        variant="outline" 
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation(); // Prevent row click
+                          onDetailButtonClick(message);
+                        }}
+                      >
+                        Details
+                      </Button>
                     </TableCell>
                   </TableRow>
                 );

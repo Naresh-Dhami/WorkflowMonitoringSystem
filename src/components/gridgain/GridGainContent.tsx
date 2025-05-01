@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -21,7 +20,7 @@ interface GridGainContentProps {
   totalPages: number;
   environmentName: string;
   onRowClick: (message: GridGainMessage) => void;
-  onDetailButtonClick: (message: GridGainMessage) => void; // Added this prop
+  onDetailButtonClick: (message: GridGainMessage) => void;
   onPageChange: (page: number) => void;
   onWorkflowSearch: (workflowId: string) => Promise<void>;
   messageTypes: string[];
@@ -39,7 +38,7 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
   totalPages,
   environmentName,
   onRowClick,
-  onDetailButtonClick, // Added this prop
+  onDetailButtonClick,
   onPageChange,
   onWorkflowSearch,
   messageTypes
@@ -169,7 +168,7 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
                 totalPages={totalPages}
                 environmentName={environmentName}
                 onRowClick={handleWorkflowClick}
-                onDetailButtonClick={onDetailButtonClick} // Pass through to MessagesTable
+                onDetailButtonClick={onDetailButtonClick}
                 onPageChange={onPageChange}
               />
             )}
