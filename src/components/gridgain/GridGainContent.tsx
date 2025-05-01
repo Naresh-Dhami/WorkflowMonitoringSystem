@@ -21,6 +21,7 @@ interface GridGainContentProps {
   totalPages: number;
   environmentName: string;
   onRowClick: (message: GridGainMessage) => void;
+  onDetailButtonClick: (message: GridGainMessage) => void; // Added this prop
   onPageChange: (page: number) => void;
   onWorkflowSearch: (workflowId: string) => Promise<void>;
   messageTypes: string[];
@@ -38,6 +39,7 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
   totalPages,
   environmentName,
   onRowClick,
+  onDetailButtonClick, // Added this prop
   onPageChange,
   onWorkflowSearch,
   messageTypes
@@ -82,15 +84,6 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
     } else {
       // Set the selected topic
       setSelectedTopic(topicDetail);
-    }
-    
-    // Also pass the topic details to the parent component to show in the drawer if needed
-    if (selectedWorkflow) {
-      const enrichedMessage = {
-        ...selectedWorkflow,
-        topicDetail: topicDetail
-      };
-      onRowClick(enrichedMessage);
     }
   };
 
@@ -176,6 +169,7 @@ const GridGainContent: React.FC<GridGainContentProps> = ({
                 totalPages={totalPages}
                 environmentName={environmentName}
                 onRowClick={handleWorkflowClick}
+                onDetailButtonClick={onDetailButtonClick} // Pass through to MessagesTable
                 onPageChange={onPageChange}
               />
             )}

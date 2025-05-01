@@ -4,10 +4,11 @@ import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Search, ArrowLeft, Filter } from "lucide-react";
+import { Search, ArrowLeft, Filter, Plus } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { MessageDetail } from "@/types";
 import { cn } from "@/lib/utils";
+import GridGainRecordDialog from "@/components/gridgain/GridGainRecordDialog";
 
 interface MessageDetailsGridProps {
   topic: string;
@@ -26,6 +27,7 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
   const [filteredMessages, setFilteredMessages] = useState<MessageDetail[]>([]);
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
   const itemsPerPage = 10;
   
   useEffect(() => {
@@ -191,6 +193,11 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
     // In a real app, this would show more details or open a modal
     console.log("Showing details for message:", message);
   };
+
+  // Handle adding new record
+  const handleAddRecord = () => {
+    setIsDialogOpen(true);
+  };
   
   return (
     <Card className="mt-4">
@@ -208,6 +215,11 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
             </Button>
             <CardTitle>Topic: {topic}</CardTitle>
           </div>
+          
+          <Button onClick={handleAddRecord} size="sm" className="flex items-center gap-2">
+            <Plus className="h-4 w-4" />
+            Add Record
+          </Button>
         </div>
         <CardDescription>
           Message Type: {messageType} | Total Message Count: {messages.length} | 
@@ -330,6 +342,13 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
           )}
         </div>
       </CardContent>
+      
+      {/* Add Record Dialog */}
+      <GridGainRecordDialog 
+        open={isDialogOpen} 
+        onOpenChange={setIsDialogOpen}
+        topic={topic}
+      />
     </Card>
   );
 };

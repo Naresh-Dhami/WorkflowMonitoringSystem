@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useBatchJobs } from "@/hooks/useBatchJobs";
@@ -12,7 +13,7 @@ import { v4 as uuidv4 } from "uuid";
 import { toast } from "sonner";
 import DeleteConfirmationDialog from "@/components/navigation/DeleteConfirmationDialog";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Settings } from "lucide-react";
 
 const ProcessesPage = () => {
   usePageTitle();
@@ -101,16 +102,21 @@ const ProcessesPage = () => {
     setShowBatchModal(true);
   };
 
+  // Function to manage processes
+  const handleManageProcesses = () => {
+    setShowConfigModal(true);
+  };
+
   return (
     <div className="container p-4 max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">XVA Processes</h2>
         <Button 
-          onClick={handleNewProcess}
+          onClick={handleManageProcesses}
           className="btn-animation"
         >
-          <Plus className="mr-2 h-4 w-4" />
-          Add Process
+          <Settings className="mr-2 h-4 w-4" />
+          Manage Processes
         </Button>
       </div>
       

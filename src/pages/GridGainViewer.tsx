@@ -49,7 +49,7 @@ const GridGainViewer = () => {
         totalPages={totalPages}
         environmentName={currentEnvironment.name}
         onRowClick={() => {}} // Empty function to prevent row click action
-        onDetailButtonClick={handleDetailButtonClick} // New prop for details button
+        onDetailButtonClick={handleDetailButtonClick} // This was missing in GridGainContent props
         onPageChange={setCurrentPage}
         onWorkflowSearch={handleSearchWorkflow}
         messageTypes={messageTypes}
