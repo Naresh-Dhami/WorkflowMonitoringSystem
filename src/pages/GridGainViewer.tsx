@@ -27,7 +27,7 @@ const GridGainViewer = () => {
     handleSearchWorkflow
   } = useGridGainData(currentEnvironment.name);
 
-  // Handle item click to show details - only for the detail button
+  // Handle detail button click to show details
   const handleDetailButtonClick = (message: any) => {
     setSelectedMessage(message);
     setIsDrawerOpen(true);

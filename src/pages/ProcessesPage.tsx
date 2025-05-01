@@ -72,7 +72,6 @@ const ProcessesPage = () => {
   const confirmDeleteProcess = () => {
     if (processToDelete) {
       deleteProcess(processToDelete);
-      toast.success("Process deleted successfully");
       setProcessToDelete(null);
       setShowDeleteDialog(false);
     }
@@ -87,14 +86,12 @@ const ProcessesPage = () => {
         id: uuidv4(),
       };
       addProcess(newProcess);
-      toast.success(`Process "${newProcess.name}" created successfully`);
     } else {
       // Update an existing process
       updateProcess({
         ...process,
         id: currentProcess.id,
       });
-      toast.success(`Process "${process.name}" updated successfully`);
     }
     setShowConfigModal(false);
   };
@@ -210,14 +207,12 @@ const ProcessesPage = () => {
       )}
       
       {/* Config Modal */}
-      {showConfigModal && (
-        <ConfigModal
-          isOpen={showConfigModal}
-          onClose={() => setShowConfigModal(false)}
-          process={currentProcess || undefined}
-          onSave={handleSaveProcess}
-        />
-      )}
+      <ConfigModal
+        isOpen={showConfigModal}
+        onClose={() => setShowConfigModal(false)}
+        process={currentProcess || undefined}
+        onSave={handleSaveProcess}
+      />
 
       {/* Delete Confirmation Dialog */}
       <DeleteConfirmationDialog

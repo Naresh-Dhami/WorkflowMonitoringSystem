@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -248,7 +247,7 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
           Message Type: {messageType} | Total Message Count: {messages.length} | 
           {filteredMessages.length < messages.length 
             ? `Showing ${filteredMessages.length} out of ${messages.length}`
-            : `Showing ${itemsPerPage > filteredMessages.length ? filteredMessages.length : itemsPerPage} out of ${messages.length}`}
+            : `Showing ${itemsPerPage > filteredMessages.length ? filteredMessages.length : itemsPerPage}`}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -339,7 +338,6 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
             </Table>
           </div>
           
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex justify-end items-center space-x-2">
               <div className="text-sm text-muted-foreground">
