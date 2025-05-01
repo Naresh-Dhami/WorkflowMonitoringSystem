@@ -27,8 +27,8 @@ const GridGainViewer = () => {
     handleSearchWorkflow
   } = useGridGainData(currentEnvironment.name);
 
-  // Handle item click to show details
-  const handleRowClick = (message: any) => {
+  // Handle item click to show details - this is now only for the detail button
+  const handleDetailButtonClick = (message: any) => {
     setSelectedMessage(message);
     setIsDrawerOpen(true);
   };
@@ -48,7 +48,8 @@ const GridGainViewer = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         environmentName={currentEnvironment.name}
-        onRowClick={handleRowClick}
+        onRowClick={() => {}} // Empty function to prevent row click action
+        onDetailButtonClick={handleDetailButtonClick} // New prop for details button
         onPageChange={setCurrentPage}
         onWorkflowSearch={handleSearchWorkflow}
         messageTypes={messageTypes}

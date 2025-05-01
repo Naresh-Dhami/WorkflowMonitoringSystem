@@ -10,10 +10,11 @@ interface NavItemProps {
   title: string;
   isActive: boolean;
   isExternal?: boolean;
+  icon?: string;
   onClick?: (path: string, e: React.MouseEvent) => void;
 }
 
-const NavItem: React.FC<NavItemProps> = ({ path, title, isActive, isExternal, onClick }) => {
+const NavItem: React.FC<NavItemProps> = ({ path, title, isActive, isExternal, icon, onClick }) => {
   const commonClasses = cn(
     "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus:outline-none focus:bg-accent focus:text-accent-foreground disabled:opacity-50 disabled:pointer-events-none bg-background hover:bg-accent hover:text-accent-foreground h-10 py-2 px-4 group w-max",
     isActive && "bg-accent text-accent-foreground"
