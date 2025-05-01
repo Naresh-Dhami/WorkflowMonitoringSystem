@@ -23,7 +23,9 @@ const ProcessesPage = () => {
     processes,
     addProcess,
     updateProcess,
-    deleteProcess
+    deleteProcess,
+    exportProcesses,
+    importProcesses
   } = useProcesses();
 
   const {
@@ -104,20 +106,68 @@ const ProcessesPage = () => {
 
   // Function to manage processes
   const handleManageProcesses = () => {
+    setCurrentProcess(null);
     setShowConfigModal(true);
+  };
+
+  // Handle import processes
+  const handleImportProcesses = () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = async (e: Event) => {
+      const target = e.target as HTMLInputElement;
+      if (!target.files?.length) return;
+      const file = target.files[0];
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        try {
+          const content = event.target?.result as string;
+          importProcesses(content);
+          toast.success('Processes imported successfully');
+        } catch (error) {
+          console.error('Failed to import processes:', error);
+          toast.error('Failed to import processes');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  };
+
+  // Handle export processes
+  const handleExportProcesses = () => {
+    exportProcesses();
+    toast.success('Processes exported successfully');
   };
 
   return (
     <div className="container p-4 max-w-5xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">XVA Processes</h2>
-        <Button 
-          onClick={handleManageProcesses}
-          className="btn-animation"
-        >
-          <Settings className="mr-2 h-4 w-4" />
-          Manage Processes
-        </Button>
+        <div className="flex space-x-2">
+          <Button 
+            onClick={handleImportProcesses}
+            variant="outline"
+            className="text-sm"
+          >
+            Import Processes
+          </Button>
+          <Button 
+            onClick={handleExportProcesses}
+            variant="outline"
+            className="text-sm"
+          >
+            Export Processes
+          </Button>
+          <Button 
+            onClick={handleManageProcesses}
+            className="btn-animation"
+          >
+            <Settings className="mr-2 h-4 w-4" />
+            Manage Processes
+          </Button>
+        </div>
       </div>
       
       <div className="grid gap-6">

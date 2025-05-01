@@ -152,3 +152,39 @@ export const deleteProcess = async (id: string): Promise<void> => {
     throw error;
   }
 };
+
+// Export processes to a JSON file
+export const exportProcessesApi = (processes: ProcessConfig[]): void => {
+  try {
+    const processesJson = JSON.stringify(processes, null, 2);
+    const blob = new Blob([processesJson], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `processes-${new Date().toISOString().slice(0, 10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Clean up
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 100);
+  } catch (error) {
+    console.error("Error exporting processes:", error);
+    throw error;
+  }
+};
+
+// Import processes from a JSON file
+export const importProcessesApi = (jsonData: string): ProcessConfig[] => {
+  try {
+    const processes = JSON.parse(jsonData) as ProcessConfig[];
+    localStorage.setItem("batchConnector.processConfigs", JSON.stringify(processes));
+    return processes;
+  } catch (error) {
+    console.error("Error importing processes:", error);
+    throw new Error("Invalid JSON format");
+  }
+};

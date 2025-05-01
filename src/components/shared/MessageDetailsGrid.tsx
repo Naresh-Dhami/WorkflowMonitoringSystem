@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { Table, TableHeader, TableBody, TableRow, TableHead, TableCell } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -8,6 +9,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MessageDetail } from "@/types";
 import { cn } from "@/lib/utils";
 import GridGainRecordDialog from "@/components/gridgain/GridGainRecordDialog";
+import MessageDetailsDrawer from "@/components/gridgain/MessageDetailsDrawer"; // Import MessageDetailsDrawer
+import { GridGainMessage } from "@/components/gridgain/GridGainData";
 
 interface MessageDetailsGridProps {
   topic: string;
@@ -27,6 +30,8 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
   const [typeFilter, setTypeFilter] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<GridGainMessage | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const itemsPerPage = 10;
   
   useEffect(() => {
@@ -189,8 +194,27 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
   };
   
   const handleShowDetails = (message: MessageDetail) => {
-    // In a real app, this would show more details or open a modal
-    console.log("Showing details for message:", message);
+    // Convert MessageDetail to GridGainMessage for the drawer
+    const gridGainMessage: GridGainMessage = {
+      id: message.id,
+      workflowId: message.typeName,
+      type: message.dataSetType,
+      status: "Completed",
+      timestamp: new Date().getTime(),
+      details: JSON.stringify({
+        typeId: message.typeId,
+        typeName: message.typeName,
+        typePfx: message.typePfx,
+        typeRunDate: message.typeRunDate,
+        startIndex: message.startIndex,
+        dataSetType: message.dataSetType,
+        topic: message.topic,
+        messageCount: message.messageCount
+      }, null, 2)
+    };
+    
+    setSelectedMessage(gridGainMessage);
+    setIsDrawerOpen(true);
   };
 
   // Handle adding new record
@@ -347,6 +371,14 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
         open={isDialogOpen} 
         onOpenChange={setIsDialogOpen}
         topic={topic}
+      />
+
+      {/* Message Details Drawer */}
+      <MessageDetailsDrawer
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+        message={selectedMessage}
+        environmentName="Default"
       />
     </Card>
   );

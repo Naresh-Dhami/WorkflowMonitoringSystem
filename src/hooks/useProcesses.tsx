@@ -6,7 +6,9 @@ import {
   fetchProcesses, 
   createProcess, 
   updateProcess as updateProcessApi, 
-  deleteProcess as deleteProcessApi 
+  deleteProcess as deleteProcessApi,
+  exportProcessesApi,
+  importProcessesApi
 } from "@/utils/api/processesApi";
 
 export function useProcesses() {
@@ -73,11 +75,34 @@ export function useProcesses() {
     }
   }, []);
   
+  // Function to export processes
+  const exportProcesses = useCallback(() => {
+    try {
+      exportProcessesApi(processes);
+    } catch (error) {
+      toast.error(`Failed to export processes: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }, [processes]);
+
+  // Function to import processes
+  const importProcesses = useCallback((jsonData: string) => {
+    try {
+      const importedProcesses = importProcessesApi(jsonData);
+      setProcesses(importedProcesses);
+      return importedProcesses;
+    } catch (error) {
+      toast.error(`Failed to import processes: ${error instanceof Error ? error.message : String(error)}`);
+      throw error;
+    }
+  }, []);
+  
   return {
     processes,
     isLoading,
     addProcess,
     updateProcess,
-    deleteProcess
+    deleteProcess,
+    exportProcesses,
+    importProcesses
   };
 }
