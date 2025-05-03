@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { MessageDetail } from "@/types";
 import { cn } from "@/lib/utils";
 import GridGainRecordDialog from "@/components/gridgain/GridGainRecordDialog";
-import MessageDetailsDrawer from "@/components/gridgain/MessageDetailsDrawer"; // Import MessageDetailsDrawer
+import MessageDetailsDrawer from "@/components/gridgain/MessageDetailsDrawer";
 import { GridGainMessage } from "@/components/gridgain/GridGainData";
 
 interface MessageDetailsGridProps {
@@ -22,6 +22,7 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
   messageType = "bflat",
   onBack
 }) => {
+  
   const [messages, setMessages] = useState<MessageDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,6 +33,7 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
   const [selectedMessage, setSelectedMessage] = useState<GridGainMessage | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const itemsPerPage = 10;
+  
   
   useEffect(() => {
     // In a real app, this would be an API call

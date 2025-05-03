@@ -30,11 +30,12 @@ interface GridGainRecordDialogProps {
   topic: string;
 }
 
+// Updated schema to make most fields optional
 const formSchema = z.object({
-  typeId: z.string().min(1, "Type ID is required"),
-  typeName: z.string().min(1, "Type name is required"),
+  typeId: z.string().optional(),
+  typeName: z.string().optional(),
   typePfx: z.string().optional(),
-  typeRunDate: z.string().min(8, "Run date should be in YYYYMMDD format"),
+  typeRunDate: z.string().optional(),
   topic: z.string().min(1, "Topic is required"),
 });
 
@@ -94,7 +95,7 @@ const GridGainRecordDialog: React.FC<GridGainRecordDialogProps> = ({
               name="typeId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type ID</FormLabel>
+                  <FormLabel>Type ID (Optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter type ID" {...field} />
                   </FormControl>
@@ -108,7 +109,7 @@ const GridGainRecordDialog: React.FC<GridGainRecordDialogProps> = ({
               name="typeName"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type Name</FormLabel>
+                  <FormLabel>Type Name (Optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter type name" {...field} />
                   </FormControl>
@@ -136,7 +137,7 @@ const GridGainRecordDialog: React.FC<GridGainRecordDialogProps> = ({
               name="typeRunDate"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type Run Date (YYYYMMDD)</FormLabel>
+                  <FormLabel>Type Run Date (Optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="YYYYMMDD" {...field} />
                   </FormControl>
