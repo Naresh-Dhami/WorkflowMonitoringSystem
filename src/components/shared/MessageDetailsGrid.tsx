@@ -314,9 +314,9 @@ const MessageDetailsGrid: React.FC<MessageDetailsGridProps> = ({
                     </TableCell>
                   </TableRow>
                 ) : (
-                  currentMessages.map((message) => (
+                  currentMessages.map((message, index) => (
                     <TableRow key={message.id}>
-                      <TableCell className="font-medium">{message.id}</TableCell>
+                      <TableCell className="font-medium">{indexOfFirstMessage + index + 1}</TableCell>
                       <TableCell>
                         <div className="text-sm">
                           [typeId={message.typeId}, typeName={message.typeName}, 

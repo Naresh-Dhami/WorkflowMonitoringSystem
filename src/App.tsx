@@ -6,6 +6,7 @@ import AmpsViewer from "./pages/AmpsViewer";
 import GridGainViewer from "./pages/GridGainViewer";
 import TopicDetailsPage from "./pages/TopicDetailsPage";
 import AmpsTopicDetailsPage from "./pages/AmpsTopicDetailsPage";
+import ChatbotPage from "./pages/ChatbotPage";
 import { EnvironmentProvider } from "./contexts/EnvironmentContext";
 import { Toaster } from "sonner";
 import { SidebarProvider } from "./components/ui/sidebar";
@@ -30,6 +31,7 @@ function App() {
                   <Route path="/processes" element={<ProcessesPage />} />
                   <Route path="/amps-viewer" element={<AmpsViewer />} />
                   <Route path="/grid-gain-viewer" element={<GridGainViewer />} />
+                  <Route path="/chatbot" element={<ChatbotPage />} />
                   <Route path="/topic-details/:topicId" element={<TopicDetailsPage />} />
                   <Route path="/amps-topic/:topicId" element={<AmpsTopicDetailsPage />} />
                   <Route path="*" element={<NotFound />} />

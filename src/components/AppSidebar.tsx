@@ -13,7 +13,7 @@ import {
   SidebarGroupLabel
 } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
-import { ExternalLink, Menu, Settings, LayersIcon, X } from "lucide-react";
+import { ExternalLink, Menu, Settings, LayersIcon, X, Bot } from "lucide-react";
 import { useNavigation } from "@/hooks/useNavigation";
 import { cn } from "@/lib/utils";
 
@@ -80,6 +80,18 @@ export function AppSidebar() {
                 <Link to="/grid-gain-viewer">
                   <ExternalLink className="h-4 w-4" />
                   <span>Grid Gain Viewer</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+
+            <SidebarMenuItem>
+              <SidebarMenuButton 
+                asChild 
+                isActive={isActive("/chatbot")}
+              >
+                <Link to="/chatbot">
+                  <Bot className="h-4 w-4" />
+                  <span>AI Chatbot</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
