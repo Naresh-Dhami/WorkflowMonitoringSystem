@@ -1,4 +1,5 @@
 
+
 import { useEnvironment } from "@/contexts/EnvironmentContext";
 import MessageDetailsDrawer from "@/components/gridgain/MessageDetailsDrawer";
 import { messageTypes } from "@/components/gridgain/GridGainData";
@@ -43,23 +44,7 @@ const GridGainViewer = () => {
     <div className="min-h-screen bg-background">
       <GridGainHeader environmentName={currentEnvironment.name} />
       
-      <GridGainContent
-        isLoading={isLoading}
-        filteredMessages={filteredMessages}
-        paginatedMessages={paginatedMessages}
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        selectedTypes={selectedTypes}
-        onTypeFilter={setSelectedTypes}
-        currentPage={currentPage}
-        totalPages={totalPages}
-        environmentName={currentEnvironment.name}
-        onRowClick={handleRowClick}
-        onDetailButtonClick={handleDetailButtonClick}
-        onPageChange={setCurrentPage}
-        onWorkflowSearch={handleSearchWorkflow}
-        messageTypes={messageTypes}
-      />
+      <GridGainContent />
 
       <MessageDetailsDrawer
         open={isDrawerOpen}
@@ -72,3 +57,4 @@ const GridGainViewer = () => {
 };
 
 export default GridGainViewer;
+

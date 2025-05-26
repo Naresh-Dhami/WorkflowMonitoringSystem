@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,7 +36,7 @@ const TopicDetailsPage = () => {
   const fetchMessages = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${currentEnvironment.url}/api/topics/${topicId}`);
+      const response = await fetch(`${currentEnvironment.baseUrl}/api/topics/${topicId}`);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
