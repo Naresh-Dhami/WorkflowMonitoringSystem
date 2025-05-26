@@ -1,170 +1,147 @@
-
-import React, { useState } from "react";
-import { useParams } from "react-router-dom";
-import { useEnvironment } from "@/contexts/EnvironmentContext";
+import React, { useState, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { Link } from "react-router-dom";
-import { TopicDetail } from "@/types";
-import { Sheet } from "@/components/ui/sheet";
-import TopicDetailsTable from "@/components/amps/TopicDetailsTable";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { MoreHorizontal, ArrowLeft, Copy, RefreshCw } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useEnvironment } from "@/contexts/EnvironmentContext";
 import MessageDetailsGrid from "@/components/shared/MessageDetailsGrid";
 
-// Sample data for demonstrating the component
-const sampleTopicDetails: TopicDetail[] = [
-  {
-    id: "1",
-    topic: "transaction.events",
-    partition: 0,
-    offset: 1000,
-    status: "Completed",
-    timestamp: new Date().toISOString(),
-    message: "Transaction processed successfully"
-  },
-  {
-    id: "2",
-    topic: "transaction.events",
-    partition: 1,
-    offset: 1001,
-    status: "Failed",
-    timestamp: new Date(Date.now() - 60000).toISOString(),
-    message: "Error: Invalid transaction format"
-  },
-  {
-    id: "3",
-    topic: "user.events",
-    partition: 0,
-    offset: 500,
-    status: "Running",
-    timestamp: new Date(Date.now() - 120000).toISOString(),
-    message: "Processing user data"
-  },
-  {
-    id: "4",
-    topic: "system.events",
-    partition: 2,
-    offset: 2500,
-    status: "Pending",
-    timestamp: new Date(Date.now() - 180000).toISOString(),
-    message: "Waiting for dependencies"
-  },
-];
+interface TopicMessage {
+  id: string;
+  timestamp: string;
+  message: any;
+}
 
 const TopicDetailsPage = () => {
-  const { id } = useParams<{ id: string }>();
-  const { currentEnvironment } = useEnvironment();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [selectedTopicDetail, setSelectedTopicDetail] = useState<TopicDetail | null>(null);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [showMessageDetails, setShowMessageDetails] = useState(false);
+  const { topicId } = useParams<{ topicId: string }>();
   const { toast } = useToast();
+  const { currentEnvironment } = useEnvironment();
+  const [messages, setMessages] = useState<TopicMessage[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [selectedMessage, setSelectedMessage] = useState<any>(null);
+  const [showMessageDetails, setShowMessageDetails] = useState(false);
 
-  // In a real app, fetch topic details based on the ID
-  // For now, use sample data
-  const topicDetails = sampleTopicDetails;
-  const totalPages = Math.ceil(topicDetails.length / 10);
+  useEffect(() => {
+    if (topicId) {
+      fetchMessages();
+    }
+  }, [topicId, currentEnvironment]);
 
-  const handleTopicDetailClick = (topicDetail: TopicDetail) => {
-    setSelectedTopicDetail(topicDetail);
-    setShowMessageDetails(true);
-    toast({
-      title: "Topic Detail Selected",
-      description: `Selected topic: ${topicDetail.topic}, Partition: ${topicDetail.partition}`,
-    });
+  const fetchMessages = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${currentEnvironment.url}/api/topics/${topicId}`);
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const data = await response.json();
+      setMessages(data);
+    } catch (error) {
+      console.error("Could not fetch messages:", error);
+      toast({
+        title: "Error fetching messages",
+        description: "Failed to load messages. Please check the server and try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
   };
-  
-  const handleBackToTopics = () => {
-    setShowMessageDetails(false);
+
+  const handleMessageClick = (message: any) => {
+    setSelectedMessage(message);
+    setShowMessageDetails(true);
+  };
+
+  const copyMessage = (message: any) => {
+    navigator.clipboard.writeText(JSON.stringify(message, null, 2));
+    toast({
+      title: "Message copied",
+      description: "The message has been copied to your clipboard.",
+    });
   };
 
   return (
-    <div className="container mx-auto p-6">
-      <div className="flex justify-between items-center mb-6">
-        <div className="flex items-center">
-          <Button variant="ghost" size="icon" asChild className="mr-2">
-            <Link to="/amps-viewer">
-              <ArrowLeft className="h-4 w-4" />
+    <div className="min-h-screen bg-background p-6">
+      <div className="max-w-4xl mx-auto">
+        <div className="mb-8">
+          <Button asChild variant="ghost">
+            <Link to="/grid-gain-viewer" className="flex items-center">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Topics
             </Link>
           </Button>
-          <h1 className="text-2xl font-bold">Topic Details</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Topic: {topicId}</h1>
+          <p className="text-muted-foreground">
+            View messages for the selected topic.
+          </p>
         </div>
-        <div className="text-sm text-muted-foreground">
-          Environment: {currentEnvironment.name}
-        </div>
-      </div>
 
-      {showMessageDetails && selectedTopicDetail ? (
-        <MessageDetailsGrid 
-          topic={selectedTopicDetail.topic} 
-          onBack={handleBackToTopics}
-        />
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>Topic: {id}</CardTitle>
+        <Card className="h-[700px]">
+          <CardHeader className="flex items-center justify-between">
+            <CardTitle>Messages</CardTitle>
+            <div className="flex items-center space-x-2">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={fetchMessages}
+                disabled={loading}
+              >
+                <RefreshCw className="h-4 w-4" />
+              </Button>
+              <Badge variant="secondary">{messages.length} messages</Badge>
+            </div>
           </CardHeader>
-          <CardContent>
-            <TopicDetailsTable 
-              topicDetails={topicDetails}
-              currentPage={currentPage}
-              totalPages={totalPages}
-              onRowClick={handleTopicDetailClick}
-              onPageChange={setCurrentPage}
-            />
+          <CardContent className="h-full p-0">
+            <ScrollArea className="h-[600px] w-full">
+              {loading ? (
+                <div className="p-4">Loading messages...</div>
+              ) : (
+                <div className="p-4 space-y-3">
+                  {messages.map((msg) => (
+                    <div key={msg.id} className="border rounded-md p-3 hover:bg-secondary cursor-pointer">
+                      <div className="flex justify-between items-center">
+                        <div className="text-sm font-medium break-all" onClick={() => handleMessageClick(msg.message)}>
+                          Message ID: {msg.id}
+                        </div>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <span className="sr-only">Open menu</span>
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => copyMessage(msg.message)}>
+                              <Copy className="h-3 w-3 mr-2" />
+                              Copy Message
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Timestamp: {new Date(msg.timestamp).toLocaleString()}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </ScrollArea>
           </CardContent>
         </Card>
-      )}
-
-      {selectedTopicDetail && (
-        <Sheet
-          open={isDrawerOpen}
-          onOpenChange={setIsDrawerOpen}
-        >
-          <div className="fixed inset-0 z-50 flex items-start justify-end">
-            <div className="h-full w-3/4 max-w-md bg-background p-6 shadow-lg">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-lg font-medium">Topic Detail</h2>
-                <Button variant="ghost" size="sm" onClick={() => setIsDrawerOpen(false)}>
-                  Close
-                </Button>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Topic</h3>
-                  <p className="text-base">{selectedTopicDetail.topic}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Partition</h3>
-                  <p className="text-base">{selectedTopicDetail.partition}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Offset</h3>
-                  <p className="text-base">{selectedTopicDetail.offset}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Status</h3>
-                  <p className="text-base">{selectedTopicDetail.status}</p>
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-muted-foreground">Timestamp</h3>
-                  <p className="text-base">{new Date(selectedTopicDetail.timestamp).toLocaleString()}</p>
-                </div>
-                {selectedTopicDetail.message && (
-                  <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Message</h3>
-                    <pre className="text-sm bg-muted p-2 rounded mt-1 overflow-auto">
-                      {selectedTopicDetail.message}
-                    </pre>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </Sheet>
-      )}
+        
+        {showMessageDetails && selectedMessage && (
+          <MessageDetailsGrid 
+            message={selectedMessage} 
+            onClose={() => setShowMessageDetails(false)} 
+          />
+        )}
+      </div>
     </div>
   );
 };
