@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,17 +5,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Send, Globe, Bot, User, Loader2 } from "lucide-react";
+import { Send, Globe, Bot, User, Loader2, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { scrapeWebContent } from "@/utils/scraper";
 import { sendToLLM } from "@/utils/llmService";
+import PuppeteerScraper from "./PuppeteerScraper";
 
 interface ChatMessage {
   id: string;
-  type: "user" | "bot" | "system";
+  type: "user" | "bot" | "system" | "puppeteer";
   content: string;
   timestamp: Date;
   isLoading?: boolean;
+  data?: any;
 }
 
 const ChatInterface = () => {
@@ -24,7 +25,7 @@ const ChatInterface = () => {
     {
       id: "1",
       type: "system",
-      content: "Welcome! I can help you chat and scrape web content. You can either ask me questions directly or provide a URL to scrape content from.",
+      content: "Welcome! I can help you chat, scrape web content, and use Puppeteer for advanced web automation. You can either ask me questions directly, provide a URL to scrape, or use Puppeteer for browser automation.",
       timestamp: new Date()
     }
   ]);
@@ -54,6 +55,56 @@ const ChatInterface = () => {
     setMessages(prev => prev.map(msg => 
       msg.id === id ? { ...msg, ...updates } : msg
     ));
+  };
+
+  const handlePuppeteerData = async (scrapedData: any) => {
+    setIsLoading(true);
+
+    // Add message about Puppeteer scraping
+    const puppeteerMsgId = addMessage({
+      type: "puppeteer",
+      content: `Puppeteer scraped data from ${scrapedData.url}:\n\nTitle: ${scrapedData.title}\n\nText Content: ${scrapedData.text.slice(0, 500)}${scrapedData.text.length > 500 ? '...' : ''}\n\nForms Found: ${scrapedData.forms.length}`,
+      data: scrapedData
+    });
+
+    // If there's a current input message, send it to AI with the scraped data
+    if (inputMessage.trim()) {
+      const aiMsgId = addMessage({
+        type: "bot",
+        content: "Analyzing Puppeteer data with AI...",
+        isLoading: true
+      });
+
+      try {
+        const prompt = `Based on the following Puppeteer scraped data from ${scrapedData.url}:
+
+Title: ${scrapedData.title}
+Text Content: ${scrapedData.text}
+Forms Found: ${scrapedData.forms.length}
+${scrapedData.forms.length > 0 ? `Form Details: ${JSON.stringify(scrapedData.forms, null, 2)}` : ''}
+
+User question: ${inputMessage}
+
+Please provide insights about this webpage and answer the user's question.`;
+
+        const aiResponse = await sendToLLM(prompt);
+        
+        updateMessage(aiMsgId, {
+          content: aiResponse,
+          isLoading: false
+        });
+
+        setInputMessage("");
+      } catch (error) {
+        updateMessage(aiMsgId, {
+          content: `Error analyzing Puppeteer data: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          isLoading: false
+        });
+        toast.error("Failed to analyze Puppeteer data with AI");
+      }
+    }
+
+    setIsLoading(false);
   };
 
   const handleScrapeAndChat = async () => {
@@ -180,6 +231,8 @@ const ChatInterface = () => {
                   ? "bg-primary text-primary-foreground" 
                   : message.type === "system"
                   ? "bg-muted"
+                  : message.type === "puppeteer"
+                  ? "bg-blue-50 border-blue-200"
                   : "bg-card"
               }`}>
                 <CardContent className="p-3">
@@ -192,6 +245,8 @@ const ChatInterface = () => {
                       ) : (
                         <Bot className="h-4 w-4 mt-1 flex-shrink-0" />
                       )
+                    ) : message.type === "puppeteer" ? (
+                      <Camera className="h-4 w-4 mt-1 flex-shrink-0 text-blue-600" />
                     ) : (
                       <Globe className="h-4 w-4 mt-1 flex-shrink-0" />
                     )}
@@ -213,9 +268,15 @@ const ChatInterface = () => {
 
       {/* Input Area */}
       <div className="p-4 space-y-4">
+        {/* Puppeteer Scraper */}
+        <PuppeteerScraper 
+          onScrapedData={handlePuppeteerData}
+          isLoading={isLoading}
+        />
+
         {/* URL Scraping Section */}
         <div className="space-y-2">
-          <label className="text-sm font-medium">Scrape Website (Optional)</label>
+          <label className="text-sm font-medium">Basic Website Scraping (Optional)</label>
           <div className="flex gap-2">
             <Input
               placeholder="Enter URL to scrape (e.g., https://example.com)"
